@@ -458,7 +458,7 @@
     rowLists.set(key, { title, sub, games, color: opts.color });
     // "See all N" tells people the row has more than fits, and opens it as a list (easier than swiping).
     const action = games.length > 1
-      ? `<button type="button" class="see-all" data-open-row="${esc(key)}" aria-label="See all ${games.length} ${esc(title)} games">See all <b>${games.length}</b> <span aria-hidden="true">→</span></button>` : "";
+      ? `<button type="button" class="see-all" data-open-row="${esc(key)}" aria-label="See all ${games.length} ${esc(title)} games"><b>${games.length}</b> games <span aria-hidden="true">→</span></button>` : "";
     return `<div class="shelf-block"${tag}>${secHead(title, sub, { ...opts, action })}
       <div class="row">
         <button type="button" class="shelf-arrow prev" aria-label="Scroll ${esc(title)} left" data-scroll="-1">${ICON.left}</button>
@@ -728,7 +728,7 @@
         ? `<p class="sched-group">${esc(whose)}</p>${mine.map(schedRowHTML).join("")}<p class="sched-group">All games</p>${shown.map(schedRowHTML).join("")}`
         : shown.map(schedRowHTML).join("");
       const more = rest.length > shown.length
-        ? `<button type="button" class="btn btn-ghost sched-more" data-sched-all>Show all ${all.length} games on ${esc(dayLabel(new Date(schedDay), "long"))}</button>` : "";
+        ? `<button type="button" class="btn btn-ghost sched-more" data-sched-all>Show all ${all.length} games ${(() => { const d = dayLabel(new Date(schedDay), "long"); return d === "Today" || d === "Tomorrow" ? d.toLowerCase() : `on ${esc(d)}`; })()}</button>` : "";
       body = `<div class="sched-list">${list}</div>${more}`;
     }
     return `${chips}<div class="sched-days" role="group" aria-label="Choose a day">${tabs}</div>${body}`;

@@ -268,7 +268,7 @@ main:focus { outline: none; }
   border: 1px solid var(--line-strong); background: transparent; color: var(--text); font: 600 13px/1 var(--font-body); white-space: nowrap;
   transition: border-color .15s, background .15s;
 }
-.see-all b { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.see-all b { color: var(--text); font-weight: 700; font-variant-numeric: tabular-nums; }
 .see-all:hover { border-color: var(--text); background: var(--surface); }
 .row-hero { background: var(--surface); }
 /* Press feedback (js/motion-fx.js animates --press) */
