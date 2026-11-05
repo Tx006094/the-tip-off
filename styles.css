@@ -1071,6 +1071,12 @@ main:focus { outline: none; }
   .intro-copy { text-align: center; }
   .stats > div, .stats > div:nth-child(odd), .stats > div:nth-child(even) { padding-left: 8px; padding-right: 8px; text-align: center; }
   .stat-link { justify-content: center; }
+  /* Pop-up buttons: an even two-column grid of equal buttons; an odd one out spans the row */
+  .m-foot { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .m-foot > .cal-menu { min-width: 0; }
+  .m-foot > .btn, .m-foot .cal-menu summary { width: 100%; min-width: 0; justify-content: center; padding-left: 10px; padding-right: 10px; }
+  .m-foot .btn svg { flex-shrink: 0; }
+  .m-foot > :last-child:nth-child(odd) { grid-column: 1 / -1; }
   .legend { justify-content: center; text-align: center; }
   .legend-cta { flex: 1 0 100%; text-align: center; }
   .site-footer ul { gap: 12px; }
