@@ -212,7 +212,7 @@
     return {
       id: t.id, name: t.displayName || t.name, short: t.shortDisplayName || t.location || t.displayName,
       abbr: t.abbreviation, logo, color: t.color,
-      rank: rank && rank <= 25 ? rank : null, score: score ?? "", winner: !!c.winner,
+      rank: rank && rank <= 25 ? rank : null, score: score ?? "", winner: !!c.winner, conf: t.conferenceId || "",
     };
   }
 
@@ -487,10 +487,13 @@
     .sort((a, b) => a.date - b.date);
 
   function renderStats() {
-    const real = state.games.filter((g) => !g.tba && upcoming(g));
+    // Today only: what's on today, and how much of it is free and still to come.
+    const today = dayKey(new Date());
+    const todays = state.games.filter((g) => !g.tba && dayKey(g.date) === today);
+    const freeToday = todays.filter((g) => g.state !== "post" && priceInfo(g.platforms).kind === "free");
     const set = (k, v) => { const el = $(`[data-stat="${k}"]`); if (el) el.textContent = v; };
-    set("games", state.loading ? "—" : real.length.toLocaleString());
-    set("free", state.loading ? "—" : freeGames().length.toLocaleString());
+    set("games", state.loading ? "—" : todays.length.toLocaleString());
+    set("free", state.loading ? "—" : freeToday.length.toLocaleString());
     set("platforms", regionPlatforms().length.toString());
     set("leagues", Object.keys(LEAGUES).length.toString());
   }
@@ -606,6 +609,28 @@
   let schedQuery = "";      // what's typed in the box
   let sugIndex = -1;        // highlighted suggestion
   const TEAM_TAB = "team";  // schedDay value for the picked teams' tab
+  // Conference filter, like ESPN's schedule: "" = everything, "top25" = a ranked team plays, or a conference id.
+  let schedConf = (() => { try { return localStorage.getItem("fc-conf") || ""; } catch { return ""; } })();
+  const CONFERENCES = typeof ESPN_CONFERENCES !== "undefined" ? ESPN_CONFERENCES : [];
+  const confLabel = (id) => (id === "top25" ? "Top 25" : CONFERENCES.find((c) => c.id === id)?.label || "");
+  const inConf = (g, id = schedConf) => !id
+    || (g.league === "ncaa" && g.away && (id === "top25" ? !!(g.home.rank || g.away.rank) : g.home.conf === id || g.away.conf === id));
+  function confSelectHTML() {
+    if (state.league !== "all" && state.league !== "ncaa") return "";
+    const college = schedGames.filter((g) => g.league === "ncaa" && g.away);
+    if (!college.length || !CONFERENCES.length) return "";
+    const count = (id) => college.filter((g) => inConf(g, id)).length;
+    const confs = CONFERENCES.map((c) => ({ ...c, n: count(c.id) })).filter((c) => c.n || c.id === schedConf);
+    const opt = (value, label, n) => `<option value="${esc(value)}"${value === schedConf ? " selected" : ""}>${esc(label)}${n != null ? ` (${n})` : ""}</option>`;
+    return `<label class="sched-conf">
+        <span class="sr-only">Filter the schedule by conference</span>
+        <select id="schedConf">
+          ${opt("", "All conferences")}
+          ${opt("top25", "Top 25", count("top25"))}
+          <optgroup label="Conferences">${confs.map((c) => opt(c.id, c.label, c.n)).join("")}</optgroup>
+        </select>
+      </label>`;
+  }
   const gameTeamKey = (g, t) => (t?.id ? `${g.league}:${t.id}` : "");
   const playsIn = (g, keys) => keys.size > 0 && [g.away, g.home].some((t) => keys.has(gameTeamKey(g, t)));
   const teamName = (key) => teamByKey.get(key)?.name || key;
@@ -619,6 +644,7 @@
     if (!schedGames.some((g) => g.away)) return "";
     return `<section class="sched-sec" id="schedule" aria-labelledby="schedTitle">
       ${secHead("Schedule", `Times in ${tzName()}`).replace("<h2>", '<h2 id="schedTitle">')}
+      <div class="sched-tools">
       <div class="sched-find">
         <div class="sched-find-box">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -628,13 +654,16 @@
         </div>
         <ul class="sched-suggest" id="schedSuggest" role="listbox" aria-label="Teams" hidden></ul>
       </div>
+      ${confSelectHTML()}
+      </div>
       <div id="schedBody">${schedBodyHTML()}</div>
     </section>`;
   }
 
   function schedBodyHTML() {
+    const pool = schedGames.filter((g) => inConf(g));
     const byDay = new Map();
-    for (const g of schedGames) {
+    for (const g of pool) {
       if (!g.away) continue;
       const k = dayKey(g.date);
       if (!byDay.has(k)) byDay.set(k, []);
@@ -645,9 +674,12 @@
     const lead = new Set([...schedTeams, ...state.favs]); // whose games go first on each day
     if (schedDay === TEAM_TAB && !picked.size) schedDay = null;
     if (schedDay !== TEAM_TAB && !byDay.has(schedDay)) { schedDay = days[0]; schedAll = false; }
+    if (!days.length && schedDay !== TEAM_TAB) {
+      return `<div class="notice sched-empty">No ${esc(confLabel(schedConf))} games in the next ${DAYS_AHEAD} days${state.price !== "all" ? " with these filters" : ""}. <button type="button" class="inline-link" data-sched-conf-clear>Show all conferences</button></div>`;
+    }
 
     // Tabs: the picked teams' tab first, then one per day, dotted where lead teams play.
-    const teamGames = picked.size ? schedGames.filter((g) => g.away && playsIn(g, picked)).sort((a, b) => a.date - b.date) : [];
+    const teamGames = picked.size ? pool.filter((g) => g.away && playsIn(g, picked)).sort((a, b) => a.date - b.date) : [];
     const teamLabel = schedTeams.length === 1 ? shortTeam(schedTeams[0]) : `${schedTeams.length} teams`;
     let tabs = picked.size
       ? `<button type="button" class="sched-day sched-day-team" data-sched-day="${TEAM_TAB}" aria-pressed="${schedDay === TEAM_TAB}"><b>${esc(teamLabel)}</b><span>All games · ${teamGames.length}</span></button>` : "";
@@ -671,7 +703,7 @@
       const stars = schedTeams.filter((k) => !state.favs.has(k)).map((k) => favButton(k).replace("Add to My Teams", `Star ${esc(shortTeam(k))}`)).join("");
       const season = schedTeams.length === 1 ? `<button type="button" class="btn btn-ghost" data-team="${esc(schedTeams[0])}">Full season schedule</button>` : "";
       const head = `<div class="sched-team-head">
-          <p><strong>${esc(names)}</strong>: ${teamGames.length ? `${plural(teamGames.length, "game")} in the next ${DAYS_AHEAD} days` : `no games in the next ${DAYS_AHEAD} days${state.price !== "all" || state.league !== "all" ? " with these filters" : ""}`}</p>
+          <p><strong>${esc(names)}</strong>${schedConf ? ` <span class="sched-conf-note">(${esc(confLabel(schedConf))} games only)</span>` : ""}: ${teamGames.length ? `${plural(teamGames.length, "game")} in the next ${DAYS_AHEAD} days` : `no games in the next ${DAYS_AHEAD} days${state.price !== "all" || state.league !== "all" ? " with these filters" : ""}`}</p>
           <div class="sched-team-actions">${stars}${season}</div>
         </div>`;
       const groups = new Map();
@@ -701,6 +733,16 @@
     el.innerHTML = schedBodyHTML();
     if (focusSel) $(focusSel)?.focus({ preventScroll: true });
   }
+
+  function setConf(value) {
+    schedConf = value; schedAll = false;
+    try { value ? localStorage.setItem("fc-conf", value) : localStorage.removeItem("fc-conf"); } catch { /* storage unavailable */ }
+    refreshSchedule();
+    const sel = $("#schedConf");
+    if (sel) sel.value = value;
+    fx("show", $$("#schedBody .srow").slice(0, 8), { y: 8, step: 0.03 });
+  }
+  document.addEventListener("change", (e) => { if (e.target.id === "schedConf") setConf(e.target.value); });
 
   // ----- "Find a team" suggestions -----
   function teamSuggestions(q) {
@@ -1636,7 +1678,7 @@
   }
 
   document.addEventListener("click", (ev) => {
-    const t = ev.target.closest("[data-game],[data-team],[data-league],[data-price],[data-platform],[data-close],[data-scroll],[data-fav],[data-share],[data-retry],[data-anchor],[data-open-free],[data-free-league],[data-region],[data-open-big],[data-open-services],[data-ics],[data-ics-team],[data-svc-clear],[data-sched-day],[data-sched-all],[data-sched-pick],[data-sched-remove],[data-sched-clear]");
+    const t = ev.target.closest("[data-game],[data-team],[data-league],[data-price],[data-platform],[data-close],[data-scroll],[data-fav],[data-share],[data-retry],[data-anchor],[data-open-free],[data-free-league],[data-region],[data-open-big],[data-open-services],[data-ics],[data-ics-team],[data-svc-clear],[data-sched-day],[data-sched-all],[data-sched-pick],[data-sched-remove],[data-sched-clear],[data-sched-conf-clear]");
     if (!t) return;
     if (t.dataset.openServices !== undefined) { ev.preventDefault(); return void openServices(); }
     if (t.dataset.schedDay) {
@@ -1652,6 +1694,7 @@
       return;
     }
     if (t.dataset.schedPick) return void pickTeam(t.dataset.schedPick);
+    if (t.dataset.schedConfClear !== undefined) return void setConf("");
     if (t.dataset.schedRemove) {
       schedTeams = schedTeams.filter((k) => k !== t.dataset.schedRemove);
       refreshSchedule();
