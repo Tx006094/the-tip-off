@@ -31,7 +31,7 @@ const LEAGUES = {
     platformsCA: ["tsn", "tsnplus", "cbc"],
   },
   upshot: {
-    id: "upshot", name: "UpShot League", short: "UpShot", color: "#e11d48",
+    id: "upshot", name: "UpShot League", short: "UpShot", color: "#f43f5e",
     season: "Spring/summer pro league in the Southeast. Season 1 tipped off May 15, 2026.",
     platforms: ["youtube", "scripps", "local"],
     platformsCA: ["youtube"],

@@ -1108,6 +1108,7 @@
   let closeToken = 0;
   function openModal(html, title) {
     closeToken++;
+    modalFresh = $("#modal").hidden;
     // Undo any closing animation still on the pop-up, so it always opens fully visible.
     fx("stopOut");
     for (const el of [$(".modal-sheet"), $(".modal-backdrop")]) { el.style.removeProperty("opacity"); el.style.removeProperty("transform"); }
@@ -1132,7 +1133,14 @@
     document.body.style.overflow = "";
     document.title = VIEW_TITLES[state.view];
     brandModalLeague = null; modalKind = null; updateBrand();
-    setHash(state.view === "home" ? "" : state.view);
+    if (modalPushed && location.hash === modalUrlHash) {
+      modalPushed = false; skipNextRoute = true;
+      setTimeout(() => { skipNextRoute = false; }, 600);
+      history.back();
+    } else {
+      modalPushed = false;
+      setHash(state.view === "home" ? "" : state.view);
+    }
     if (lastFocus && document.contains(lastFocus) && !lastFocus.closest("#ticker")) lastFocus.focus({ preventScroll: true });
     else if (lastFocus?.closest?.("#ticker")) lastFocus.blur();
     lastFocus = null;
@@ -1150,6 +1158,20 @@
   function setHash(h) {
     const url = location.pathname + location.search + (h ? "#" + h : "");
     history.replaceState(null, "", url);
+  }
+  // Pop-ups get their own step in the browser history, so the phone's Back button (or swipe) closes
+  // them instead of leaving the site. Switching from one pop-up to another reuses the same step.
+  let modalPushed = false;    // the open pop-up owns a history step that Back should undo
+  let modalFresh = false;     // this open started from a closed pop-up
+  let modalUrlHash = "";      // the address the pop-up set, to tell if someone navigated away meanwhile
+  let openVia = "";           // "nav": the address already changed (a link, Back/Forward); "load": arrived on this link
+  let skipNextRoute = false;  // ignore the hashchange caused by our own history.back()
+  function modalHash(h) {
+    const url = location.pathname + location.search + "#" + h;
+    if (openVia) { modalPushed = openVia === "nav"; openVia = ""; history.replaceState(null, "", url); }
+    else if (($("#modal").hidden || modalFresh) && !modalPushed) { history.pushState(null, "", url); modalPushed = true; }
+    else history.replaceState(null, "", url);
+    modalUrlHash = location.hash;
   }
 
   function watchListHTML(platforms, expected, regionNote = "") {
@@ -1224,7 +1246,7 @@
     openModal(servicesHTML(), "My Viewing Options: Women's Basketball Games You Can Watch");
     fx("sequence", $$("#svcForm .svc"));
     modalKind = "services";
-    setHash("services");
+    modalHash("services");
     updateBrand();
     return true;
   }
@@ -1436,7 +1458,7 @@
     if (!keepScroll) fx("sequence", $$("#modalBody .sched-item"));
     modalKind = "row"; openRowKey = key;
     if (keepScroll) sheet.scrollTop = y;
-    setHash("row/" + key);
+    modalHash("row/" + key);
     updateBrand();
     return true;
   }
@@ -1449,7 +1471,7 @@
     if (!keepScroll) fx("sequence", $$("#modalBody .sched-item"));
     modalKind = "big";
     if (keepScroll) sheet.scrollTop = y;
-    setHash("big");
+    modalHash("big");
     updateBrand();
     return true;
   }
@@ -1462,7 +1484,7 @@
     if (!keepScroll) fx("sequence", $$("#modalBody .sched-item"));
     modalKind = "free";
     if (keepScroll) sheet.scrollTop = y;
-    setHash("free");
+    modalHash("free");
     updateBrand();
     return true;
   }
@@ -1507,7 +1529,7 @@
     fx("sequence", $$("#modalBody .verdict, #modalBody .watch"));
     modalKind = null;
     updateBrand();
-    setHash("game/" + encodeURIComponent(g.id));
+    modalHash("game/" + encodeURIComponent(g.id));
     return true;
   }
 
@@ -1527,7 +1549,7 @@
       </div>`;
     const docTitle = `${t.name} Schedule & Where to Watch`;
     brandModalLeague = t.league;
-    setHash("team/" + encodeURIComponent(key));
+    modalHash("team/" + encodeURIComponent(key));
 
     if (!t.espnId) {
       const plats = state.region === "ca"
@@ -1707,7 +1729,9 @@
   // ---------- routing ----------
   // #home | #teams | #platforms | #team/<key> | #game/<id>
   let keepQueryOnRoute = false;
-  function route() {
+  function route(e) {
+    if (e && skipNextRoute) { skipNextRoute = false; return; }
+    openVia = e ? "nav" : "load";
     const h = decodeURIComponent((location.hash || "").slice(1));
     const [head, ...rest] = h.split("/");
     const arg = rest.join("/");
@@ -1727,8 +1751,13 @@
       if (!$("#view-" + state.view).innerHTML) render();
       return;
     }
+    openVia = "";
     const next = ["home", "teams", "platforms"].includes(head) ? head : "home";
-    if (!$("#modal").hidden) { $("#modal").hidden = true; document.body.style.overflow = ""; }
+    if (!$("#modal").hidden) {
+      modalPushed = false;
+      if (next === state.view) return void closeModal(); // Back from a pop-up: close it, keep the page as it was
+      $("#modal").hidden = true; document.body.style.overflow = "";
+    }
     if (next !== state.view && !keepQueryOnRoute) { state.q = ""; $("#search").value = ""; }
     keepQueryOnRoute = false;
     const changed = next !== state.view;
@@ -1746,7 +1775,7 @@
     if (p.type === "services") { openServices(); return; }
     if (p.type === "row") { if (!openRow(p.id)) setHash(state.view === "home" ? "" : state.view); return; }
     const ok = p.type === "team" ? teamByKey.has(p.id) && (openTeam(p.id), true) : openGame(p.id);
-    if (!ok) { setHash(state.view === "home" ? "" : state.view); toast(p.type === "game" ? "That game is no longer listed" : "Team not found"); }
+    if (!ok) { openVia = ""; setHash(state.view === "home" ? "" : state.view); toast(p.type === "game" ? "That game is no longer listed" : "Team not found"); }
   }
 
   // ---------- events ----------

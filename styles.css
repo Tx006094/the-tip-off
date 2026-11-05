@@ -11,7 +11,7 @@
   --line-strong: rgba(255, 255, 255, 0.16);
   --text: #f4f4f5;
   --muted: #a1a1aa;
-  --dim: #74747e;
+  --dim: #8b8b95; /* 4.8:1 or better on every surface */
   --accent: #fa4e02; /* brand orange, from the logo pin */
   --accent-soft: rgba(250, 78, 2, 0.14);
   --free: #3ddc97;
@@ -114,7 +114,7 @@ main:focus { outline: none; }
 }
 .search:focus-within { border-color: var(--line-strong); background: var(--surface-2); }
 .search svg { width: 17px; height: 17px; stroke: var(--muted); stroke-width: 2; fill: none; flex-shrink: 0; }
-.search input { all: unset; flex: 1; min-width: 0; color: var(--text); font-size: 15px; height: 100%; }
+.search input { all: unset; flex: 1; min-width: 0; color: var(--text); font-size: 16px; height: 100%; }
 .search input::placeholder { color: var(--dim); }
 .search input::-webkit-search-cancel-button { filter: invert(1) opacity(.5); cursor: pointer; }
 .search { position: relative; }
@@ -344,7 +344,7 @@ main:focus { outline: none; }
 }
 .sched-conf select {
   appearance: none; -webkit-appearance: none; width: 100%; height: 44px; padding: 0 38px 0 14px; border-radius: 10px;
-  background: var(--surface); border: 1px solid var(--line-strong); color: var(--text); font: 600 15px/1 var(--font-body); cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line-strong); color: var(--text); font: 600 16px/1 var(--font-body); cursor: pointer;
 }
 .sched-conf select:hover, .sched-conf select:focus { border-color: var(--text); background: var(--surface-2); }
 .sched-conf-note { color: var(--muted); font-weight: 500; }
@@ -355,7 +355,7 @@ main:focus { outline: none; }
 }
 .sched-find-box:focus-within { border-color: var(--text); background: var(--surface-2); }
 .sched-find-box svg { width: 17px; height: 17px; stroke: var(--muted); stroke-width: 2; fill: none; flex-shrink: 0; }
-.sched-find-box input { all: unset; flex: 1; min-width: 0; height: 100%; color: var(--text); font-size: 15px; }
+.sched-find-box input { all: unset; flex: 1; min-width: 0; height: 100%; color: var(--text); font-size: 16px; }
 .sched-find-box input::placeholder { color: var(--dim); }
 .sched-find-box input::-webkit-search-cancel-button { filter: invert(1) opacity(.5); cursor: pointer; }
 .sched-suggest {
@@ -506,7 +506,7 @@ main:focus { outline: none; }
   padding: 0 8px; border-radius: 6px; background: rgba(10,10,12,.78);
   white-space: nowrap; color: var(--text);
 }
-.pill.live { background: var(--live); }
+.pill.live { background: #dc2626; color: #fff; } /* white text 4.8:1 */
 .pill.live::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #fff; animation: blink 1.4s infinite; }
 @keyframes blink { 50% { opacity: .25; } }
 .pill.free { color: var(--free); }
@@ -1079,7 +1079,12 @@ main:focus { outline: none; }
   .m-foot > :last-child:nth-child(odd) { grid-column: 1 / -1; }
   .legend { justify-content: center; text-align: center; }
   .legend-cta { flex: 1 0 100%; text-align: center; }
-  .site-footer ul { gap: 12px; }
+  .site-footer ul { gap: 0; }
+  .site-footer ul a { display: block; padding: 12px 0; } /* each link a full 44px tap */
+  body { font-size: 16px; }
+  .card-meta, .legend, .m-small, .picker-count, .rail-head span, .sug-name small { font-size: 13px; }
+  .sched-day { font-size: 13px; }
+  .srow-team .mono, .sug .mono, .pick-chip .mono { font-size: 10px; }
   .footer-grid { gap: 32px 24px; }
 }
 @media (max-width: 420px) {
@@ -1088,4 +1093,14 @@ main:focus { outline: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition: none !important; scroll-behavior: auto !important; }
+}
+
+/* Touch screens: small controls get an invisible 44px tap area around them, so they're easy to hit
+   without making them look bigger or moving anything. */
+@media (pointer: coarse) {
+  .chip, .segmented button, .see-all, .stat-link, .legend-cta, .search-close { position: relative; }
+  .chips { padding-top: 5px; padding-bottom: 5px; margin-top: -5px; margin-bottom: -5px; } /* room inside the scrolling row */
+  .chip::after, .segmented button::after, .see-all::after, .stat-link::after, .legend-cta::after, .search-close::after {
+    content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%);
+  }
 }
