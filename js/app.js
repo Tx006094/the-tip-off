@@ -549,7 +549,7 @@
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     html += scheduleHTML();
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
-    html += shelfHTML("Top 25 vs. Top 25", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
+    html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     html += shelfHTML("Showcase Events", real.filter((g) => g.state !== "post" && showcaseName(g)), "Marquee neutral-site games", { color: "var(--event)" });
     html += shelfHTML("Ranked Teams in Action", real.filter((g) => g.state === "pre" && !!g.home.rank !== !!g.away?.rank), "One team in the Top 25");
     html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
@@ -1301,7 +1301,7 @@
         <div class="sched">${list.map((g) => schedItemHTML(g, { tag: true })).join("")}</div>`).join("");
     return `<div class="m-hero picker-hero big-hero">
         <h2 class="m-title" id="modalTitle" style="text-align:left">${plural(games.length, "big game")}</h2>
-        <p class="picker-dek">Top 25 vs. Top 25 matchups, showcase events and ranked teams on national TV over the next ${DAYS_AHEAD} days, so you can catch the best teams and star players. Biggest matchups are listed first each day. Times in ${esc(tzName())}.</p>
+        <p class="picker-dek">Top 25 matchups (both teams ranked), showcase events and ranked teams on national TV over the next ${DAYS_AHEAD} days, so you can catch the best teams and star players. Biggest matchups are listed first each day. Times in ${esc(tzName())}.</p>
       </div>
       <div class="m-body picker-body">${games.length ? days : `<div class="notice" style="margin:0">No big games in the next ${DAYS_AHEAD} days right now. Check back soon.</div>`}
         <p class="m-small">Rankings are the AP Top 25 for college. More games with a ranked team are in the Ranked Teams in Action row on the home page. Tap a game to see every way to watch it.</p>
