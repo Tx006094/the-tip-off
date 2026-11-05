@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261105w" />
+  <link rel="stylesheet" href="styles.css?v=20261105y" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -103,7 +103,14 @@
         <label class="sr-only" for="search">Search teams, games and platforms</label>
         <input id="search" name="q" type="search" placeholder="Search teams, games, platforms" autocomplete="off" spellcheck="false" enterkeyhint="search" />
         <kbd aria-hidden="true">/</kbd>
+        <button type="button" class="search-close" data-search-close aria-label="Close search">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+        </button>
       </form>
+      <!-- Phones: the search box folds into this button so the logo has room -->
+      <button type="button" class="search-toggle" data-search-open aria-label="Search teams, games and platforms" aria-controls="search" aria-expanded="false">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      </button>
     </div>
     <div class="filters" id="filters">
       <div class="chips" role="group" aria-label="Filter by league" id="leagueChips"></div>
@@ -289,12 +296,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261105w"></script>
-  <script src="js/services.js?v=20261105w"></script>
-  <script src="js/leagues.js?v=20261105w"></script>
-  <script src="js/teams-data.js?v=20261105w"></script>
-  <script src="js/news-data.js?v=20261105w"></script>
-  <script src="js/motion-fx.js?v=20261105w"></script>
-  <script src="js/app.js?v=20261105w"></script>
+  <script src="js/platforms.js?v=20261105y"></script>
+  <script src="js/services.js?v=20261105y"></script>
+  <script src="js/leagues.js?v=20261105y"></script>
+  <script src="js/teams-data.js?v=20261105y"></script>
+  <script src="js/news-data.js?v=20261105y"></script>
+  <script src="js/motion-fx.js?v=20261105y"></script>
+  <script src="js/app.js?v=20261105y"></script>
 </body>
 </html>

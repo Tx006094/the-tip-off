@@ -117,6 +117,10 @@ main:focus { outline: none; }
 .search input { all: unset; flex: 1; min-width: 0; color: var(--text); font-size: 15px; height: 100%; }
 .search input::placeholder { color: var(--dim); }
 .search input::-webkit-search-cancel-button { filter: invert(1) opacity(.5); cursor: pointer; }
+.search-toggle, .search-close { display: none; }
+.search-close { place-items: center; flex-shrink: 0; width: 30px; height: 30px; margin-right: -6px; border: 0; border-radius: 8px; background: none; color: var(--muted); }
+.search-close svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.2; fill: none; }
+.search-close:hover { color: var(--text); background: var(--surface-3); }
 .search kbd {
   font: 500 12px/1 var(--font-body); color: var(--dim); font-variant-numeric: tabular-nums;
   border: 1px solid var(--line-strong); border-radius: 5px; padding: 3px 6px;
@@ -974,9 +978,19 @@ main:focus { outline: none; }
   html { scroll-padding-top: 180px; }
   .bar { flex-wrap: wrap; row-gap: 0; padding-top: 0; padding-bottom: 0; min-height: 0; }
   .brand { padding: 9px 0 8px; }
-  .brand-mark { height: 46px; }
-  .brand-word { height: 36px; }
+  .brand-mark { height: 54px; }
+  .brand-word { height: 44px; }
   .search { order: 2; width: auto; flex: 1 1 120px; min-width: 0; margin-left: 4px; height: 38px; }
+  /* Phones: a search button beside a bigger logo; tapping it opens the box across the whole row */
+  .masthead:not(.searching) .search { display: none; }
+  .search-toggle {
+    display: grid; place-items: center; order: 2; margin-left: auto; width: 44px; height: 44px; border-radius: 12px;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--text);
+  }
+  .search-toggle svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2.2; fill: none; }
+  .masthead.searching .brand, .masthead.searching .search-toggle { display: none; }
+  .masthead.searching .search { flex: 1 1 100%; margin: 13px 0 14px; height: 44px; }
+  .search-close { display: grid; }
   .masthead { transition: transform .28s var(--ease); }
   .masthead.tucked { transform: translateY(-100%); }
   .search kbd { display: none; }

@@ -1836,10 +1836,35 @@
     }
   });
 
+  // Phones: the search button opens the search box across the header row (CSS hides it otherwise).
+  function openSearch() {
+    $("#topbar").classList.add("searching");
+    $("[data-search-open]").setAttribute("aria-expanded", "true");
+    $("#search").focus();
+  }
+  function closeSearch({ focusButton = true } = {}) {
+    $("#topbar").classList.remove("searching");
+    $("[data-search-open]").setAttribute("aria-expanded", "false");
+    if ($("#search").value) { $("#search").value = ""; setQuery(""); }
+    if (focusButton) $("[data-search-open]").focus({ preventScroll: true });
+  }
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-search-open]")) openSearch();
+    else if (e.target.closest("[data-search-close]")) closeSearch();
+  });
+  // Leaving an empty search box (tapping elsewhere, or focus moving on) folds it back into the button.
+  document.addEventListener("pointerdown", (e) => {
+    if ($("#topbar").classList.contains("searching") && !$("#search").value && !e.target.closest("#topbar")) closeSearch({ focusButton: false });
+  }, { passive: true });
+  $("#search").addEventListener("blur", () => setTimeout(() => {
+    if (!$("#search").value && !$(".search").contains(document.activeElement)) closeSearch({ focusButton: false });
+  }, 150));
+
   $("#search").addEventListener("input", (e) => setQuery(e.target.value));
   $("#search").addEventListener("keydown", (e) => {
     if (e.key === "Enter") { e.preventDefault(); $("#main").focus({ preventScroll: true }); }
     if (e.key === "Escape" && e.target.value) { e.preventDefault(); e.target.value = ""; setQuery(""); }
+    else if (e.key === "Escape" && $("#topbar").classList.contains("searching")) { e.preventDefault(); closeSearch(); }
   });
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape" && !$("#modal").hidden) return closeModal();
@@ -1860,6 +1885,7 @@
   $("#year").textContent = new Date().getFullYear();
   const initialQ = new URLSearchParams(location.search).get("q") || "";
   $("#search").value = initialQ; // also overrides any value the browser restored
+  if (initialQ) $("#topbar").classList.add("searching"); // a ?q= link shows its search on phones too
   state.q = initialQ.trim();
   {
     const h = decodeURIComponent((location.hash || "").slice(1)).split("/")[0];
