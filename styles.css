@@ -944,7 +944,8 @@ main:focus { outline: none; }
 .ticker-pause .i-play { display: none; }
 .ticker.paused .ticker-pause .i-play { display: block; }
 .ticker.paused .ticker-pause .i-pause { display: none; }
-@media (hover: none), (max-width: 760px), (prefers-reduced-motion: reduce) {
+/* The ticker scrolls on its own everywhere (phones included); only "Reduce motion" turns it into a still strip you can swipe. */
+@media (prefers-reduced-motion: reduce) {
   .ticker-viewport { overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
   .ticker-viewport::-webkit-scrollbar { display: none; }
   .ticker-track { animation: none; }
