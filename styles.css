@@ -1032,6 +1032,10 @@ main:focus { outline: none; }
   .hero .eyebrow, .hero-platforms { justify-content: center; }
   .hero-event { align-self: center; }
   .footer-brand p { max-width: none; }
+  /* Phones: the headline and today's numbers are centred, like the featured game below them */
+  .intro-copy { text-align: center; }
+  .stats > div, .stats > div:nth-child(odd), .stats > div:nth-child(even) { padding-left: 8px; padding-right: 8px; text-align: center; }
+  .stat-link { justify-content: center; }
   .site-footer ul { gap: 12px; }
   .footer-grid { gap: 32px 24px; }
 }
