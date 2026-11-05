@@ -63,8 +63,8 @@
 
   // ---------- region (US / Canada) ----------
   // Order: ?region= in the link, then the viewer's saved choice, then a guess from time zone / language.
-  const CA_ZONES = /^America\/(Toronto|Montreal|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Moncton|Glace_Bay|Goose_Bay|Whitehorse|Yellowknife|Iqaluit|Rankin_Inlet|Resolute|Cambridge_Bay|Inuvik|Dawson|Dawson_Creek|Creston|Fort_Nelson|Swift_Current|Thunder_Bay|Nipigon|Rainy_River|Atikokan|Blanc-Sablon|Pangnirtung)$/;
   function initialRegion() {
+    const CA_ZONES = /^America\/(Toronto|Montreal|Vancouver|Edmonton|Winnipeg|Halifax|St_Johns|Regina|Moncton|Glace_Bay|Goose_Bay|Whitehorse|Yellowknife|Iqaluit|Rankin_Inlet|Resolute|Cambridge_Bay|Inuvik|Dawson|Dawson_Creek|Creston|Fort_Nelson|Swift_Current|Thunder_Bay|Nipigon|Rainy_River|Atikokan|Blanc-Sablon|Pangnirtung)$/;
     const fromUrl = new URLSearchParams(location.search).get("region");
     if (fromUrl === "ca" || fromUrl === "us") return fromUrl;
     try { const saved = localStorage.getItem("fc-region"); if (saved === "ca" || saved === "us") return saved; } catch { /* storage unavailable */ }
