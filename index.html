@@ -38,7 +38,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261105y" />
+  <link rel="stylesheet" href="styles.css?v=20261105z" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -101,8 +101,10 @@
       <form class="search" role="search" action="" onsubmit="return false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <label class="sr-only" for="search">Search teams, games and platforms</label>
-        <input id="search" name="q" type="search" placeholder="Search teams, games, platforms" autocomplete="off" spellcheck="false" enterkeyhint="search" />
+        <input id="search" name="q" type="search" placeholder="Search teams, games, platforms" autocomplete="off" spellcheck="false" enterkeyhint="search"
+          role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="headSuggest" />
         <kbd aria-hidden="true">/</kbd>
+        <ul class="sched-suggest head-suggest" id="headSuggest" role="listbox" aria-label="Teams and search" hidden></ul>
         <button type="button" class="search-close" data-search-close aria-label="Close search">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
         </button>
@@ -296,12 +298,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261105y"></script>
-  <script src="js/services.js?v=20261105y"></script>
-  <script src="js/leagues.js?v=20261105y"></script>
-  <script src="js/teams-data.js?v=20261105y"></script>
-  <script src="js/news-data.js?v=20261105y"></script>
-  <script src="js/motion-fx.js?v=20261105y"></script>
-  <script src="js/app.js?v=20261105y"></script>
+  <script src="js/platforms.js?v=20261105z"></script>
+  <script src="js/services.js?v=20261105z"></script>
+  <script src="js/leagues.js?v=20261105z"></script>
+  <script src="js/teams-data.js?v=20261105z"></script>
+  <script src="js/news-data.js?v=20261105z"></script>
+  <script src="js/motion-fx.js?v=20261105z"></script>
+  <script src="js/app.js?v=20261105z"></script>
 </body>
 </html>

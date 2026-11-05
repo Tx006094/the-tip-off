@@ -523,13 +523,33 @@
       const plats = PLATFORMS.filter((p) => p.id !== "local" && matchesQuery(norm(p.name), state.q));
       const bits = [plural(filtered.length, "game"), teams.length && plural(teams.length, "team"), plats.length && plural(plats.length, "platform")].filter(Boolean);
       html += `<div class="page-head"><h2>“${esc(state.q)}”</h2><p class="dek">${esc(bits.join(" · "))}</p></div>`;
+      // Games first, today at the top, as schedule rows; then later days; then teams and services.
+      const today = dayKey(new Date());
+      const listed = filtered.filter((g) => !g.tba && g.away);
+      const todays = listed.filter((g) => dayKey(g.date) === today).sort(byPhase);
+      const later = listed.filter((g) => dayKey(g.date) > today).sort((x, y) => x.date - y.date);
+      const LATER_CAP = 40;
+      if (listed.length) {
+        html += secHead("Today", plural(todays.length, "game"));
+        html += todays.length
+          ? `<div class="sched-list">${todays.map(schedRowHTML).join("")}</div>`
+          : `<div class="notice">No games matching “${esc(state.q)}” today.${later.length ? " Here's what's coming up." : ""}</div>`;
+        if (later.length) {
+          const days = new Map();
+          for (const g of later.slice(0, LATER_CAP)) { const k = dayKey(g.date); if (!days.has(k)) days.set(k, []); days.get(k).push(g); }
+          html += secHead("Coming up", later.length > LATER_CAP ? `Next ${LATER_CAP} of ${later.length} games` : plural(later.length, "game"));
+          html += `<div class="sched-list">${[...days].map(([k, gs]) => `<h3 class="sched-dayhead">${esc(dayLabel(new Date(k), "long"))}</h3>${gs.map(schedRowHTML).join("")}`).join("")}</div>`;
+        }
+      }
+      const announced = filtered.filter((g) => g.tba || !g.away);
+      if (announced.length) html += `${secHead("Announced events")}<div class="grid" style="padding-top:12px">${announced.map(cardHTML).join("")}</div>`;
       if (teams.length) {
         html += `${secHead("Teams", "Tap for full schedule")}
           <div class="row"><div class="shelf teams-shelf">${teams.map(teamTileHTML).join("")}</div></div>`;
       }
       if (plats.length) html += `${secHead("Platforms")}<div class="grid plat-grid">${plats.map(platformCardHTML).join("")}</div>`;
       if (filtered.length) {
-        html += `${secHead("Games", `Next ${DAYS_AHEAD} days + announced events`)}${legendHTML()}<div class="grid" style="padding-top:16px">${filtered.map(cardHTML).join("")}</div>`;
+        // shown above
       } else if (!teams.length && !plats.length) {
         html += emptyHTML("No matches", "Try a team like “UConn”, “Liberty” or “Lunar Owls”, or a service like “ESPN+”.");
       } else {
@@ -710,7 +730,8 @@
       const names = listNames(schedTeams.map(shortTeam));
       const stars = schedTeams.filter((k) => !state.favs.has(k)).map((k) => favButton(k).replace("Add to My Teams", `Star ${esc(shortTeam(k))}`)).join("");
       const season = schedTeams.length === 1 ? `<button type="button" class="btn btn-ghost" data-team="${esc(schedTeams[0])}">Full season schedule</button>` : "";
-      const head = `<div class="sched-team-head">
+      const answers = schedTeams.slice(0, 3).map(teamTodayHTML).join("");
+      const head = `${answers}<div class="sched-team-head">
           <p><strong>${esc(names)}</strong>${schedConf ? ` <span class="sched-conf-note">(${esc(confLabel(schedConf))} games only)</span>` : ""}: ${teamGames.length ? `${plural(teamGames.length, "game")} in the next ${DAYS_AHEAD} days` : `no games in the next ${DAYS_AHEAD} days${state.price !== "all" || state.league !== "all" ? " with these filters" : ""}`}</p>
           <div class="sched-team-actions">${stars}${season}</div>
         </div>`;
@@ -732,6 +753,33 @@
       body = `<div class="sched-list">${list}</div>${more}`;
     }
     return `${chips}<div class="sched-days" role="group" aria-label="Choose a day">${tabs}</div>${body}`;
+  }
+
+  /** "Is my team on today, and where?" answered in one line, with a button to the game. */
+  function teamTodayHTML(key) {
+    const keys = new Set([key]);
+    const games = schedGames.filter((g) => g.away && playsIn(g, keys)).sort((x, y) => x.date - y.date);
+    const today = dayKey(new Date());
+    const name = esc(shortTeam(key));
+    const vs = (g) => {
+      const home = gameTeamKey(g, g.home) === key;
+      const opp = home ? g.away : g.home;
+      return `${home || g.neutral ? "vs." : "at"} ${esc(opp.short || opp.name)}`;
+    };
+    const where = (g) => (g.platforms.length ? `on ${esc(g.platforms.slice(0, 2).map((p) => p.name).join(" & "))}` : "channel not announced yet");
+    const btn = (g, label = "Where to watch") => `<button type="button" class="btn btn-primary" data-game="${esc(g.id)}">${ICON.play}${label}</button>`;
+    const todays = games.filter((g) => dayKey(g.date) === today);
+    const g = todays.find((x) => x.state !== "post") || todays[0];
+    let text, action = "";
+    if (g && g.state === "in") { text = `<strong>${name} is playing now</strong> ${vs(g)} · ${where(g)}`; action = btn(g); }
+    else if (g && g.state === "pre") { text = `<strong>${name} plays today</strong> ${vs(g)} · ${esc(clock(g))} ${where(g)}`; action = btn(g); }
+    else {
+      const next = games.find((x) => dayKey(x.date) > today);
+      const played = g ? `${name} played today ${vs(g)}${g.home.score !== "" ? ` (final ${esc(g.away.score)}–${esc(g.home.score)})` : ""}. ` : `<strong>${name} doesn't play today.</strong> `;
+      if (next) { text = `${played}Next: ${esc(dayLabel(next.date))} ${vs(next)} · ${esc(clock(next))} ${where(next)}`; action = btn(next); }
+      else text = `${played}No games in the next ${DAYS_AHEAD} days.`;
+    }
+    return `<div class="team-today"><p>${text}</p>${action}</div>`;
   }
 
   /** Redraw just the schedule's tabs and list, so the page doesn't jump and the search box keeps focus. */
@@ -1860,9 +1908,79 @@
     if (!$("#search").value && !$(".search").contains(document.activeElement)) closeSearch({ focusButton: false });
   }, 150));
 
-  $("#search").addEventListener("input", (e) => setQuery(e.target.value));
+  // Top search: as you type it suggests teams; picking one jumps into the Schedule with that team's
+  // games (today's answer first). "Search everything" (or Enter with no team) shows the results page.
+  let headIndex = -1;
+  const SEARCH_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>';
+  function renderHeadSuggest() {
+    const box = $("#headSuggest"), input = $("#search"), q = input.value.trim();
+    const list = teamSuggestions(q);
+    const all = list.length; // index of the "search everything" option
+    if (headIndex > all) headIndex = all;
+    box.innerHTML = q ? list.map(({ t: team, n }, i) => `<li role="option" id="hs-${i}" class="sug" data-head-pick="${esc(team.key)}" aria-selected="${i === headIndex}">
+        ${logoHTML(team)}<span class="sug-name">${esc(team.name)}<small>${esc(LEAGUES[team.league].short)}</small></span>
+        <span class="sug-n">${n ? plural(n, "game") : "No games"}</span></li>`).join("")
+      + `<li role="option" id="hs-${all}" class="sug sug-all" data-head-search aria-selected="${headIndex === all}">${SEARCH_ICON}<span class="sug-name">Search everything for “${esc(q)}”</span><span class="sug-n">Games &amp; services</span></li>` : "";
+    box.hidden = !q;
+    input.setAttribute("aria-expanded", String(!!q));
+    if (q && headIndex >= 0) input.setAttribute("aria-activedescendant", `hs-${headIndex}`); else input.removeAttribute("aria-activedescendant");
+  }
+  function closeHeadSuggest() {
+    headIndex = -1;
+    $("#headSuggest").hidden = true;
+    $("#search").setAttribute("aria-expanded", "false");
+    $("#search").removeAttribute("aria-activedescendant");
+  }
+  function runSearch() {
+    closeHeadSuggest();
+    setQuery($("#search").value);
+    $("#main").focus({ preventScroll: true });
+  }
+  function goToTeam(key) {
+    closeHeadSuggest();
+    $("#search").value = "";
+    $("#search").blur();
+    $("#topbar").classList.remove("searching");
+    $("[data-search-open]").setAttribute("aria-expanded", "false");
+    if (state.q) {
+      state.q = "";
+      const url = new URL(location.href); url.searchParams.delete("q");
+      history.replaceState(null, "", url.pathname + url.search);
+    }
+    if (state.view !== "home") { state.view = "home"; setHash(""); }
+    schedTeams = [key]; schedDay = TEAM_TAB; schedAll = false;
+    render();
+    requestAnimationFrame(() => {
+      const s = $("#schedule");
+      if (!s) return;
+      s.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
+      fx("show", $$("#schedBody .team-today, #schedBody .srow").slice(0, 6), { y: 10, step: 0.04 });
+    });
+  }
+  document.addEventListener("click", (e) => {
+    const pick = e.target.closest("[data-head-pick]");
+    if (pick) return void goToTeam(pick.dataset.headPick);
+    if (e.target.closest("[data-head-search]")) runSearch();
+  });
+  document.addEventListener("pointerdown", (e) => { if (!e.target.closest?.(".search")) closeHeadSuggest(); }, { passive: true });
+
+  $("#search").addEventListener("input", (e) => {
+    headIndex = e.target.value.trim() ? 0 : -1;
+    renderHeadSuggest();
+    if (!e.target.value.trim() && state.q) setQuery(""); // clearing the box goes back to the home page
+  });
   $("#search").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { e.preventDefault(); $("#main").focus({ preventScroll: true }); }
+    const n = $$("#headSuggest .sug").length;
+    const open = !$("#headSuggest").hidden && n;
+    if (open && e.key === "ArrowDown") { e.preventDefault(); headIndex = (headIndex + 1) % n; renderHeadSuggest(); return; }
+    if (open && e.key === "ArrowUp") { e.preventDefault(); headIndex = (headIndex - 1 + n) % n; renderHeadSuggest(); return; }
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const opt = open ? $$("#headSuggest .sug")[Math.max(0, headIndex)] : null;
+      if (opt?.dataset.headPick) goToTeam(opt.dataset.headPick); else if (e.target.value.trim()) runSearch();
+      return;
+    }
+    if (e.key === "Escape" && open) { e.preventDefault(); closeHeadSuggest(); return; }
     if (e.key === "Escape" && e.target.value) { e.preventDefault(); e.target.value = ""; setQuery(""); }
     else if (e.key === "Escape" && $("#topbar").classList.contains("searching")) { e.preventDefault(); closeSearch(); }
   });

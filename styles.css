@@ -117,6 +117,17 @@ main:focus { outline: none; }
 .search input { all: unset; flex: 1; min-width: 0; color: var(--text); font-size: 15px; height: 100%; }
 .search input::placeholder { color: var(--dim); }
 .search input::-webkit-search-cancel-button { filter: invert(1) opacity(.5); cursor: pointer; }
+.search { position: relative; }
+.head-suggest { min-width: 320px; }
+.sug-all svg { width: 18px; height: 18px; margin: 0 4px; stroke: var(--muted); stroke-width: 2; fill: none; }
+.sug-all .sug-name { font-weight: 500; color: var(--muted); }
+.team-today {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 16px;
+  margin: 4px var(--edge) 12px; padding: 14px 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-strong);
+}
+.team-today p { margin: 0; flex: 1 1 260px; font-size: 16px; line-height: 1.45; color: var(--muted); }
+.team-today strong { color: var(--text); }
+.team-today .btn { height: 40px; }
 .search-toggle, .search-close { display: none; }
 .search-close { place-items: center; flex-shrink: 0; width: 30px; height: 30px; margin-right: -6px; border: 0; border-radius: 8px; background: none; color: var(--muted); }
 .search-close svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.2; fill: none; }
