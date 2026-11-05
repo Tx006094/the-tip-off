@@ -444,14 +444,22 @@
     </button>`;
   }
 
-  function secHead(title, sub = "", { color, live } = {}) {
-    return `<div class="sec-head"${color ? ` style="--c:${color}"` : ""}><h2>${live ? '<span class="live-dot" aria-hidden="true"></span>' : ""}${esc(title)}</h2>${sub ? `<span class="sub">${esc(sub)}</span>` : ""}</div>`;
+  function secHead(title, sub = "", { color, live, action = "" } = {}) {
+    return `<div class="sec-head"${color ? ` style="--c:${color}"` : ""}><h2>${live ? '<span class="live-dot" aria-hidden="true"></span>' : ""}${esc(title)}</h2>${sub || action ? `<span class="sec-side">${sub ? `<span class="sub">${esc(sub)}</span>` : ""}${action}</span>` : ""}</div>`;
   }
+  // Each game row is remembered by a short key so "See all" can list it in a pop-up.
+  const rowLists = new Map();
+  const rowKey = (title) => title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   function shelfHTML(title, games, sub = "", opts = {}) {
     if (!games.length) return "";
     const leagues = new Set(games.map((g) => g.league));
     const tag = leagues.size === 1 ? ` data-brand-league="${[...leagues][0]}"` : "";
-    return `<div class="shelf-block"${tag}>${secHead(title, sub || plural(games.length, "game"), opts)}
+    const key = rowKey(title);
+    rowLists.set(key, { title, sub, games, color: opts.color });
+    // "See all N" tells people the row has more than fits, and opens it as a list (easier than swiping).
+    const action = games.length > 1
+      ? `<button type="button" class="see-all" data-open-row="${esc(key)}" aria-label="See all ${games.length} ${esc(title)} games">See all <b>${games.length}</b> <span aria-hidden="true">→</span></button>` : "";
+    return `<div class="shelf-block"${tag}>${secHead(title, sub, { ...opts, action })}
       <div class="row">
         <button type="button" class="shelf-arrow prev" aria-label="Scroll ${esc(title)} left" data-scroll="-1">${ICON.left}</button>
         <div class="shelf">${games.map(cardHTML).join("")}</div>
@@ -977,6 +985,7 @@
       revealNext = false;
       fx("reveal", $("#view-" + state.view));
       if (!guideRevealed && state.view === "home") { guideRevealed = true; fx("reveal", $("#guide")); }
+      if (state.view === "home") fx("nudge", $$("#view-home .shelf"));
     }
     requestAnimationFrame(() => { updateAllArrows(); updateBrand(); });
     renderTicker();
@@ -1349,6 +1358,43 @@
         <p class="m-small">Rankings are the AP Top 25 for college. More games with a ranked team are in the Ranked Teams in Action row on the home page. Tap a game to see every way to watch it.</p>
       </div>`;
   }
+  // ---------- a row's "See all" list ----------
+  let openRowKey = null;
+  function rowPickerHTML(key) {
+    const row = rowLists.get(key);
+    if (!row) return "";
+    const byDay = new Map();
+    for (const g of [...row.games].sort((x, y) => x.date - y.date)) {
+      const k = g.tba ? "tba" : dayKey(g.date);
+      if (!byDay.has(k)) byDay.set(k, []);
+      byDay.get(k).push(g);
+    }
+    const days = [...byDay].map(([k, list]) => `<h3>${k === "tba" ? "Dates to be announced" : esc(dayLabel(new Date(k), "long"))} <span class="picker-count">${plural(list.length, "game")}</span></h3>
+        <div class="sched">${list.map(schedItemHTML).join("")}</div>`).join("");
+    return `<div class="m-hero picker-hero row-hero"${row.color ? ` style="--c:${row.color}"` : ""}>
+        <h2 class="m-title" id="modalTitle" style="text-align:left">${esc(row.title)}</h2>
+        <p class="picker-dek">${plural(row.games.length, "game")}${row.sub ? ` · ${esc(row.sub)}` : ""}. Times in ${esc(tzName())}.</p>
+      </div>
+      <div class="m-body picker-body">${days}
+        <p class="m-small">Tap a game to see every way to watch it.</p>
+      </div>`;
+  }
+  function openRow(key, { keepScroll = false } = {}) {
+    if (state.loading) { state.pendingOpen = { type: "row", id: key }; return true; }
+    if (!rowLists.has(key) && !$("#view-home").innerHTML) renderHome();
+    const html = rowPickerHTML(key);
+    if (!html) return false;
+    const sheet = $(".modal-sheet"), y = keepScroll ? sheet.scrollTop : 0;
+    brandModalLeague = null;
+    openModal(html, `${rowLists.get(key).title}: Women's Basketball Games`);
+    if (!keepScroll) fx("sequence", $$("#modalBody .sched-item"));
+    modalKind = "row"; openRowKey = key;
+    if (keepScroll) sheet.scrollTop = y;
+    setHash("row/" + key);
+    updateBrand();
+    return true;
+  }
+
   function openBigPicker({ keepScroll = false } = {}) {
     if (state.loading) { state.pendingOpen = { type: "big" }; return true; }
     const sheet = $(".modal-sheet"), y = keepScroll ? sheet.scrollTop : 0;
@@ -1399,6 +1445,7 @@
       <div class="m-body">
         ${back === "free" ? `<button type="button" class="btn btn-ghost picker-back" data-open-free>${ICON.left}All free games</button>` : ""}
         ${back === "big" ? `<button type="button" class="btn btn-ghost picker-back" data-open-big>${ICON.left}All big games</button>` : ""}
+        ${back === "row" && rowLists.has(openRowKey) ? `<button type="button" class="btn btn-ghost picker-back" data-open-row="${esc(openRowKey)}">${ICON.left}All ${esc(rowLists.get(openRowKey).title)}</button>` : ""}
         ${watchListHTML(g.platforms, g.expected, g.regionNote)}
         ${g.expected ? `<p class="m-small">These are the channels expected under the league's TV deal. Exact channels for each game are confirmed closer to the date.</p>` : ""}
         <div class="m-foot">
@@ -1618,6 +1665,11 @@
     const h = decodeURIComponent((location.hash || "").slice(1));
     const [head, ...rest] = h.split("/");
     const arg = rest.join("/");
+    if (head === "row") {
+      if (!$("#view-" + state.view).innerHTML) render();
+      if (!openRow(arg)) setHash(state.view === "home" ? "" : state.view);
+      return;
+    }
     if (head === "free" || head === "big" || head === "services") {
       if (!$("#view-" + state.view).innerHTML) render();
       ({ free: openFreePicker, big: openBigPicker, services: openServices })[head]();
@@ -1646,6 +1698,7 @@
     if (p.type === "free") { openFreePicker(); return; }
     if (p.type === "big") { openBigPicker(); return; }
     if (p.type === "services") { openServices(); return; }
+    if (p.type === "row") { if (!openRow(p.id)) setHash(state.view === "home" ? "" : state.view); return; }
     const ok = p.type === "team" ? teamByKey.has(p.id) && (openTeam(p.id), true) : openGame(p.id);
     if (!ok) { setHash(state.view === "home" ? "" : state.view); toast(p.type === "game" ? "That game is no longer listed" : "Team not found"); }
   }
@@ -1678,7 +1731,7 @@
   }
 
   document.addEventListener("click", (ev) => {
-    const t = ev.target.closest("[data-game],[data-team],[data-league],[data-price],[data-platform],[data-close],[data-scroll],[data-fav],[data-share],[data-retry],[data-anchor],[data-open-free],[data-free-league],[data-region],[data-open-big],[data-open-services],[data-ics],[data-ics-team],[data-svc-clear],[data-sched-day],[data-sched-all],[data-sched-pick],[data-sched-remove],[data-sched-clear],[data-sched-conf-clear]");
+    const t = ev.target.closest("[data-game],[data-team],[data-league],[data-price],[data-platform],[data-close],[data-scroll],[data-fav],[data-share],[data-retry],[data-anchor],[data-open-free],[data-open-row],[data-free-league],[data-region],[data-open-big],[data-open-services],[data-ics],[data-ics-team],[data-svc-clear],[data-sched-day],[data-sched-all],[data-sched-pick],[data-sched-remove],[data-sched-clear],[data-sched-conf-clear]");
     if (!t) return;
     if (t.dataset.openServices !== undefined) { ev.preventDefault(); return void openServices(); }
     if (t.dataset.schedDay) {
@@ -1742,6 +1795,7 @@
     if (t.dataset.region) return void setRegion(t.dataset.region);
     if (t.dataset.openFree !== undefined) { ev.preventDefault(); return void openFreePicker(); }
     if (t.dataset.openBig !== undefined) { ev.preventDefault(); return void openBigPicker(); }
+    if (t.dataset.openRow) { ev.preventDefault(); return void openRow(t.dataset.openRow); }
     if (t.dataset.freeLeague) { freeLeague = t.dataset.freeLeague; return void openFreePicker({ keepScroll: true }); }
     if (t.dataset.game) { ev.preventDefault(); return void openGame(t.dataset.game, { back: t.closest("#modal") ? modalKind : null }); }
     if (t.dataset.team) { ev.preventDefault(); return void openTeam(t.dataset.team); }
@@ -1824,7 +1878,7 @@
     state.news = news;
     const wasLoading = state.loading;
     state.loading = false;
-    if ($("#modal").hidden || wasLoading) render(); else { renderTicker(); renderStats(); if (modalKind === "free") openFreePicker({ keepScroll: true }); if (modalKind === "big") openBigPicker({ keepScroll: true }); }
+    if ($("#modal").hidden || wasLoading) render(); else { renderTicker(); renderStats(); if (modalKind === "free") openFreePicker({ keepScroll: true }); if (modalKind === "row") openRow(openRowKey, { keepScroll: true }); if (modalKind === "big") openBigPicker({ keepScroll: true }); }
     if (wasLoading) processPendingOpen();
   }
   refreshLive(true);

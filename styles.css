@@ -262,9 +262,18 @@ main:focus { outline: none; }
   display: flex; align-items: center; gap: 10px;
 }
 .sec-head .sub { color: var(--dim); font: 500 12px/1.3 var(--font-body); text-align: right; }
+.sec-side { display: inline-flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.see-all {
+  display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: transparent; color: var(--text); font: 600 13px/1 var(--font-body); white-space: nowrap;
+  transition: border-color .15s, background .15s;
+}
+.see-all b { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.see-all:hover { border-color: var(--text); background: var(--surface); }
+.row-hero { background: var(--surface); }
 /* Press feedback (js/motion-fx.js animates --press) */
 @property --press { syntax: "<number>"; inherits: false; initial-value: 1; }
-.btn, .chip, .segmented button, .sched-day, .stat-link, .card, .srow, .sched-item, .team-tile, .plat, .rail-item, .svc, .t-item { scale: var(--press); }
+.btn, .chip, .see-all, .segmented button, .sched-day, .stat-link, .card, .srow, .sched-item, .team-tile, .plat, .rail-item, .svc, .t-item { scale: var(--press); }
 
 /* First paint: the headline block eases in (CSS, so it runs before any script loads) */
 @keyframes enter { from { opacity: 0; transform: translateY(14px); } }
