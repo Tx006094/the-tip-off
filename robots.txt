@@ -1,0 +1,5 @@
+# The Tip-Off: every page may be crawled.
+User-agent: *
+Allow: /
+
+Sitemap: https://thetipoffguide.com/sitemap.xml

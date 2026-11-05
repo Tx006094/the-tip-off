@@ -1,0 +1,10 @@
+# macOS
+.DS_Store
+
+# Local tools and working files (not part of the website)
+.claude/
+.taste-skill/
+__pycache__/
+
+# Stray image in the project root that the site doesn't use
+/Unknown.png
