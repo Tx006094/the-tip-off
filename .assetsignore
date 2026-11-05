@@ -1,0 +1,9 @@
+# Files in the project that aren't part of the public website (Cloudflare skips these when it publishes).
+.assetsignore
+.gitignore
+.github/
+README.md
+scripts/
+# Logo design sources; the site uses the smaller versions in the same folder.
+assets/brand/The Tip-Off*
+assets/brand/*-original.webp
