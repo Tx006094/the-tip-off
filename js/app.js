@@ -551,10 +551,10 @@
     html += shelfHTML("Live Now", real.filter((g) => g.state === "in"), "", { color: "var(--live)", live: true });
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     html += scheduleHTML();
-    if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
-    html += shelfHTML("Showcase Events", real.filter((g) => g.state !== "post" && showcaseName(g)), "Marquee neutral-site games", { color: "var(--event)" });
+    if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
     html += shelfHTML("Ranked Teams in Action", real.filter((g) => g.state === "pre" && !!g.home.rank !== !!g.away?.rank), "One team in the Top 25");
+    html += shelfHTML("Showcase Events", real.filter((g) => g.state !== "post" && showcaseName(g)), "Marquee neutral-site games", { color: "var(--event)" });
     html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
     const announced = filtered.filter((g) => g.tba);
     for (const id of ["unrivaled", "wnba", "upshot", "fiba", "ncaa"]) {
@@ -870,7 +870,7 @@
           gameById.set(x.id, x);
           const ch = x.platforms[0];
           return `<li><button type="button" class="rail-item" data-game="${esc(x.id)}" aria-label="${esc(matchupLabel(x))}, ${esc(whenLabel(x))}">
-            <span class="rail-time">${x.state === "in" ? '<span style="color:var(--live)">Live</span>' : esc(timeLabel(x))}<small>${esc(x.state === "in" ? x.statusText : dayLabel(x.date))}</small></span>
+            <span class="rail-time">${x.state === "in" ? '<span style="color:var(--live)">Live</span>' : esc(clock(x))}<small>${esc(x.state === "in" ? x.statusText : dayLabel(x.date))}</small></span>
             <span style="min-width:0"><span class="rail-match" style="display:block">${x.away.rank ? `<span class="rk">${x.away.rank}</span>` : ""}${esc(x.away.short)} ${x.neutral ? "vs" : "@"} ${x.home.rank ? `<span class="rk">${x.home.rank}</span>` : ""}${esc(x.home.short)}</span>
             <span class="rail-sub">${ch ? `<span class="ptag ${ch.access}">${esc(ch.name)}</span>` : '<span class="ptag more">TBA</span>'}</span></span>
           </button></li>`;
