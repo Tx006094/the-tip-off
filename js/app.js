@@ -984,9 +984,7 @@
     if (revealNext && !state.loading) {
       revealNext = false;
       fx("reveal", $("#view-" + state.view));
-      if (!guideRevealed && state.view === "home") { guideRevealed = true; fx("reveal", $("#guide")); }
-      if (state.view === "home") fx("nudge", $$("#view-home .shelf"));
-    }
+      if (!guideRevealed && state.view === "home") { guideRevealed = true; fx("reveal", $("#guide")); }    }
     requestAnimationFrame(() => { updateAllArrows(); updateBrand(); });
     renderTicker();
   }

@@ -167,27 +167,5 @@
     done(m.animate(el, { opacity: [0, 1], transform: ["translateY(6px) scale(.96)", "translateY(0px) scale(1)"] }, { duration: DUR.fast, ease: EASE }), el);
   }
 
-  // ---------- a one-time hint that rows scroll sideways ----------
-  // On touch screens (no arrow buttons) the first row that has more cards than fit slides left a
-  // little and springs back when it comes into view. Once per visit; skipped if the visitor has
-  // already scrolled that row, and never with "Reduce motion".
-  const touch = matchMedia("(hover: none), (max-width: 760px)");
-  function nudge(shelves) {
-    const m = M();
-    if (!m || !touch.matches) return;
-    try { if (sessionStorage.getItem("fc-nudged")) return; } catch { /* storage unavailable */ }
-    const shelf = shelves.find((s) => s.scrollWidth > s.clientWidth + 8);
-    if (!shelf) return;
-    try { sessionStorage.setItem("fc-nudged", "1"); } catch { /* storage unavailable */ }
-    m.inView(shelf, () => {
-      setTimeout(() => {
-        if (shelf.scrollLeft > 4 || !shelf.isConnected) return;
-        const cards = [...shelf.children].slice(0, 4);
-        cards.forEach((c) => done(m.animate(c, { transform: ["translateX(0px)", "translateX(-56px)", "translateX(0px)"] },
-          { duration: 1.1, ease: EASE, times: [0, 0.4, 1] }), c, ["transform"]));
-      }, 900); // after the row's own entrance has finished
-    }, { amount: 0.6 });
-  }
-
-  window.FX = { nudge, reveal, show, sequence, modalOut, stopOut, thumb, swapIn, slideRows, pop, count, grow };
+  window.FX = { reveal, show, sequence, modalOut, stopOut, thumb, swapIn, slideRows, pop, count, grow };
 })();
