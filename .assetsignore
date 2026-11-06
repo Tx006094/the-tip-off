@@ -7,3 +7,5 @@ scripts/
 # Logo design sources; the site uses the smaller versions in the same folder.
 assets/brand/The Tip-Off*
 assets/brand/*-original.webp
+# Notes and planning documents (kept in the project, not published)
+docs/

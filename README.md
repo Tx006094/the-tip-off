@@ -73,13 +73,8 @@ Shareable links: `#team/ncaa:2579` opens a team, `#game/<id>` opens a game, and 
 
 ## Daily headline refresh
 
-A macOS background job runs `scripts/update_news.py` every day at 7:00 AM. If the Mac is asleep then, it runs on wake.
+GitHub runs `scripts/update_news.py` every morning (`.github/workflows/update-news.yml`, 12:00 UTC) and commits `js/news-data.js` when the headlines change; Cloudflare then republishes the site. To run it by hand, open the repository's **Actions** tab, choose **Update headlines** and click **Run workflow**.
 
-- Job file: `~/Library/LaunchAgents/com.fullcourt.update-news.plist`
-- Log: `~/Library/Logs/fullcourt-update-news.log`
-- Run it now: `launchctl kickstart gui/$(id -u)/com.fullcourt.update-news`
-- Turn it off: `launchctl bootout gui/$(id -u)/com.fullcourt.update-news && rm ~/Library/LaunchAgents/com.fullcourt.update-news.plist`
-
-This only updates the copy on this Mac. Once the site is hosted online, run the script on the host instead, for example with a daily GitHub Action.
+The Mac background job that used to do this was turned off on November 6, 2026. Its settings file was kept at `~/Library/LaunchAgents-disabled/com.fullcourt.update-news.plist`; moving it back to `~/Library/LaunchAgents/` and running `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.fullcourt.update-news.plist` would restore it.
 
 To add a new broadcaster, add an entry to `PLATFORMS` in `js/platforms.js`. The `match` field lists the names ESPN uses for it.
