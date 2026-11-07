@@ -308,10 +308,6 @@ main:focus { outline: none; }
 .mt-pick:hover { border-color: var(--text); background: var(--surface-2); }
 .mt-pick img, .mt-pick .mono { width: 28px; height: 28px; max-width: none; object-fit: contain; font-size: 10px; border-width: 1px; }
 .mt-more { padding: 0 16px; color: var(--muted); }
-.mt-more-row { margin-top: 12px; align-items: center; }
-.mt-more-label { flex-shrink: 0; color: var(--muted); font-size: 13px; font-weight: 600; margin-right: 4px; }
-.mt-more-row .mt-pick { height: 40px; font-size: 13px; }
-.mt-more-row .mt-pick img, .mt-more-row .mt-pick .mono { width: 24px; height: 24px; }
 .mt-card {
   flex: 0 0 auto; width: 260px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; text-align: left;
   border: 1px solid var(--line-strong); background: color-mix(in srgb, var(--tc) 14%, var(--surface)); color: var(--text);

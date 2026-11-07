@@ -513,12 +513,10 @@
       return `<button type="button" class="mt-pick" data-follow="${esc(k)}" aria-label="Follow ${esc(tm.name)}">${logoHTML(tm)}<span>${esc(tm.short || tm.name)}</span></button>`;
     };
     if (favs.length) {
-      // While someone follows only a team or two, keep a few one-tap picks handy.
-      const more = favs.length < 3 ? quickPickKeys().slice(0, 6) : [];
+      // Once a team is followed the quick picks go away; "Add more teams" leads to the full list.
       return `<section class="myteams" aria-label="My Teams">${head}
         <div class="mt-row">${favs.map(myTeamCardHTML).join("")}
-          <a class="mt-add" href="#teams">${ICON.star}<span>Add a team</span></a></div>
-        ${more.length ? `<div class="mt-picks mt-more-row" role="group" aria-label="More teams to follow"><span class="mt-more-label">Follow more</span>${more.map(pickHTML).join("")}</div>` : ""}</section>`;
+          <a class="mt-add" href="#teams">${ICON.star}<span>Add more teams</span></a></div></section>`;
     }
     const picks = quickPickKeys().slice(0, 12);
     if (!picks.length) return "";
