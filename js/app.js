@@ -521,7 +521,7 @@
     const picks = quickPickKeys().slice(0, 12);
     if (!picks.length) return "";
     return `<section class="myteams" aria-label="My Teams">${head}
-      <p class="mt-dek">Who do you root for? Tap a team to follow it, and its next game will show up here every time you visit.</p>
+      <p class="mt-dek">Your teams. Your games. Never miss a tip-off. Select your favorites and keep their upcoming matchups front and center.</p>
       <div class="mt-picks" role="group" aria-label="Popular teams to follow">${picks.map(pickHTML).join("")}<a class="mt-pick mt-more" href="#teams"><span>More teams</span> <span aria-hidden="true">→</span></a></div>
     </section>`;
   }
