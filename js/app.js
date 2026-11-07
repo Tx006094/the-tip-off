@@ -501,7 +501,7 @@
       line = `<span class="mt-when">No games in the next ${DAYS_AHEAD} days</span><span class="mt-ch">See the full schedule</span>`;
       attr = `data-team="${esc(key)}" aria-label="${esc(`${team.name}: full schedule`)}"`;
     }
-    return `<button type="button" class="mt-card" ${attr} style="--tc:${hex(team.color)}">
+    return `<button type="button" class="mt-card" data-team-key="${esc(key)}" ${attr} style="--tc:${hex(team.color)}">
         ${logoHTML(team)}<span class="mt-info"><b>${esc(team.short || team.name)}</b>${line}</span>
       </button>`;
   }
@@ -524,6 +524,36 @@
       <p class="mt-dek">Who do you root for? Tap a team to follow it, and its next game will show up here every time you visit.</p>
       <div class="mt-picks" role="group" aria-label="Popular teams to follow">${picks.map(pickHTML).join("")}<a class="mt-pick mt-more" href="#teams"><span>More teams</span> <span aria-hidden="true">→</span></a></div>
     </section>`;
+  }
+
+  // ---------- light sweep linking My Teams to their days ----------
+  // An amber ray runs around a team's card and the Schedule days it plays: once when the Schedule
+  // first comes into view, and whenever a card is hovered or focused. "Reduce motion" gets a still outline.
+  function beam(keys) {
+    const want = new Set(keys);
+    const els = [
+      ...$$(".mt-card").filter((c) => want.has(c.dataset.teamKey)),
+      ...$$(".sched-day[data-teams]").filter((d) => d.dataset.teams.split(" ").some((k) => want.has(k))),
+    ];
+    for (const el of els) {
+      el.classList.remove("beam"); void el.offsetWidth; // restart if already running
+      el.classList.add("beam");
+      clearTimeout(el._beamT);
+      el._beamT = setTimeout(() => el.classList.remove("beam"), 3400);
+    }
+  }
+  let beamedOnce = false;
+  const beamWatch = new IntersectionObserver((entries) => {
+    if (beamedOnce || !entries.some((e) => e.isIntersecting) || !state.favs.size) return;
+    beamedOnce = true; beamWatch.disconnect();
+    beam([...state.favs]);
+  }, { threshold: 0.4 });
+  const watchSchedule = () => { const s = $("#schedule .sched-days"); if (s && !beamedOnce) { beamWatch.disconnect(); beamWatch.observe(s); } };
+  for (const type of ["pointerenter", "focusin"]) {
+    document.addEventListener(type, (e) => {
+      const card = e.target.closest?.(".mt-card");
+      if (card && (type === "focusin" || e.pointerType === "mouse")) beam([card.dataset.teamKey]);
+    }, true);
   }
 
   function teamTileHTML(t) {
@@ -776,7 +806,8 @@
       const name = label === "Today" || label === "Tomorrow" ? label : d.toLocaleDateString(undefined, { weekday: "short" });
       const date = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
       const dot = byDay.get(k).some((g) => playsIn(g, lead));
-      return `<button type="button" class="sched-day${dot ? " has-dot" : ""}" data-sched-day="${k}" aria-pressed="${k === schedDay}"${dot ? ` aria-label="${esc(`${label}, ${date}, ${byDay.get(k).length} games, includes your teams`)}"` : ""}><b>${esc(name)}</b><span>${esc(date)} · ${byDay.get(k).length}</span></button>`;
+      const favsHere = [...state.favs].filter((f) => byDay.get(k).some((g) => playsIn(g, new Set([f])))).join(" ");
+      return `<button type="button" class="sched-day${dot ? " has-dot" : ""}" data-sched-day="${k}"${favsHere ? ` data-teams="${esc(favsHere)}"` : ""} aria-pressed="${k === schedDay}"${dot ? ` aria-label="${esc(`${label}, ${date}, ${byDay.get(k).length} games, includes your teams`)}"` : ""}><b>${esc(name)}</b><span>${esc(date)} · ${byDay.get(k).length}</span></button>`;
     }).join("");
 
     // Chips for the picked teams, each removable.
@@ -1088,6 +1119,7 @@
     else if (state.view === "teams") renderTeams();
     else renderPlatforms();
     if ($("#modal").hidden) document.title = VIEW_TITLES[state.view];
+    if (!state.loading && state.view === "home") requestAnimationFrame(watchSchedule);
     if (revealNext && !state.loading) {
       revealNext = false;
       fx("reveal", $("#view-" + state.view));

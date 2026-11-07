@@ -1143,3 +1143,18 @@ main:focus { outline: none; }
     content: ""; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%);
   }
 }
+
+/* Light sweep: an amber ray around a My Teams card and the days that team plays */
+@property --beam-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.mt-card { position: relative; }
+.beam::before {
+  content: ""; position: absolute; inset: -1px; border-radius: inherit; padding: 2px; pointer-events: none; z-index: 2;
+  background: conic-gradient(from var(--beam-angle), transparent 0deg 250deg, var(--paid) 320deg, #fff6d8 345deg, transparent 360deg); /* taste-skill-ignore: the light sweep */
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; /* taste-skill-ignore: border mask */
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); /* taste-skill-ignore: border mask */
+  animation: beam-spin 1.6s linear 2;
+}
+@keyframes beam-spin { to { --beam-angle: 360deg; } }
+@media (prefers-reduced-motion: reduce) {
+  .beam::before { animation: none; background: var(--paid); }
+}
