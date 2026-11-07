@@ -1163,11 +1163,11 @@
   // ---------- league-aware logo ----------
   // The header pin (and tab icon) switch to a league's own ball. Leagues without one use the main ball.
   const BRAND = {
-    default: { pin: "assets/brand/tipoff-pin.png", icon: "assets/brand/favicon-64.png" },
-    ncaa: { pin: "assets/brand/tipoff-pin-ncaa.png", icon: "assets/brand/favicon-ncaa.png" },
-    unrivaled: { pin: "assets/brand/tipoff-pin-unrivaled.png", icon: "assets/brand/favicon-unrivaled.png" },
-    fiba: { pin: "assets/brand/tipoff-pin-fiba.png", icon: "assets/brand/favicon-fiba.png" },
-    upshot: { pin: "assets/brand/tipoff-pin-fiba.png", icon: "assets/brand/favicon-fiba.png" }, // shares the panelled ball
+    default: { pin: "assets/brand/tipoff-pin.png", icon: "assets/brand/favicon-64.png?v=2" },
+    ncaa: { pin: "assets/brand/tipoff-pin-ncaa.png", icon: "assets/brand/favicon-ncaa.png?v=2" },
+    unrivaled: { pin: "assets/brand/tipoff-pin-unrivaled.png", icon: "assets/brand/favicon-unrivaled.png?v=2" },
+    fiba: { pin: "assets/brand/tipoff-pin-fiba.png", icon: "assets/brand/favicon-fiba.png?v=2" },
+    upshot: { pin: "assets/brand/tipoff-pin-fiba.png", icon: "assets/brand/favicon-fiba.png?v=2" }, // shares the panelled ball
   };
   for (const b of Object.values(BRAND)) { const i = new Image(); i.src = b.pin; } // preload so swaps are instant
   let brandModalLeague = null, brandNow = "default", brandTimer;
