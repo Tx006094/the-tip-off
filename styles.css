@@ -1158,3 +1158,18 @@ main:focus { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .beam::before { animation: none; background: var(--paid); }
 }
+
+/* Floating "next section" pill: names the next key section below the screen */
+.next-pill {
+  position: fixed; right: var(--edge); bottom: calc(var(--ticker-h) + 16px + env(safe-area-inset-bottom)); z-index: 45;
+  display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 16px; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: color-mix(in srgb, var(--surface) 88%, transparent); color: var(--text);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); /* taste-skill-ignore: floating pill */
+  font-weight: 650; font-size: 14px; box-shadow: 0 10px 24px rgba(0,0,0,.45); /* taste-skill-ignore: floating pill */
+  transition: opacity .2s, transform .2s var(--ease);
+  animation: rise .25s var(--ease);
+}
+.next-pill:hover { border-color: var(--text); }
+.next-pill span { color: var(--paid); }
+.next-pill.is-scrolling { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.next-pill[hidden] { display: none; }

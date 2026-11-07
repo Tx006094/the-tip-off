@@ -526,6 +526,41 @@
     </section>`;
   }
 
+  // ---------- "next section" pill ----------
+  // A small floating button names the next key section below the screen (My Teams, then Schedule)
+  // and scrolls there when tapped. It hides once those sections are on screen or passed.
+  const NEXT_TARGETS = [[".myteams", "My Teams"], ["#schedule", "Schedule"]];
+  const pill = document.createElement("button");
+  pill.type = "button"; pill.className = "next-pill"; pill.hidden = true;
+  document.body.append(pill);
+  let pillTarget = null, pillScrollT = 0;
+  function updatePill() {
+    pillTarget = null;
+    if (state.view === "home" && !state.q && $("#modal").hidden && scrollY > 150) {
+      for (const [sel, label] of NEXT_TARGETS) {
+        const el = $(sel);
+        if (el && el.getBoundingClientRect().top > innerHeight - 80) { pillTarget = el; pill.innerHTML = `<span aria-hidden="true">↓</span> ${label}`; pill.setAttribute("aria-label", `Jump to ${label}`); break; }
+      }
+    }
+    pill.hidden = !pillTarget;
+  }
+  let pillRaf = 0;
+  const queuePill = () => { if (!pillRaf) pillRaf = requestAnimationFrame(() => { pillRaf = 0; updatePill(); }); };
+  addEventListener("scroll", () => {
+    queuePill();
+    if (matchMedia("(pointer: coarse)").matches) {
+      pill.classList.add("is-scrolling");
+      clearTimeout(pillScrollT); pillScrollT = setTimeout(() => pill.classList.remove("is-scrolling"), 500);
+    }
+  }, { passive: true });
+  addEventListener("resize", queuePill);
+  pill.addEventListener("click", () => {
+    if (!pillTarget) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const y = pillTarget.getBoundingClientRect().top + scrollY - ($(".topbar, header")?.offsetHeight || 0) - 8;
+    scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" });
+  });
+
   // ---------- light sweep linking My Teams to their days ----------
   // An amber ray runs around a team's card and the Schedule days it plays: once when the Schedule
   // first comes into view, and whenever a card is hovered or focused. "Reduce motion" gets a still outline.
@@ -1127,6 +1162,7 @@
     else renderPlatforms();
     if ($("#modal").hidden) document.title = VIEW_TITLES[state.view];
     if (!state.loading && state.view === "home") requestAnimationFrame(() => { watchSchedule(); flushBeam(); });
+    queuePill();
     if (revealNext && !state.loading) {
       revealNext = false;
       fx("reveal", $("#view-" + state.view));
@@ -1243,6 +1279,7 @@
     else if (lastFocus?.closest?.("#ticker")) lastFocus.blur();
     lastFocus = null;
     flushBeam();
+    queuePill();
   }
   // Keep keyboard focus inside the dialog.
   $("#modal").addEventListener("keydown", (e) => {
