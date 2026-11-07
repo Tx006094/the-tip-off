@@ -537,6 +537,8 @@
       if (el.matches(".shelf-block")) { list.push([el, el.querySelector("h2")?.textContent.trim() || "More"]); n++; }
       el = el.nextElementSibling;
     }
+    const guide = $("#guide");
+    if (guide && !guide.hidden) list.push([guide, "How to watch"]);
     return list;
   }
   const pill = document.createElement("button");
