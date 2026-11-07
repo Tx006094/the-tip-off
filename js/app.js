@@ -1562,6 +1562,9 @@
     }
     const when = g.state === "in" ? `<span class="pill live">Live</span> ${esc(g.statusText)}` : g.state === "post" ? esc(g.statusText || "Final") : esc(whenLabel(g, "long"));
     const place = [g.venue, g.city].filter(Boolean).join(" · ");
+    // Follow/unfollow both teams right from the game (also how My Teams cards lead to unfollowing).
+    const followRow = g.away ? [g.away, g.home].filter((t) => t.id && teamByKey.has(`${g.league}:${t.id}`))
+      .map((t) => favButton(`${g.league}:${t.id}`, t.short || t.name)).join("") : "";
     const teamBtns = g.away ? [g.away, g.home].filter((t) => t.id).map((t) => `<button type="button" class="btn btn-ghost" data-team="${esc(`${g.league}:${t.id}`)}">${esc(t.short)} schedule</button>`).join("") : "";
     const html = `<div class="m-hero" style="${artBackground(g)}">
         <span class="eyebrow" style="--c:${lg.color};justify-content:center"><span class="league-tag">${esc(lg.name)}</span></span>
@@ -1573,6 +1576,7 @@
         ${back === "free" ? `<button type="button" class="btn btn-ghost picker-back" data-open-free>${ICON.left}All free games</button>` : ""}
         ${back === "big" ? `<button type="button" class="btn btn-ghost picker-back" data-open-big>${ICON.left}All big games</button>` : ""}
         ${back === "row" && rowLists.has(openRowKey) ? `<button type="button" class="btn btn-ghost picker-back" data-open-row="${esc(openRowKey)}">${ICON.left}All ${esc(rowLists.get(openRowKey).title)}</button>` : ""}
+        ${followRow ? `<div class="m-follow" role="group" aria-label="My Teams">${followRow}</div>` : ""}
         ${watchListHTML(g.platforms, g.expected, g.regionNote)}
         ${g.expected ? `<p class="m-small">These are the channels expected under the league's TV deal. Exact channels for each game are confirmed closer to the date.</p>` : ""}
         <div class="m-foot">
@@ -1592,9 +1596,12 @@
     return true;
   }
 
-  function favButton(key) {
+  /** The follow/unfollow toggle. With a team name it reads "Follow UConn" / "Following UConn". */
+  function favButton(key, name = "") {
     const on = state.favs.has(key);
-    return `<button type="button" class="btn btn-ghost ${on ? "is-on" : ""}" data-fav="${esc(key)}" aria-pressed="${on}">${ICON.star}${on ? "In My Teams" : "Add to My Teams"}</button>`;
+    const label = name ? (on ? `Following ${name}` : `Follow ${name}`) : (on ? "In My Teams" : "Add to My Teams");
+    const aria = on ? `${name || "This team"} is in My Teams. Tap to unfollow.` : `Add ${name || "this team"} to My Teams`;
+    return `<button type="button" class="btn btn-ghost ${on ? "is-on" : ""}" data-fav="${esc(key)}"${name ? ` data-fav-name="${esc(name)}"` : ""} aria-pressed="${on}" aria-label="${esc(aria)}">${ICON.star}${esc(label)}</button>`;
   }
 
   async function openTeam(key) {
@@ -1967,7 +1974,7 @@
       const k = t.dataset.fav;
       state.favs.has(k) ? state.favs.delete(k) : state.favs.add(k);
       saveFavs();
-      t.outerHTML = favButton(k);
+      t.outerHTML = favButton(k, t.dataset.favName || "");
       fx("pop", $(`[data-fav="${CSS.escape(k)}"] svg`), 1.4);
       $(`[data-fav="${CSS.escape(k)}"]`)?.focus();
       toast(state.favs.has(k) ? "Added to My Teams" : "Removed from My Teams");

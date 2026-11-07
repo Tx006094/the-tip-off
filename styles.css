@@ -906,6 +906,11 @@ main:focus { outline: none; }
 .watch .wlink { grid-column: 1 / -1; justify-self: start; font-size: 13px; color: var(--tv); font-weight: 650; display: inline-flex; gap: 4px; align-items: center; }
 .watch .wlink:hover { text-decoration: underline; text-underline-offset: 3px; }
 .m-foot { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
+/* Follow / unfollow the two teams, at the top of a game pop-up */
+.m-follow { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
+.m-follow .btn { flex: 1 1 0; min-width: 0; height: 40px; padding: 0 12px; }
+.m-follow .btn svg { flex-shrink: 0; }
+.m-follow .btn.is-on { border-color: rgba(251, 191, 36, .45); background: var(--paid-bg); }
 .m-small { color: var(--dim); font-size: 13px; margin: 16px 0 0; line-height: 1.5; }
 
 .sched { display: flex; flex-direction: column; gap: 6px; }
@@ -1106,6 +1111,7 @@ main:focus { outline: none; }
   .stat-link { justify-content: center; }
   /* Pop-up buttons: an even two-column grid of equal buttons; an odd one out spans the row */
   .m-foot { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .m-follow .btn { flex: 1 1 100%; }
   .m-foot > .cal-menu { min-width: 0; }
   .m-foot > .btn, .m-foot .cal-menu summary { width: 100%; min-width: 0; justify-content: center; padding-left: 10px; padding-right: 10px; }
   .m-foot .btn svg { flex-shrink: 0; }
