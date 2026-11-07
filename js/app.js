@@ -542,6 +542,13 @@
       el._beamT = setTimeout(() => el.classList.remove("beam"), 3400);
     }
   }
+  // A team you just followed gets the sweep as soon as you're back on the page (pop-up closed).
+  const pendingBeam = new Set();
+  function flushBeam() {
+    if (!pendingBeam.size || state.view !== "home" || !$("#modal").hidden) return;
+    const keys = [...pendingBeam]; pendingBeam.clear();
+    setTimeout(() => beam(keys), 350);
+  }
   let beamedOnce = false;
   const beamWatch = new IntersectionObserver((entries) => {
     if (beamedOnce || !entries.some((e) => e.isIntersecting) || !state.favs.size) return;
@@ -1119,7 +1126,7 @@
     else if (state.view === "teams") renderTeams();
     else renderPlatforms();
     if ($("#modal").hidden) document.title = VIEW_TITLES[state.view];
-    if (!state.loading && state.view === "home") requestAnimationFrame(watchSchedule);
+    if (!state.loading && state.view === "home") requestAnimationFrame(() => { watchSchedule(); flushBeam(); });
     if (revealNext && !state.loading) {
       revealNext = false;
       fx("reveal", $("#view-" + state.view));
@@ -1235,6 +1242,7 @@
     if (lastFocus && document.contains(lastFocus) && !lastFocus.closest("#ticker")) lastFocus.focus({ preventScroll: true });
     else if (lastFocus?.closest?.("#ticker")) lastFocus.blur();
     lastFocus = null;
+    flushBeam();
   }
   // Keep keyboard focus inside the dialog.
   $("#modal").addEventListener("keydown", (e) => {
@@ -2000,11 +2008,13 @@
       toast(`Following ${teamByKey.get(key)?.short || "team"}`);
       render();
       fx("show", $$(".myteams .mt-card, .myteams .mt-add"), { y: 8, step: 0.04 });
+      pendingBeam.add(key); flushBeam();
       return;
     }
     if (t.dataset.fav) {
       const k = t.dataset.fav;
       state.favs.has(k) ? state.favs.delete(k) : state.favs.add(k);
+      state.favs.has(k) ? pendingBeam.add(k) : pendingBeam.delete(k);
       saveFavs();
       t.outerHTML = favButton(k, t.dataset.favName || "");
       fx("pop", $(`[data-fav="${CSS.escape(k)}"] svg`), 1.4);
