@@ -1163,7 +1163,7 @@
   // ---------- league-aware logo ----------
   // The header pin (and tab icon) switch to a league's own ball. Leagues without one use the main ball.
   const BRAND = {
-    default: { pin: "assets/brand/tipoff-pin.png", icon: "assets/brand/favicon-64.png?v=3" },
+    default: { pin: "assets/brand/tipoff-pin.png", icon: "assets/brand/favicon-64.png?v=4" },
     ncaa: { pin: "assets/brand/tipoff-pin-ncaa.png", icon: "assets/brand/favicon-ncaa.png?v=2" },
     unrivaled: { pin: "assets/brand/tipoff-pin-unrivaled.png", icon: "assets/brand/favicon-unrivaled.png?v=2" },
     fiba: { pin: "assets/brand/tipoff-pin-fiba.png", icon: "assets/brand/favicon-fiba.png?v=2" },
