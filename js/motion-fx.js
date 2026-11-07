@@ -83,8 +83,8 @@
   // ---------- 3: press feedback ----------
   // A quick shrink on press and a springy return, on anything you tap. Uses the CSS `scale`
   // property (via --press) so it stacks with the cards' hover lift instead of replacing it.
-  const PRESSABLE = ".btn, .chip, .see-all, .segmented button, .sched-day, .stat-link, .card, .srow, .sched-item, .team-tile, .plat, .rail-item, .svc, .t-item";
-  const BIG = ".card, .srow, .sched-item, .team-tile, .plat, .svc, .rail-item";
+  const PRESSABLE = ".btn, .chip, .see-all, .mt-pick, .mt-card, .segmented button, .sched-day, .stat-link, .card, .srow, .sched-item, .team-tile, .plat, .rail-item, .svc, .t-item";
+  const BIG = ".mt-card, .card, .srow, .sched-item, .team-tile, .plat, .svc, .rail-item";
   document.addEventListener("pointerdown", (e) => {
     const m = M();
     const el = e.target.closest?.(PRESSABLE);

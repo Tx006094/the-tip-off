@@ -466,6 +466,68 @@
         <button type="button" class="shelf-arrow next" aria-label="Scroll ${esc(title)} right" data-scroll="1">${ICON.right}</button>
       </div></div>`;
   }
+  // ---------- My Teams ----------
+  // Before anyone follows a team: "Who do you root for?" with one-tap picks (this week's top-ranked
+  // college teams plus popular WNBA teams). After: a card per followed team with its next game.
+  const WNBA_PICKS = ["wnba:5", "wnba:9", "wnba:17", "wnba:131935", "wnba:129689"]; // Fever, Liberty, Aces, Tempo, Valkyries
+  function quickPickKeys() {
+    const ranked = new Map();
+    for (const g of state.games) {
+      if (g.league !== "ncaa" || !g.away) continue;
+      for (const tm of [g.home, g.away]) if (tm.rank && tm.id) ranked.set(`ncaa:${tm.id}`, tm.rank);
+    }
+    const college = [...ranked].sort((x, y) => x[1] - y[1]).slice(0, 7).map(([k]) => k);
+    const wnba = state.region === "ca" ? ["wnba:131935", ...WNBA_PICKS.filter((k) => k !== "wnba:131935")] : WNBA_PICKS;
+    return [...college, ...wnba].filter((k) => teamByKey.has(k) && !state.favs.has(k));
+  }
+  function nextGameFor(key) {
+    const keys = new Set([key]);
+    const games = state.games.filter((g) => g.away && !g.tba && g.state !== "post" && [g.away, g.home].some((tm) => tm.id && keys.has(`${g.league}:${tm.id}`)));
+    return games.sort((x, y) => (x.state === "in" ? -1 : 0) - (y.state === "in" ? -1 : 0) || x.date - y.date)[0] || null;
+  }
+  function myTeamCardHTML(key) {
+    const team = teamByKey.get(key);
+    if (!team) return "";
+    const g = nextGameFor(key);
+    let line, attr;
+    if (g) {
+      const home = `${g.league}:${g.home.id}` === key;
+      const opp = home ? g.away : g.home;
+      const when = g.state === "in" ? "Live now" : `${dayLabel(g.date)} · ${clock(g)}`;
+      const ch = g.platforms.length ? g.platforms.slice(0, 2).map((p) => p.name).join(", ") : "Channel TBA";
+      line = `<span class="mt-when${g.state === "in" ? " is-live" : ""}">${esc(when)}</span><span class="mt-vs">${home || g.neutral ? "vs." : "at"} ${esc(opp.short || opp.name)}</span><span class="mt-ch">${esc(ch)}</span>`;
+      attr = `data-game="${esc(g.id)}" aria-label="${esc(`${team.name}: ${when}, ${home ? "vs." : "at"} ${opp.name}, on ${ch}`)}"`;
+    } else {
+      line = `<span class="mt-when">No games in the next ${DAYS_AHEAD} days</span><span class="mt-ch">See the full schedule</span>`;
+      attr = `data-team="${esc(key)}" aria-label="${esc(`${team.name}: full schedule`)}"`;
+    }
+    return `<button type="button" class="mt-card" ${attr} style="--tc:${hex(team.color)}">
+        ${logoHTML(team)}<span class="mt-info"><b>${esc(team.short || team.name)}</b>${line}</span>
+      </button>`;
+  }
+  function myTeamsHTML() {
+    const favs = [...state.favs].filter((k) => teamByKey.has(k));
+    const head = secHead("My Teams", favs.length ? plural(favs.length, "team") : "", { color: "var(--paid)" });
+    const pickHTML = (k) => {
+      const tm = teamByKey.get(k);
+      return `<button type="button" class="mt-pick" data-follow="${esc(k)}" aria-label="Follow ${esc(tm.name)}">${logoHTML(tm)}<span>${esc(tm.short || tm.name)}</span></button>`;
+    };
+    if (favs.length) {
+      // While someone follows only a team or two, keep a few one-tap picks handy.
+      const more = favs.length < 3 ? quickPickKeys().slice(0, 6) : [];
+      return `<section class="myteams" aria-label="My Teams">${head}
+        <div class="mt-row">${favs.map(myTeamCardHTML).join("")}
+          <a class="mt-add" href="#teams">${ICON.star}<span>Add a team</span></a></div>
+        ${more.length ? `<div class="mt-picks mt-more-row" role="group" aria-label="More teams to follow"><span class="mt-more-label">Follow more</span>${more.map(pickHTML).join("")}</div>` : ""}</section>`;
+    }
+    const picks = quickPickKeys().slice(0, 12);
+    if (!picks.length) return "";
+    return `<section class="myteams" aria-label="My Teams">${head}
+      <p class="mt-dek">Who do you root for? Tap a team to follow it, and its next game will show up here every time you visit.</p>
+      <div class="mt-picks" role="group" aria-label="Popular teams to follow">${picks.map(pickHTML).join("")}<a class="mt-pick mt-more" href="#teams"><span>More teams</span> <span aria-hidden="true">→</span></a></div>
+    </section>`;
+  }
+
   function teamTileHTML(t) {
     teamByKey.set(t.key, t);
     const fav = state.favs.has(t.key) ? `<svg class="fav" viewBox="0 0 24 24" aria-label="My team"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.9l-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/></svg>` : "";
@@ -574,8 +636,7 @@
     html += legendHTML();
 
     const today = dayKey(new Date());
-    const favGames = real.filter((g) => [g.home, g.away].some((t) => t && state.favs.has(`${g.league}:${t.id}`)));
-    html += shelfHTML("My Teams", favGames, "", { color: "var(--paid)" });
+    html += myTeamsHTML();
     html += shelfHTML("Live Now", real.filter((g) => g.state === "in"), "", { color: "var(--live)", live: true });
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     html += scheduleHTML();
@@ -1806,7 +1867,7 @@
   }
 
   document.addEventListener("click", (ev) => {
-    const t = ev.target.closest("[data-game],[data-team],[data-league],[data-price],[data-platform],[data-close],[data-scroll],[data-fav],[data-share],[data-retry],[data-anchor],[data-open-free],[data-open-row],[data-free-league],[data-region],[data-open-big],[data-open-services],[data-ics],[data-ics-team],[data-svc-clear],[data-sched-day],[data-sched-all],[data-sched-pick],[data-sched-remove],[data-sched-clear],[data-sched-conf-clear]");
+    const t = ev.target.closest("[data-game],[data-team],[data-league],[data-price],[data-platform],[data-close],[data-scroll],[data-fav],[data-follow],[data-share],[data-retry],[data-anchor],[data-open-free],[data-open-row],[data-free-league],[data-region],[data-open-big],[data-open-services],[data-ics],[data-ics-team],[data-svc-clear],[data-sched-day],[data-sched-all],[data-sched-pick],[data-sched-remove],[data-sched-clear],[data-sched-conf-clear]");
     if (!t) return;
     if (t.dataset.openServices !== undefined) { ev.preventDefault(); return void openServices(); }
     if (t.dataset.schedDay) {
@@ -1894,6 +1955,14 @@
       state.q = t.dataset.platform;
       if (state.view !== "home") { keepQueryOnRoute = true; location.hash = "#home"; }
       else { render(); window.scrollTo({ top: 0 }); }
+      return;
+    }
+    if (t.dataset.follow) {
+      const key = t.dataset.follow;
+      state.favs.add(key); saveFavs();
+      toast(`Following ${teamByKey.get(key)?.short || "team"}`);
+      render();
+      fx("show", $$(".myteams .mt-card, .myteams .mt-add"), { y: 8, step: 0.04 });
       return;
     }
     if (t.dataset.fav) {

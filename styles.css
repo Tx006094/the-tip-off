@@ -288,13 +288,48 @@ main:focus { outline: none; }
 .row-hero { background: var(--surface); }
 /* Press feedback (js/motion-fx.js animates --press) */
 @property --press { syntax: "<number>"; inherits: false; initial-value: 1; }
-.btn, .chip, .see-all, .segmented button, .sched-day, .stat-link, .card, .srow, .sched-item, .team-tile, .plat, .rail-item, .svc, .t-item { scale: var(--press); }
+.btn, .chip, .see-all, .mt-pick, .mt-card, .segmented button, .sched-day, .stat-link, .card, .srow, .sched-item, .team-tile, .plat, .rail-item, .svc, .t-item { scale: var(--press); }
 
 /* First paint: the headline block eases in (CSS, so it runs before any script loads) */
 @keyframes enter { from { opacity: 0; transform: translateY(14px); } }
 .intro-copy > *, .intro .stats { animation: enter .5s var(--ease) both; }
 .intro-copy > :nth-child(2) { animation-delay: .06s; }
 .intro .stats { animation-delay: .12s; }
+
+/* My Teams: quick picks before following, then a card per team */
+.mt-dek { margin: -4px var(--edge) 12px; color: var(--muted); font-size: 15px; line-height: 1.5; max-width: 60ch; }
+.mt-picks, .mt-row { display: flex; gap: 8px; margin: 0 var(--edge); overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.mt-picks::-webkit-scrollbar, .mt-row::-webkit-scrollbar { display: none; }
+.mt-pick {
+  flex-shrink: 0; display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 14px 0 8px; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font-weight: 600; font-size: 14px; white-space: nowrap;
+  transition: border-color .15s, background .15s;
+}
+.mt-pick:hover { border-color: var(--text); background: var(--surface-2); }
+.mt-pick img, .mt-pick .mono { width: 28px; height: 28px; max-width: none; object-fit: contain; font-size: 10px; border-width: 1px; }
+.mt-more { padding: 0 16px; color: var(--muted); }
+.mt-more-row { margin-top: 12px; align-items: center; }
+.mt-more-label { flex-shrink: 0; color: var(--muted); font-size: 13px; font-weight: 600; margin-right: 4px; }
+.mt-more-row .mt-pick { height: 40px; font-size: 13px; }
+.mt-more-row .mt-pick img, .mt-more-row .mt-pick .mono { width: 24px; height: 24px; }
+.mt-card {
+  flex: 0 0 auto; width: 260px; display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; text-align: left;
+  border: 1px solid var(--line-strong); background: color-mix(in srgb, var(--tc) 14%, var(--surface)); color: var(--text);
+  transition: border-color .15s;
+}
+.mt-card:hover { border-color: var(--text); }
+.mt-card img, .mt-card .mono { width: 44px; height: 44px; max-width: none; flex-shrink: 0; object-fit: contain; font-size: 14px; }
+.mt-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mt-info b { font-size: 16px; font-weight: 700; }
+.mt-info span { font-size: 13px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mt-when { color: var(--text) !important; font-weight: 600; }
+.mt-when.is-live { color: var(--live) !important; }
+.mt-add {
+  flex: 0 0 auto; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; width: 120px;
+  border-radius: 14px; border: 1px dashed var(--line-strong); color: var(--muted); font-weight: 600; font-size: 13px;
+}
+.mt-add svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+.mt-add:hover { color: var(--text); border-color: var(--text); }
 
 /* Schedule: the TV listings, one day at a time */
 .sched-days {
@@ -1036,6 +1071,8 @@ main:focus { outline: none; }
   .srow-time { font-size: 14px; }
   .sched-day { min-width: 84px; padding: 8px 12px; }
   .sched-find, .sched-conf { flex: 1 1 100%; max-width: none; }
+  .mt-card { width: 240px; }
+  .mt-dek { text-align: center; font-size: 14px; }
   .modal { padding: 0; place-items: end stretch; }
   .modal-sheet { width: 100%; max-height: 92dvh; border-radius: 20px 20px 0 0; border-bottom: 0; animation: sheet .32s var(--ease); }
   @keyframes sheet { from { transform: translateY(40px); opacity: 0; } }
