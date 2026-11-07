@@ -529,7 +529,16 @@
   // ---------- "next section" pill ----------
   // A small floating button names the next key section below the screen (My Teams, then Schedule)
   // and scrolls there when tapped. It hides once those sections are on screen or passed.
-  const NEXT_TARGETS = [[".myteams", "My Teams"], ["#schedule", "Schedule"]];
+  // My Teams, the Schedule, then the two rows that follow the Schedule (whichever have games today).
+  function nextTargets() {
+    const list = [[$(".myteams"), "My Teams"], [$("#schedule"), "Schedule"]];
+    let el = $("#schedule")?.nextElementSibling, n = 0;
+    while (el && n < 2) {
+      if (el.matches(".shelf-block")) { list.push([el, el.querySelector("h2")?.textContent.trim() || "More"]); n++; }
+      el = el.nextElementSibling;
+    }
+    return list;
+  }
   const pill = document.createElement("button");
   pill.type = "button"; pill.className = "next-pill"; pill.hidden = true;
   document.body.append(pill);
@@ -537,9 +546,8 @@
   function updatePill() {
     pillTarget = null;
     if (state.view === "home" && !state.q && $("#modal").hidden && scrollY > 150) {
-      for (const [sel, label] of NEXT_TARGETS) {
-        const el = $(sel);
-        if (el && el.getBoundingClientRect().top > innerHeight - 80) { pillTarget = el; pill.innerHTML = `<span aria-hidden="true">↓</span> ${label}`; pill.setAttribute("aria-label", `Jump to ${label}`); break; }
+      for (const [el, label] of nextTargets()) {
+        if (el && el.getBoundingClientRect().top > innerHeight - 80) { pillTarget = el; pill.innerHTML = `<span aria-hidden="true">↓</span> ${esc(label)}`; pill.setAttribute("aria-label", `Jump to ${label}`); break; }
       }
     }
     pill.hidden = !pillTarget;
