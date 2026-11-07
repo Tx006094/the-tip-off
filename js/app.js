@@ -671,8 +671,8 @@
     html += legendHTML();
 
     const today = dayKey(new Date());
-    html += myTeamsHTML();
     html += shelfHTML("Live Now", real.filter((g) => g.state === "in"), "", { color: "var(--live)", live: true });
+    html += myTeamsHTML();
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     html += scheduleHTML();
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
