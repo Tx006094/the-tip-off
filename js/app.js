@@ -430,7 +430,7 @@
     const meta = g.state === "in" ? esc(g.statusText) : g.state === "post" ? esc(g.statusText || "Final") : esc(whenLabel(g));
     const price = priceInfo(g.platforms).kind;
     const aria = `${matchupLabel(g)}. ${g.state === "pre" ? whenLabel(g) : g.statusText}. ${price === "free" ? "Free to watch" : includedForMe(g) ? "Included in your services" : price === "paid" ? "Subscription needed" : ""}`;
-    return `<button type="button" class="card" data-game="${esc(g.id)}" aria-label="${esc(aria)}">
+    return `<button type="button" class="card" data-game="${esc(g.id)}" data-card-league="${esc(g.league)}" aria-label="${esc(aria)}">
       <div class="card-art" style="${artBackground(g)}">
         <div class="card-badges">${status}${priceBadge(g)}</div>
         ${art}
@@ -777,7 +777,7 @@
       html += shelfHTML(`${LEAGUES[id].name}: Coming Up`, list, "Announced seasons & events", { color: LEAGUES[id].color }).replace('<div class="shelf-block"', '<div class="shelf-block desk-only"');
     }
     const allAnnounced = LEAGUE_ORDER.flatMap((id) => announced.filter((g) => g.league === id));
-    html += shelfHTML("Coming Up", allAnnounced, "Announced seasons & events").replace('<div class="shelf-block"', '<div class="shelf-block phone-only"');
+    html += shelfHTML("Coming Up", allAnnounced, "Announced seasons & events").replace('<div class="shelf-block"', '<div class="shelf-block phone-only" data-brand-league="mixed"');
 
     if (lg) {
       const plats = leaguePlatformIds(lg).map((id) => platformById(id, state.region)).filter(Boolean)
@@ -1277,7 +1277,18 @@
     for (const el of $$("[data-brand-league]")) {
       if (el.closest("[hidden]")) continue;
       const r = el.getBoundingClientRect();
-      if (r.top <= probe && r.bottom >= probe) return el.dataset.brandLeague;
+      if (!r.height) continue; // hidden at this screen size (phone-only / desktop-only rows)
+      if (r.top <= probe && r.bottom >= probe) {
+        if (el.dataset.brandLeague !== "mixed") return el.dataset.brandLeague;
+        // A row with several leagues (phones' single "Coming up" row): follow the card nearest the middle.
+        let best = null, bestD = Infinity;
+        for (const c of $$("[data-card-league]", el)) {
+          const cr = c.getBoundingClientRect();
+          const d = Math.abs(cr.left + cr.width / 2 - innerWidth / 2);
+          if (d < bestD) { bestD = d; best = c.dataset.cardLeague; }
+        }
+        return best;
+      }
     }
     return null;
   }
@@ -1296,10 +1307,11 @@
     brandTimer = setTimeout(() => { pin.src = BRAND[key].pin; pin.classList.remove("swapping"); }, 160);
   }
   let brandRaf = 0;
-  window.addEventListener("scroll", () => {
+  // Capture phase so sideways scrolling inside a row counts too, not just scrolling the page.
+  document.addEventListener("scroll", () => {
     if (brandRaf) return;
     brandRaf = requestAnimationFrame(() => { brandRaf = 0; updateBrand(); });
-  }, { passive: true });
+  }, { passive: true, capture: true });
 
   // ---------- modal ----------
   let lastFocus = null;
