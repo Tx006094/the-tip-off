@@ -1082,7 +1082,11 @@
     const pi = priceInfo(g.platforms);
     const rk = (t) => (t.rank ? `#${t.rank} ` : "");
     const title = g.away ? `${rk(g.away)}${g.away.short} ${g.neutral ? "vs." : "at"} ${rk(g.home)}${g.home.short}` : g.title;
-    const logos = g.away ? `${logoHTML(g.away)}<span class="vs">${g.neutral ? "VS" : "@"}</span>${logoHTML(g.home)}` : "";
+    // Each team: logo, and while the game is live its score right underneath (leader bright, trailer dimmer).
+    const live = g.state === "in" && g.away && g.away.score != null && g.home.score != null && g.away.score !== "" && g.home.score !== "";
+    const lead = live ? Math.sign(Number(g.away.score) - Number(g.home.score)) : 0;
+    const side = (tm, trailing) => `<div class="hero-team">${logoHTML(tm)}${live ? `<span class="hero-score${trailing ? " trail" : ""}" aria-label="${esc(tm.short || tm.name)} ${esc(tm.score)}">${esc(tm.score)}</span>` : ""}</div>`;
+    const logos = g.away ? `${side(g.away, lead < 0)}<span class="vs">${g.neutral ? "VS" : "@"}</span>${side(g.home, lead > 0)}` : "";
     const yours = includedForMe(g) ? g.platforms.filter((p) => myCoverage().has(p.id)) : [];
     const verdict = pi.kind === "free" ? `Free on ${pi.free.map((p) => p.name).join(", ")}`
       : yours.length ? `Yours on ${yours.map((p) => p.name).join(", ")}`
