@@ -1179,3 +1179,30 @@ main:focus { outline: none; }
   .next-pill { right: auto; left: 50%; translate: -50% 0; }
   body:has(#toast:not([hidden])) .next-pill { opacity: 0; pointer-events: none; }
 }
+
+/* My Teams: find any team to follow */
+.mt-find { margin: 12px var(--edge) 0; max-width: 520px; }
+.mt-dek + .mt-find { margin: 0 var(--edge) 12px; }
+
+/* Phone-only / desktop-only pieces */
+.phone-only, .filter-toggle, .more-watch-btn { display: none; }
+@media (max-width: 760px) {
+  .desk-only { display: none; }
+  .phone-only { display: block; }
+  /* Filters: league chips plus one button; price and region open below it */
+  .filters .chips { flex: 1 1 0; min-width: 0; }
+  .filter-toggle {
+    display: inline-flex; align-items: center; gap: 6px; flex: none; height: 40px; padding: 0 14px; border-radius: 999px;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font-weight: 600; font-size: 14px; white-space: nowrap;
+  }
+  .filter-toggle svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2.2; fill: none; }
+  .filter-toggle.is-set { border-color: var(--paid); color: var(--paid); }
+  .filters:not(.open) #priceSeg, .filters:not(.open) #regionSeg { display: none; }
+  /* More to watch: extra rows fold away behind one button */
+  .more-watch-btn {
+    display: flex; align-items: center; justify-content: center; gap: 6px; width: calc(100% - 2 * var(--edge)); height: 48px; margin: 24px var(--edge) 0;
+    border-radius: 12px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); font-weight: 650; font-size: 15px;
+  }
+  .more-watch.open .more-watch-btn span { transform: rotate(180deg); }
+  .more-watch:not(.open) .more-watch-body { display: none; }
+}

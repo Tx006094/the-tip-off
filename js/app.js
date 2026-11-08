@@ -505,6 +505,44 @@
         ${logoHTML(team)}<span class="mt-info"><b>${esc(team.short || team.name)}</b>${line}</span>
       </button>`;
   }
+  // "Find your team": search every team and follow it right here, without leaving the page.
+  function mtFinderHTML() {
+    return `<div class="mt-find sched-find">
+        <div class="sched-find-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <label class="sr-only" for="mtFind">Find a team to follow</label>
+          <input id="mtFind" type="search" placeholder="Search for a team to follow" autocomplete="off" spellcheck="false" enterkeyhint="go"
+            role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mtSuggest" />
+        </div>
+        <ul class="sched-suggest" id="mtSuggest" role="listbox" aria-label="Teams to follow" hidden></ul>
+      </div>`;
+  }
+  function renderMtSuggest() {
+    const box = $("#mtSuggest"), input = $("#mtFind");
+    if (!box || !input) return;
+    const q = input.value.trim();
+    const nq = norm(q);
+    const list = q ? state.teams
+      .filter((tm) => !state.favs.has(tm.key) && matchesQuery(teamText(tm), q))
+      .map((tm) => ({ tm, starts: norm(tm.name).startsWith(nq) || norm(tm.short || "").startsWith(nq) ? 1 : 0 }))
+      .sort((a, b) => b.starts - a.starts || a.tm.name.length - b.tm.name.length || a.tm.name.localeCompare(b.tm.name))
+      .slice(0, 6).map((x) => x.tm) : [];
+    box.innerHTML = list.length
+      ? list.map((tm, i) => `<li role="option" id="mts-${i}" class="sug" data-follow="${esc(tm.key)}" aria-selected="${i === 0}">
+          ${logoHTML(tm)}<span class="sug-name">${esc(tm.name)}<small>${esc(LEAGUES[tm.league].short)}</small></span>
+          <span class="sug-n">Follow</span></li>`).join("")
+      : q ? `<li class="sug-empty" role="presentation">No team matches “${esc(q)}”</li>` : "";
+    box.hidden = !q;
+    input.setAttribute("aria-expanded", String(!!q && list.length > 0));
+  }
+  document.addEventListener("input", (e) => { if (e.target.id === "mtFind") renderMtSuggest(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.id !== "mtFind") return;
+    if (e.key === "Enter") { e.preventDefault(); $("#mtSuggest .sug")?.click(); }
+    else if (e.key === "Escape") { e.target.value = ""; renderMtSuggest(); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest?.(".mt-find")) { const b = $("#mtSuggest"); if (b) b.hidden = true; } });
+
   function myTeamsHTML() {
     const favs = [...state.favs].filter((k) => teamByKey.has(k));
     const head = secHead("My Teams", favs.length ? plural(favs.length, "team") : "", { color: "var(--paid)" });
@@ -516,12 +554,13 @@
       // Once a team is followed the quick picks go away; "Add more teams" leads to the full list.
       return `<section class="myteams" aria-label="My Teams">${head}
         <div class="mt-row">${favs.map(myTeamCardHTML).join("")}
-          <a class="mt-add" href="#teams">${ICON.star}<span>Add more teams</span></a></div></section>`;
+          <a class="mt-add" href="#teams">${ICON.star}<span>Add more teams</span></a></div>${mtFinderHTML()}</section>`;
     }
     const picks = quickPickKeys().slice(0, 12);
     if (!picks.length) return "";
     return `<section class="myteams" aria-label="My Teams">${head}
       <p class="mt-dek">Your teams. Your games. Never miss a tip-off. Select your favorites and keep their upcoming matchups front and center.</p>
+      ${mtFinderHTML()}
       <div class="mt-picks" role="group" aria-label="Popular teams to follow">${picks.map(pickHTML).join("")}<a class="mt-pick mt-more" href="#teams"><span>More teams</span> <span aria-hidden="true">→</span></a></div>
     </section>`;
   }
@@ -567,7 +606,9 @@
   pill.addEventListener("click", () => {
     if (!pillTarget) return;
     const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const y = pillTarget.getBoundingClientRect().top + scrollY - ($(".topbar, header")?.offsetHeight || 0) - 8;
+    const down = pillTarget.getBoundingClientRect().top > 0;
+    const head = innerWidth <= 760 && down ? 0 : ($("#topbar")?.offsetHeight || 0);
+    const y = pillTarget.getBoundingClientRect().top + scrollY - head - 8;
     scrollTo({ top: y, behavior: reduce ? "auto" : "smooth" });
   });
 
@@ -722,14 +763,21 @@
     html += scheduleHTML();
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
-    html += shelfHTML("Ranked Teams in Action", real.filter((g) => g.state === "pre" && !!g.home.rank !== !!g.away?.rank), "One team in the Top 25");
-    html += shelfHTML("Showcase Events", real.filter((g) => g.state !== "post" && showcaseName(g)), "Marquee neutral-site games", { color: "var(--event)" });
-    html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
+    let more = "";
+    more += shelfHTML("Ranked Teams in Action", real.filter((g) => g.state === "pre" && !!g.home.rank !== !!g.away?.rank), "One team in the Top 25");
+    more += shelfHTML("Showcase Events", real.filter((g) => g.state !== "post" && showcaseName(g)), "Marquee neutral-site games", { color: "var(--event)" });
+    more += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
+    // Phones fold these rows behind one "More to watch" button; desktop always shows them.
+    if (more) html += `<div class="more-watch"><button type="button" class="more-watch-btn" data-more-watch aria-expanded="false">More to watch <span aria-hidden="true">▾</span></button><div class="more-watch-body">${more}</div></div>`;
     const announced = filtered.filter((g) => g.tba);
-    for (const id of ["unrivaled", "wnba", "upshot", "fiba", "ncaa"]) {
+    const LEAGUE_ORDER = ["unrivaled", "wnba", "upshot", "fiba", "ncaa"];
+    // Desktop: a "Coming up" row per league. Phones: the same events in a single "Coming up" row.
+    for (const id of LEAGUE_ORDER) {
       const list = announced.filter((g) => g.league === id);
-      html += shelfHTML(`${LEAGUES[id].name}: Coming Up`, list, "Announced seasons & events", { color: LEAGUES[id].color });
+      html += shelfHTML(`${LEAGUES[id].name}: Coming Up`, list, "Announced seasons & events", { color: LEAGUES[id].color }).replace('<div class="shelf-block"', '<div class="shelf-block desk-only"');
     }
+    const allAnnounced = LEAGUE_ORDER.flatMap((id) => announced.filter((g) => g.league === id));
+    html += shelfHTML("Coming Up", allAnnounced, "Announced seasons & events").replace('<div class="shelf-block"', '<div class="shelf-block phone-only"');
 
     if (lg) {
       const plats = leaguePlatformIds(lg).map((id) => platformById(id, state.region)).filter(Boolean)
@@ -1187,6 +1235,12 @@
       `<button type="button" class="chip" data-league="${id}" aria-pressed="${state.league === id}"${c ? ` style="--c:${c}"` : ""}>${c ? '<span class="dot" aria-hidden="true"></span>' : ""}${esc(name)}</button>`).join("");
     $$("#priceSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.price === state.price)));
     $$("#regionSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.region === state.region)));
+    const ft = $("#filterToggle");
+    if (ft) {
+      const bits = [state.price !== "all" && { free: "Free", paid: "Paid", mine: "Mine" }[state.price], state.region === "ca" && "CA"].filter(Boolean);
+      ft.querySelector("span").textContent = bits.length ? `Filters · ${bits.join(", ")}` : "Filters";
+      ft.classList.toggle("is-set", bits.length > 0);
+    }
     fx("thumb", $("#priceSeg")); fx("thumb", $("#regionSeg"));
     document.documentElement.dataset.region = state.region;
   }
@@ -2050,6 +2104,7 @@
       return;
     }
     if (t.dataset.follow) {
+      const mt = $("#mtFind"); if (mt) mt.value = "";
       const key = t.dataset.follow;
       state.favs.add(key); saveFavs();
       toast(`Following ${teamByKey.get(key)?.short || "team"}`);
@@ -2182,6 +2237,23 @@
     if (e.key === "/" && !typing && $("#modal").hidden) { e.preventDefault(); $("#search").focus(); }
   });
   window.addEventListener("hashchange", route);
+
+  // Phones: price and region live behind one "Filters" button so the header is a row shorter.
+  $("#filterToggle")?.addEventListener("click", () => {
+    const f = $("#filters"), open = !f.classList.contains("open");
+    f.classList.toggle("open", open);
+    $("#filterToggle").setAttribute("aria-expanded", String(open));
+    if (open) { fx("thumb", $("#priceSeg"), { animate: false }); fx("thumb", $("#regionSeg"), { animate: false }); }
+  });
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.("[data-more-watch]");
+    if (!b) return;
+    const box = b.closest(".more-watch"), open = !box.classList.contains("open");
+    box.classList.toggle("open", open);
+    b.setAttribute("aria-expanded", String(open));
+    b.firstChild.textContent = open ? "Show less " : "More to watch ";
+    if (open) fx("show", $$(".more-watch-body .shelf-block", box), { y: 8, step: 0.05 });
+  });
 
   // Phones: slide the header away while scrolling down, bring it back when scrolling up.
   let lastY = scrollY;

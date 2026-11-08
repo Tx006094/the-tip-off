@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261107q" />
+  <link rel="stylesheet" href="styles.css?v=20261108a" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -117,6 +117,9 @@
     </div>
     <div class="filters" id="filters">
       <div class="chips" role="group" aria-label="Filter by league" id="leagueChips"></div>
+      <button type="button" class="filter-toggle" id="filterToggle" aria-expanded="false" aria-controls="priceSeg regionSeg">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span>Filters</span>
+      </button>
       <div class="segmented" role="group" aria-label="Filter by price" id="priceSeg">
         <button type="button" data-price="all" aria-pressed="true">All</button>
         <button type="button" data-price="free" aria-pressed="false">Free</button>
@@ -299,12 +302,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261107q"></script>
-  <script src="js/services.js?v=20261107q"></script>
-  <script src="js/leagues.js?v=20261107q"></script>
-  <script src="js/teams-data.js?v=20261107q"></script>
-  <script src="js/news-data.js?v=20261107q"></script>
-  <script src="js/motion-fx.js?v=20261107q"></script>
-  <script src="js/app.js?v=20261107q"></script>
+  <script src="js/platforms.js?v=20261108a"></script>
+  <script src="js/services.js?v=20261108a"></script>
+  <script src="js/leagues.js?v=20261108a"></script>
+  <script src="js/teams-data.js?v=20261108a"></script>
+  <script src="js/news-data.js?v=20261108a"></script>
+  <script src="js/motion-fx.js?v=20261108a"></script>
+  <script src="js/app.js?v=20261108a"></script>
 </body>
 </html>
