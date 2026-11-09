@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261108d" />
+  <link rel="stylesheet" href="styles.css?v=20261109a" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -88,6 +88,25 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
 
+  <!-- Event banner: hides itself once the event is over -->
+  <a class="event-banner" id="eventBanner" href="/draft-lottery" data-ends="2026-11-16T01:30:00Z">
+    <span class="eb-tag">WNBA Draft Lottery</span>
+    <span class="eb-when"><b id="ebTime">Sun, Nov 15 · 7:30 PM ET</b> on <b>ESPN</b><span class="eb-ca"> (TSN in Canada)</span></span>
+    <span class="eb-cta">See the odds <span aria-hidden="true">→</span></span>
+  </a>
+  <script>
+    (function () {
+      var b = document.getElementById("eventBanner");
+      var end = new Date(b.dataset.ends), start = new Date("2026-11-15T19:30:00-05:00"), now = new Date();
+      if (now > end) { b.remove(); return; }
+      if (now >= start) { document.getElementById("ebTime").textContent = "Live now"; b.classList.add("is-live"); return; }
+      try {
+        var t = start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+        var day = start.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+        document.getElementById("ebTime").textContent = day + " · " + t;
+      } catch (e) {}
+    })();
+  </script>
   <header class="masthead" id="topbar">
     <div class="bar">
       <a class="brand" href="#home" aria-label="The Tip-Off, home">
@@ -302,12 +321,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261108d"></script>
-  <script src="js/services.js?v=20261108d"></script>
-  <script src="js/leagues.js?v=20261108d"></script>
-  <script src="js/teams-data.js?v=20261108d"></script>
-  <script src="js/news-data.js?v=20261108d"></script>
-  <script src="js/motion-fx.js?v=20261108d"></script>
-  <script src="js/app.js?v=20261108d"></script>
+  <script src="js/platforms.js?v=20261109a"></script>
+  <script src="js/services.js?v=20261109a"></script>
+  <script src="js/leagues.js?v=20261109a"></script>
+  <script src="js/teams-data.js?v=20261109a"></script>
+  <script src="js/news-data.js?v=20261109a"></script>
+  <script src="js/motion-fx.js?v=20261109a"></script>
+  <script src="js/app.js?v=20261109a"></script>
 </body>
 </html>
