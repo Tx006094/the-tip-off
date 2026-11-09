@@ -1215,19 +1215,21 @@ main:focus { outline: none; }
   .more-watch:not(.open) .more-watch-body { display: none; }
 }
 
-/* Event banner across the top (e.g. the WNBA Draft Lottery) */
+/* Event banner across the top (e.g. the WNBA Draft Lottery): bright WNBA orange so it can't be missed */
 .event-banner {
   display: flex; align-items: center; justify-content: center; gap: 8px 14px; flex-wrap: wrap;
-  padding: 10px var(--edge); background: #1a0f08; border-bottom: 1px solid color-mix(in srgb, #ff6a13 45%, transparent);
-  color: var(--text); text-decoration: none; font-size: 14px; line-height: 1.3; text-align: center;
+  padding: 11px var(--edge); background: linear-gradient(90deg, #ff5a00, #ff7a1a 50%, #ff5a00); /* taste-skill-ignore: event banner */
+  color: #1a0a00; text-decoration: none; font-size: 15px; line-height: 1.3; text-align: center;
 }
-.event-banner:hover .eb-cta { text-decoration: underline; }
-.eb-tag { background: #ff6a13; color: #1a0a00; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; padding: 4px 9px; border-radius: 999px; }
-.eb-when { color: var(--muted); }
-.eb-when b { color: var(--text); font-weight: 650; }
-.eb-cta { color: #ff8a3d; font-weight: 700; white-space: nowrap; }
-.event-banner.is-live #ebTime { color: var(--live); }
+.event-banner:hover { filter: brightness(1.06); }
+.eb-tag { background: #1a0a00; color: #fff; font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding: 5px 10px; border-radius: 999px; }
+.eb-when { color: #2a1203; font-weight: 500; }
+.eb-when b { color: #1a0a00; font-weight: 800; }
+.eb-cta { background: #fff; color: #1a0a00; font-weight: 800; white-space: nowrap; padding: 6px 12px; border-radius: 999px; box-shadow: 0 2px 8px rgba(0,0,0,.18); } /* taste-skill-ignore: event banner */
+.event-banner.is-live .eb-tag { background: #b91c1c; }
+.event-banner.is-live #ebTime { color: #1a0a00; }
 @media (max-width: 760px) {
-  .event-banner { font-size: 13px; gap: 6px 10px; padding: 9px var(--edge); }
+  .event-banner { font-size: 14px; gap: 6px 10px; padding: 10px var(--edge); }
+  .eb-cta { padding: 5px 11px; }
   .eb-ca { display: none; }
 }
