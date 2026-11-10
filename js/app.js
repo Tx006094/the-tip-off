@@ -858,16 +858,16 @@
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     if (lastNight) { const have = new Set(schedGames.map((g) => g.id)); schedGames = schedGames.concat(lastNight.filter((g) => !have.has(g.id) && passesFilters(g))); }
     html += scheduleHTML();
+    html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
-    html += shelfHTML("Ranked Teams in Action", real.filter((g) => g.state === "pre" && !!g.home.rank !== !!g.away?.rank), "One team in the Top 25");
     // Everything else folds behind one "More to watch" button.
     const announced = filtered.filter((g) => g.tba);
     const LEAGUE_ORDER = ["unrivaled", "wnba", "upshot", "fiba", "ncaa"];
     const allAnnounced = LEAGUE_ORDER.flatMap((id) => announced.filter((g) => g.league === id));
     let more = "";
+    more += shelfHTML("Ranked Teams in Action", real.filter((g) => g.state === "pre" && !!g.home.rank !== !!g.away?.rank), "One team in the Top 25");
     more += shelfHTML("Showcase Events", real.filter((g) => g.state !== "post" && showcaseName(g)), "Marquee neutral-site games", { color: "var(--event)" });
-    more += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
     more += shelfHTML("Coming Up", allAnnounced, "Announced seasons & events").replace('<div class="shelf-block"', '<div class="shelf-block" data-brand-league="mixed"');
     if (more) html += `<div class="more-watch"><button type="button" class="more-watch-btn" data-more-watch aria-expanded="false">More to watch <span aria-hidden="true">▾</span></button><div class="more-watch-body">${more}</div></div>`;
 
