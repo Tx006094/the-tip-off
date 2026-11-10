@@ -1264,3 +1264,13 @@ main:focus { outline: none; }
 /* Desktop intro trimmed to match phones: headline, tagline and the two key numbers */
 .intro .kicker, .intro .dek { display: none; }
 .stats > div:nth-child(n + 3) { display: none; }
+
+/* Game card art: each logo in the same square box, centred in its own half (matching the colour split),
+   so tall and wide logos look the same size and the event label sits evenly between them */
+.card-art { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; justify-items: center; gap: 0; }
+.card-art img, .card-art .mono { width: min(58%, 84px); aspect-ratio: 1; height: auto; object-fit: contain; grid-row: 1; }
+.card-art img:first-of-type, .card-art .mono:first-of-type { grid-column: 1; }
+.card-art .at { grid-column: 2; grid-row: 1; }
+.card-art > :is(img, .mono):last-of-type { grid-column: 3; }
+.card-art:has(.card-event) > :is(img, .mono, .at) { margin-bottom: 26px; }
+.card-art .art-title { grid-column: 1 / -1; }
