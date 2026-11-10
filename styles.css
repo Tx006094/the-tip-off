@@ -1281,7 +1281,7 @@ main:focus { outline: none; }
 /* Latest headlines: the ticker's news as a readable list */
 .news-sec { margin-top: 8px; }
 .nw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 var(--edge); }
-.nw-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); text-decoration: none; }
+.nw-item { display: flex; gap: 12px; align-items: center; padding: 12px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); text-decoration: none; }
 .nw-item:hover { border-color: var(--text); }
 .nw-thumb { width: 96px; aspect-ratio: 16 / 9; flex: none; border-radius: 8px; overflow: hidden; background: var(--surface-2); }
 .nw-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
