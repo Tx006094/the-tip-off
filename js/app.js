@@ -547,17 +547,6 @@
     try { localStorage.setItem("fc-seen", JSON.stringify(now)); } catch { /* private mode */ }
   }
 
-  // Countdown text for games starting within a day: "Tips in 2h 14m".
-  function tipsIn(ms) {
-    const m = Math.max(0, Math.round(ms / 60000));
-    if (m < 1) return "Tipping off now";
-    if (m < 60) return `Tips in ${m}m`;
-    return `Tips in ${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
-  }
-  setInterval(() => {
-    for (const el of $$("[data-tip]")) el.textContent = tipsIn(Number(el.dataset.tip) - Date.now());
-  }, 30000);
-
   function myTeamCardHTML(key) {
     const team = teamByKey.get(key);
     if (!team) return "";
@@ -582,12 +571,9 @@
     } else if (g) {
       const live = g.state === "in";
       const me = g[sideOf(g)], opp = oppOf(g);
-      const within = !live && g.date - Date.now() < 24 * 3600000;
-      const when = live ? `Live now${me.score !== "" ? ` · ${me.score}–${opp.score}` : ""}` : within ? tipsIn(g.date - Date.now()) : `${dayLabel(g.date)} · ${clock(g)}`;
+      const when = live ? `Live now${me.score !== "" ? ` · ${me.score}–${opp.score}` : ""}` : `${dayLabel(g.date)} · ${clock(g)}`;
       const ch = g.platforms.length ? g.platforms.slice(0, 2).map((x) => x.name).join(", ") : "Channel TBA";
-      const tip = within ? ` data-tip="${g.date.getTime ? g.date.getTime() : +g.date}"` : "";
-      const chLine = within ? `${clock(g)} · ${ch}` : ch;
-      line = `<span class="mt-when${live ? " is-live" : ""}"${tip}>${esc(when)}</span><span class="mt-vs">${esc(vsOf(g))}</span><span class="mt-ch">${esc(chLine)}</span>`;
+      line = `<span class="mt-when${live ? " is-live" : ""}">${esc(when)}</span><span class="mt-vs">${esc(vsOf(g))}</span><span class="mt-ch">${esc(ch)}</span>`;
       attr = `data-game="${esc(g.id)}" aria-label="${esc(`${team.name}: ${when}, ${vsOf(g)}, on ${ch}`)}"`;
       gameById.set(g.id, g);
     } else {
