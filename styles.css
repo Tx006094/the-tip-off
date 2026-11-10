@@ -1253,3 +1253,8 @@ main:focus { outline: none; }
 @media (min-width: 1101px) {
   .feature:has(.rail) ~ .legend { padding-right: calc(var(--edge) + clamp(300px, 27vw, 380px) + 16px); }
 }
+
+/* Featured game on wider screens: text centred top-to-bottom (in line with the logos), a little shorter */
+@media (min-width: 761px) {
+  .hero { align-items: center; min-height: clamp(300px, 28vw, 400px); }
+}
