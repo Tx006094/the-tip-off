@@ -298,6 +298,13 @@
     }));
   }
 
+  // ESPN article photos are ~1300px wide; ask ESPN's resizer for a thumbnail-sized copy.
+  const newsPhoto = (url) => {
+    const m = /^https:\/\/a\.espncdn\.com(\/photo\/[^?]+\.(?:jpg|png))$/.exec(url);
+    if (m) return `https://a.espncdn.com/combiner/i?img=${m[1]}&w=240&h=135`;
+    // Video thumbnails (about 576px wide) are small enough to use as they are.
+    return /^https:\/\/(espnmedia-cdn\.akamaized\.net|s\.espncdn\.com)\//.test(url) ? url : "";
+  };
   const NEWS_LEAGUES = ["wnba", "ncaa"]; // ESPN only has news feeds for these two; others come from js/news-data.js.
   async function loadNews() {
     const lists = await Promise.all(NEWS_LEAGUES.map((lg) =>
@@ -305,6 +312,7 @@
         .then((j) => (j.articles || []).map((a) => ({
           id: `news-${a.id || a.headline}`, league: lg, headline: a.headline,
           url: a.links?.web?.href || "", date: new Date(a.published || 0),
+          img: (a.images || []).map((i) => newsPhoto(i.url || "")).find(Boolean) || "",
         })).filter((a) => a.headline && a.url))
         .catch(() => [])));
     if (typeof SITE_NEWS !== "undefined") {
@@ -861,6 +869,7 @@
     html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
+    html += newsSectionHTML();
     // Everything else folds behind one "More to watch" button.
     const announced = filtered.filter((g) => g.tba);
     const LEAGUE_ORDER = ["unrivaled", "wnba", "upshot", "fiba", "ncaa"];
@@ -923,6 +932,44 @@
     if (ranked) return { k: "rk", label: "Top 25", score: 1 };
     return null;
   }
+  // ---------- Latest headlines: the ticker's news, laid out to read ----------
+  function ago(d) {
+    const m = Math.round((Date.now() - d) / 60000);
+    if (m < 60) return `${Math.max(1, m)}m ago`;
+    const h = Math.round(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const days = Math.round(h / 24);
+    return days === 1 ? "Yesterday" : `${days} days ago`;
+  }
+  function newsSectionHTML() {
+    // Same order as the ticker: leagues take turns, newest first within each league.
+    const list = (state.news || []).filter((n) => state.league === "all" || n.league === state.league).slice(0, 12);
+    if (!list.length) return "";
+    const src = (n) => { try { const h = new URL(n.url).hostname.replace(/^www\./, ""); return /espn/.test(h) ? "ESPN" : /unrivaled/.test(h) ? "Unrivaled" : h; } catch { return ""; } };
+    const items = list.map((n) => {
+      const lg = LEAGUES[n.league];
+      const thumb = n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy" decoding="async">` : `<span class="nw-ph" style="--c:${lg.color}">${esc(lg.short)}</span>`;
+      return `<a class="nw-item" href="${esc(n.url)}" target="_blank" rel="noopener">
+          <span class="nw-thumb">${thumb}</span>
+          <span class="nw-text"><span class="nw-tag" style="--c:${lg.color}">${esc(lg.short)}</span><b>${esc(n.headline)}</b><small>${esc([src(n), ago(n.date)].filter(Boolean).join(" · "))}</small></span>
+        </a>`;
+    }).join("");
+    const leagues = [...new Set(list.map((n) => LEAGUES[n.league].short))].join(" · ");
+    return `<section class="news-sec" id="headlines" aria-labelledby="newsTitle">
+      ${secHead("Latest headlines", leagues).replace("<h2>", '<h2 id="newsTitle">')}
+      <div class="nw-grid">${items}</div>
+      ${list.length > 4 ? `<button type="button" class="nw-more" data-news-more aria-expanded="false">More headlines <span aria-hidden="true">→</span></button>` : ""}
+    </section>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.("[data-news-more]");
+    if (!b) return;
+    const sec = b.closest(".news-sec"), open = !sec.classList.contains("open");
+    sec.classList.toggle("open", open);
+    b.setAttribute("aria-expanded", String(open));
+    b.innerHTML = open ? 'Fewer headlines <span aria-hidden="true">↑</span>' : 'More headlines <span aria-hidden="true">→</span>';
+  });
+
   // ---------- schedule (the TV listings) ----------
   // One day at a time, in tip-off order, each game on one row with its channels and price. Replaces the
   // stack of one-row-per-day shelves, so the whole week is a tab away instead of ten rows down.

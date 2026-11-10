@@ -1277,3 +1277,27 @@ main:focus { outline: none; }
 .card-art .mono { display: grid; place-items: center; border-radius: 50%; font-size: 18px; }
 .card-art:has(.card-event) > :is(img, .mono, .at) { margin-bottom: 26px; }
 .card-art .art-title { grid-column: 1 / -1; }
+
+/* Latest headlines: the ticker's news as a readable list */
+.news-sec { margin-top: 8px; }
+.nw-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 var(--edge); }
+.nw-item { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); text-decoration: none; }
+.nw-item:hover { border-color: var(--text); }
+.nw-thumb { width: 96px; aspect-ratio: 16 / 9; flex: none; border-radius: 8px; overflow: hidden; background: var(--surface-2); }
+.nw-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nw-ph { display: grid; place-items: center; width: 100%; height: 100%; color: var(--c); font: 800 12px/1 var(--font-display); background: color-mix(in srgb, var(--c) 16%, var(--surface-2)); }
+.nw-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.nw-tag { align-self: flex-start; font-size: 11px; font-weight: 700; color: var(--c); background: color-mix(in srgb, var(--c) 16%, transparent); border-radius: 999px; padding: 2px 8px; }
+.nw-text b { font-size: 15px; font-weight: 650; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nw-text small { color: var(--dim); font-size: 12px; }
+.news-sec:not(.open) .nw-item:nth-child(n + 7) { display: none; }
+.nw-more { display: block; margin: 12px var(--edge) 0; height: 42px; padding: 0 18px; border-radius: 10px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); font-weight: 650; font-size: 14px; }
+.nw-more:hover { border-color: var(--text); }
+@media (min-width: 761px) { .news-sec .nw-more { display: none; } .news-sec:has(.nw-item:nth-child(7)) .nw-more { display: block; } }
+@media (max-width: 760px) {
+  .nw-grid { grid-template-columns: 1fr; }
+  .news-sec:not(.open) .nw-item:nth-child(n + 5) { display: none; }
+  .nw-thumb { width: 84px; }
+  .nw-text b { font-size: 14px; }
+  .nw-more { width: calc(100% - 2 * var(--edge)); }
+}
