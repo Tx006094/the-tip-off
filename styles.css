@@ -1253,3 +1253,38 @@ main:focus { outline: none; }
 @media (min-width: 1101px) {
   .feature:has(.rail) ~ .legend { padding-right: calc(var(--edge) + clamp(300px, 27vw, 380px) + 16px); }
 }
+
+/* Last night: yesterday's finals, your teams first */
+.last-night { margin-top: 28px; }
+.ln-head { display: flex; align-items: baseline; gap: 6px 12px; flex-wrap: wrap; padding: 0 var(--edge); }
+.ln-head h2 { margin: 0; font: 800 22px/1.1 var(--font-display); font-stretch: 85%; }
+.ln-sub { color: var(--muted); font-size: 13px; }
+.ln-toggle { margin-left: auto; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); border-radius: 999px; height: 34px; padding: 0 14px; font-weight: 600; font-size: 13px; }
+.ln-toggle:hover { border-color: var(--text); }
+.last-night:not(.open) .ln-body { display: none; }
+.ln-body { padding: 12px var(--edge) 0; }
+.ln-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 1000px) { .ln-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ln-card { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); }
+.ln-card:hover { border-color: var(--text); }
+.ln-card.mine { border-color: var(--paid); }
+.ln-tag { align-self: flex-start; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 3px 9px; margin-bottom: 4px; }
+.ln-you { background: color-mix(in srgb, var(--paid) 20%, transparent); color: var(--paid); }
+.ln-up { background: rgba(244, 63, 94, .16); color: #ff8fa3; }
+.ln-thr { background: rgba(56, 189, 248, .14); color: #8fd0ff; }
+.ln-rk { background: var(--surface-2); color: var(--muted); }
+.ln-line { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 15px; font-weight: 600; }
+.ln-line.lost { color: var(--muted); font-weight: 500; }
+.ln-line b { font-variant-numeric: tabular-nums; }
+.ln-team { display: flex; align-items: center; gap: 7px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ln-team img, .ln-team .mono { width: 22px; height: 22px; flex-shrink: 0; object-fit: contain; font-size: 8px; }
+.ln-team i { font-style: normal; color: var(--dim); font-size: 12px; }
+.ln-foot { color: var(--dim); font-size: 12px; margin-top: 2px; }
+.ln-all { margin-top: 12px; border: 1px solid var(--line-strong); background: transparent; color: var(--text); border-radius: 10px; height: 40px; padding: 0 16px; font-weight: 600; font-size: 14px; }
+.ln-all:hover { border-color: var(--text); }
+@media (max-width: 760px) {
+  .ln-row { display: flex; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--edge)); padding: 0 var(--edge) 2px; }
+  .ln-row::-webkit-scrollbar { display: none; }
+  .ln-card { flex: 0 0 220px; }
+  .ln-all { width: 100%; }
+}

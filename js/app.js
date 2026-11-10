@@ -848,6 +848,7 @@
     html += shelfHTML("Live Now", real.filter((g) => g.state === "in"), "", { color: "var(--live)", live: true });
     html += myTeamsHTML();
     schedGames = real.filter((g) => dayKey(g.date) >= today);
+    html += lastNightHTML();
     html += scheduleHTML();
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
@@ -877,6 +878,99 @@
       : emptyHTML("No games match these filters", "Try All leagues, or switch the price filter back to All.");
     el.innerHTML = html;
   }
+
+  // ---------- "Last night": yesterday's finals, your teams first ----------
+  // Loaded after the page appears (two small requests), so it never slows the first screen.
+  let lastNight = null;            // null = not loaded yet; [] = loaded, no finals
+  let lastNightLoading = false;
+  let lastNightOpen = null;        // null = automatic (open until today's first game starts)
+  function loadLastNight() {
+    if (lastNight || lastNightLoading) return;
+    lastNightLoading = true;
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const day = ymd(d);
+    const jobs = ["ncaa", "wnba"].map((lg) =>
+      getJSON(`${ESPN}/${LEAGUES[lg].espn}/scoreboard?dates=${day}&limit=300${lg === "ncaa" ? "&groups=50" : ""}`)
+        .then((j) => (j.events || []).map((e) => parseEspnEvent(e, lg)).filter(Boolean))
+        .catch(() => []));
+    Promise.all(jobs).then((lists) => {
+      lastNight = lists.flat().filter((g) => g.state === "post" && g.away);
+      lastNightLoading = false;
+      const box = $("#lastNight");
+      if (state.view === "home" && box) {
+        const fresh = document.createElement("div");
+        fresh.innerHTML = lastNightHTML();
+        box.replaceWith(fresh.firstElementChild || document.createComment("last night"));
+        fx("show", $$("#lastNight .ln-card"), { y: 8, step: 0.04 });
+      }
+    });
+  }
+  // What makes a result worth a spot: your team, an upset, a close finish, or a ranked team.
+  function lastNightTag(g) {
+    const a = g.away, h = g.home;
+    const sa = Number(a.score), sh = Number(h.score);
+    if (!Number.isFinite(sa) || !Number.isFinite(sh)) return null;
+    const [w, l] = sa > sh ? [a, h] : [h, a];
+    const mine = [a, h].some((tm) => state.favs.has(`${g.league}:${tm.id}`));
+    const upset = l.rank && (!w.rank || w.rank > l.rank);
+    const ot = /OT/i.test(g.statusText || "");
+    const thriller = ot || Math.abs(sa - sh) <= 3;
+    const ranked = a.rank || h.rank;
+    if (mine) return { k: "you", label: "Your team", score: 4 };
+    if (upset) return { k: "up", label: "Upset", score: 3 };
+    if (thriller) return { k: "thr", label: ot ? "Thriller · OT" : "Thriller", score: 2 };
+    if (ranked) return { k: "rk", label: "Top 25", score: 1 };
+    return null;
+  }
+  function lastNightCardHTML(g, tag) {
+    gameById.set(g.id, g);
+    const sa = Number(g.away.score), sh = Number(g.home.score);
+    const line = (tm, win) => `<span class="ln-line${win ? "" : " lost"}"><span class="ln-team">${logoHTML(tm)}${tm.rank ? `<i>${tm.rank}</i>` : ""}${esc(tm.short || tm.name)}</span><b>${esc(tm.score)}</b></span>`;
+    const ev = showcaseName(g);
+    return `<button type="button" class="ln-card${tag.k === "you" ? " mine" : ""}" data-game="${esc(g.id)}" aria-label="${esc(`${tag.label}: ${g.away.name} ${g.away.score}, ${g.home.name} ${g.home.score}, ${g.statusText || "Final"}`)}">
+        <span class="ln-tag ln-${tag.k}">${esc(tag.label)}</span>
+        ${line(g.away, sa > sh)}${line(g.home, sh > sa)}
+        <span class="ln-foot">${esc(g.statusText || "Final")}${ev ? ` · ${esc(ev)}` : ""}</span>
+      </button>`;
+  }
+  function lastNightHTML() {
+    if (!lastNight) return `<div id="lastNight" hidden></div>`;
+    const all = lastNight.filter((g) => state.league === "all" || g.league === state.league);
+    if (!all.length) return `<div id="lastNight" hidden></div>`;
+    const picks = all.map((g) => ({ g, tag: lastNightTag(g) })).filter((x) => x.tag)
+      .sort((x, y) => y.tag.score - x.tag.score || (x.g.home.rank || x.g.away.rank || 99) - (y.g.home.rank || y.g.away.rank || 99))
+      .slice(0, 8);
+    const key = rowKey("Last night");
+    rowLists.set(key, { title: "Last night", sub: "Final scores", games: all });
+    const d = new Date(); d.setDate(d.getDate() - 1);
+    const dayTxt = d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+    // Open until today's first game tips off, then fold away so it never competes with live games.
+    const started = state.games.some((g) => dayKey(g.date) === dayKey(new Date()) && g.state !== "pre");
+    const open = lastNightOpen ?? !started;
+    const cards = picks.length ? `<div class="ln-row">${picks.map(({ g, tag }) => lastNightCardHTML(g, tag)).join("")}</div>` : "";
+    return `<section class="last-night${open ? " open" : ""}" id="lastNight" aria-labelledby="lnTitle">
+      <div class="ln-head">
+        <h2 id="lnTitle">Last night</h2>
+        <span class="ln-sub">${esc(dayTxt)} · ${plural(all.length, "final")}${picks.some((x) => x.tag.k === "you") ? " · Your teams first" : ""}</span>
+        <button type="button" class="ln-toggle" data-ln-toggle aria-expanded="${open}">${open ? "Hide" : `Show ${plural(all.length, "result")}`}</button>
+      </div>
+      <div class="ln-body">
+        ${cards}
+        <button type="button" class="ln-all" data-open-row="${esc(key)}">See all ${plural(all.length, "result")} <span aria-hidden="true">→</span></button>
+      </div>
+    </section>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.("[data-ln-toggle]");
+    if (!b) return;
+    const box = $("#lastNight"), open = !box.classList.contains("open");
+    lastNightOpen = open;
+    box.classList.toggle("open", open);
+    b.setAttribute("aria-expanded", String(open));
+    const n = rowLists.get(rowKey("Last night"))?.games.length || 0;
+    b.textContent = open ? "Hide" : `Show ${plural(n, "result")}`;
+    if (open) fx("show", $$("#lastNight .ln-card"), { y: 8, step: 0.04 });
+  });
 
   // ---------- schedule (the TV listings) ----------
   // One day at a time, in tip-off order, each game on one row with its channels and price. Replaces the
@@ -1311,7 +1405,7 @@
     else if (state.view === "teams") renderTeams();
     else renderPlatforms();
     if ($("#modal").hidden) document.title = VIEW_TITLES[state.view];
-    if (!state.loading && state.view === "home") requestAnimationFrame(() => { watchSchedule(); flushBeam(); ensureFavSchedules(); });
+    if (!state.loading && state.view === "home") requestAnimationFrame(() => { watchSchedule(); flushBeam(); ensureFavSchedules(); loadLastNight(); });
     queuePill();
     if (revealNext && !state.loading) {
       revealNext = false;
