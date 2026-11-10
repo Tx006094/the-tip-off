@@ -1192,9 +1192,9 @@ main:focus { outline: none; }
 .mt-find { margin: 12px var(--edge) 0; max-width: 520px; }
 .mt-dek + .mt-find { margin: 0 var(--edge) 12px; }
 
-/* Phone-only / desktop-only pieces */
+/* Decluttered layout (phones and desktop): one Filters button, More to watch fold, one Coming up row */
 .phone-only, .filter-toggle, .more-watch-btn { display: none; }
-@media (max-width: 760px) {
+@media all {
   .desk-only { display: none; }
   .phone-only { display: block; }
   /* Filters: league chips plus one button; price and region open below it */
@@ -1258,3 +1258,7 @@ main:focus { outline: none; }
 @media (min-width: 761px) {
   .hero { align-items: center; min-height: clamp(300px, 28vw, 400px); }
 }
+
+/* Desktop intro trimmed to match phones: headline, tagline and the two key numbers */
+.intro .kicker, .intro .dek { display: none; }
+.stats > div:nth-child(n + 3) { display: none; }
