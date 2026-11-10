@@ -2345,7 +2345,9 @@
     }
     if (t.dataset.scroll) {
       const shelf = t.parentElement.querySelector(".shelf");
-      shelf.scrollBy({ left: Number(t.dataset.scroll) * shelf.clientWidth * 0.85, behavior: "smooth" });
+      // A full set of cards per click (the row shows exactly 4 on desktop); phones keep the partial step.
+      const page = innerWidth > 760 ? shelf.clientWidth + 14 : shelf.clientWidth * 0.85;
+      shelf.scrollBy({ left: Number(t.dataset.scroll) * page, behavior: "smooth" });
     }
   });
 

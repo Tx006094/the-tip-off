@@ -1302,3 +1302,14 @@ main:focus { outline: none; }
   .nw-more { width: calc(100% - 2 * var(--edge)); }
 }
 .nw-logo img { width: 36% !important; height: auto !important; object-fit: contain; }
+
+/* Desktop rows: exactly 4 cards (3 on medium screens), nothing peeking past the edge; the arrows page through */
+@media (min-width: 761px) {
+  .shelf:not(.teams-shelf) {
+    grid-auto-columns: calc((100% - 3 * 14px) / 4);
+    padding-left: 0; padding-right: 0; margin: 0 var(--edge); scroll-padding: 0;
+  }
+}
+@media (min-width: 761px) and (max-width: 1099px) {
+  .shelf:not(.teams-shelf) { grid-auto-columns: calc((100% - 2 * 14px) / 3); }
+}
