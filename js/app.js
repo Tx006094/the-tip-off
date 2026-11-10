@@ -353,10 +353,18 @@
   // ---------- rendering: pieces ----------
   // ESPN publishes dark-background versions of team logos; use them so navy/black logos stay visible.
   const darkLogo = (url) => url.replace(/(\/i\/teamlogos\/[a-z]+\/)500\//, "$1500-dark/");
-  function logoHTML(t) {
+  // ESPN logos are 500×500 files; ask ESPN's resizer for a copy at the size we show (×2 for sharp phone screens).
+  // A quick-pick logo drops from about 95 KB to about 9 KB.
+  function sizedLogo(url, px) {
+    const m = /^https:\/\/a\.espncdn\.com(\/i\/teamlogos\/[^?]+\.png)$/.exec(url || "");
+    return m && px ? `https://a.espncdn.com/combiner/i?img=${m[1]}&w=${px}&h=${px}` : url;
+  }
+  /** size = how big the logo is shown, in CSS pixels; eager = load right away (above the fold). */
+  function logoHTML(t, { size = 90, eager = false } = {}) {
     if (t?.logo) {
-      const dark = darkLogo(t.logo);
-      return `<img src="${esc(dark)}" alt="" loading="lazy" decoding="async" data-initials="${esc(initials(t.name))}"${dark !== t.logo ? ` data-fallback="${esc(t.logo)}"` : ""}>`;
+      const dark = darkLogo(t.logo), px = size * 2;
+      const src = sizedLogo(dark, px), fb = dark !== t.logo ? sizedLogo(t.logo, px) : "";
+      return `<img src="${esc(src)}" alt="" ${eager ? 'fetchpriority="high"' : 'loading="lazy"'} decoding="async" data-initials="${esc(initials(t.name))}"${fb ? ` data-fallback="${esc(fb)}"` : ""}>`;
     }
     return `<div class="mono" aria-hidden="true">${esc(initials(t?.name))}</div>`;
   }
@@ -585,7 +593,7 @@
     const cal = (scheduleCache.get(key) || []).filter((x) => x.state !== "post" && canCalendar(x)).length;
     const calBtn = LEAGUES[team.league]?.espn ? `<button type="button" class="mt-cal" data-ics-team="${esc(key)}" aria-label="${esc(`Add ${team.name}'s season to my calendar`)}">${ICON.cal}<span>${cal ? `Add ${cal} games to calendar` : "Add season to calendar"}</span></button>` : "";
     return `<div class="mt-item"><button type="button" class="mt-card" data-team-key="${esc(key)}" ${attr} style="--tc:${hex(team.color)}">
-        ${logoHTML(team)}<span class="mt-info">${isNew ? `<em class="mt-new-label">${esc(isNew)}</em>` : ""}<b>${esc(team.short || team.name)}</b>${line}</span>${newTag}
+        ${logoHTML(team, { size: 48, eager: true })}<span class="mt-info">${isNew ? `<em class="mt-new-label">${esc(isNew)}</em>` : ""}<b>${esc(team.short || team.name)}</b>${line}</span>${newTag}
       </button>${calBtn}</div>`;
   }
   // "Find your team": search every team and follow it right here, without leaving the page.
@@ -612,7 +620,7 @@
       .slice(0, 6).map((x) => x.tm) : [];
     box.innerHTML = list.length
       ? list.map((tm, i) => `<li role="option" id="mts-${i}" class="sug" data-follow="${esc(tm.key)}" aria-selected="${i === 0}">
-          ${logoHTML(tm)}<span class="sug-name">${esc(tm.name)}<small>${esc(LEAGUES[tm.league].short)}</small></span>
+          ${logoHTML(tm, { size: 32, eager: true })}<span class="sug-name">${esc(tm.name)}<small>${esc(LEAGUES[tm.league].short)}</small></span>
           <span class="sug-n">Follow</span></li>`).join("")
       : q ? `<li class="sug-empty" role="presentation">No team matches “${esc(q)}”</li>` : "";
     box.hidden = !q;
@@ -636,7 +644,7 @@
     const head = secHead("My Teams", favs.length ? plural(favs.length, "team") : "", { color: "var(--paid)" });
     const pickHTML = (k) => {
       const tm = teamByKey.get(k);
-      return `<button type="button" class="mt-pick" data-follow="${esc(k)}" aria-label="Follow ${esc(tm.name)}">${logoHTML(tm)}<span>${esc(tm.short || tm.name)}</span></button>`;
+      return `<button type="button" class="mt-pick" data-follow="${esc(k)}" aria-label="Follow ${esc(tm.name)}">${logoHTML(tm, { size: 32, eager: true })}<span>${esc(tm.short || tm.name)}</span></button>`;
     };
     if (favs.length) {
       // Once a team is followed the quick picks go away; "Add more teams" leads to the full list.
@@ -1210,7 +1218,7 @@
     // Each team: logo, and while the game is live its score right underneath (leader bright, trailer dimmer).
     const live = g.state === "in" && g.away && g.away.score != null && g.home.score != null && g.away.score !== "" && g.home.score !== "";
     const lead = live ? Math.sign(Number(g.away.score) - Number(g.home.score)) : 0;
-    const side = (tm, trailing) => `<div class="hero-team">${logoHTML(tm)}${live ? `<span class="hero-score${trailing ? " trail" : ""}" aria-label="${esc(tm.short || tm.name)} ${esc(tm.score)}">${esc(tm.score)}</span>` : ""}</div>`;
+    const side = (tm, trailing) => `<div class="hero-team">${logoHTML(tm, { size: 170, eager: true })}${live ? `<span class="hero-score${trailing ? " trail" : ""}" aria-label="${esc(tm.short || tm.name)} ${esc(tm.score)}">${esc(tm.score)}</span>` : ""}</div>`;
     const logos = g.away ? `${side(g.away, lead < 0)}<span class="vs">${g.neutral ? "VS" : "@"}</span>${side(g.home, lead > 0)}` : "";
     const yours = includedForMe(g) ? g.platforms.filter((p) => myCoverage().has(p.id)) : [];
     const verdict = pi.kind === "free" ? `Free on ${pi.free.map((p) => p.name).join(", ")}`
