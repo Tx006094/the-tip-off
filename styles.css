@@ -200,8 +200,8 @@ main:focus { outline: none; }
   text-transform: uppercase; letter-spacing: -0.015em;
 }
 .intro h1 .h1-sub {
-  display: block; margin-top: 12px;
-  font: 600 clamp(15px, 1.35vw, 18px)/1.3 var(--font-body); font-stretch: normal;
+  display: block; margin-top: 14px;
+  font: 650 clamp(17px, 1.75vw, 25px)/1.3 var(--font-body); font-stretch: normal;
   text-transform: none; letter-spacing: 0; color: var(--text);
 }
 .stats {
