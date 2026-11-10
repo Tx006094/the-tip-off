@@ -480,30 +480,127 @@
     const wnba = state.region === "ca" ? ["wnba:131935", ...WNBA_PICKS.filter((k) => k !== "wnba:131935")] : WNBA_PICKS;
     return [...college, ...wnba].filter((k) => teamByKey.has(k) && !state.favs.has(k));
   }
+  // Games for one followed team: this week's scoreboard plus, once loaded, the team's full season.
+  function teamGames(key) {
+    const isTeam = (g) => g.away && !g.tba && [g.away, g.home].some((tm) => tm.id && `${g.league}:${tm.id}` === key);
+    const byId = new Map();
+    for (const g of scheduleCache.get(key) || []) if (isTeam(g)) byId.set(g.id, g);
+    for (const g of state.games) if (isTeam(g)) byId.set(g.id, g); // scoreboard copies are fresher (live scores)
+    return [...byId.values()];
+  }
   function nextGameFor(key) {
-    const keys = new Set([key]);
-    const games = state.games.filter((g) => g.away && !g.tba && g.state !== "post" && [g.away, g.home].some((tm) => tm.id && keys.has(`${g.league}:${tm.id}`)));
+    const games = teamGames(key).filter((g) => g.state !== "post");
     return games.sort((x, y) => (x.state === "in" ? -1 : 0) - (y.state === "in" ? -1 : 0) || x.date - y.date)[0] || null;
   }
+  function lastResultFor(key) {
+    return teamGames(key).filter((g) => g.state === "post" && g.date <= Date.now()).sort((x, y) => y.date - x.date)[0] || null;
+  }
+
+  // Load the full season for each followed team (one request per team, once per visit) so the cards can
+  // show last results and games beyond this week's scoreboard.
+  const favSchedLoading = new Set();
+  let favSchedDone = false;
+  function ensureFavSchedules() {
+    const keys = [...state.favs].filter((k) => teamByKey.has(k) && LEAGUES[teamByKey.get(k).league]?.espn && !scheduleCache.has(k) && !favSchedLoading.has(k));
+    if (!keys.length) { if (!favSchedLoading.size && !favSchedDone) { favSchedDone = true; markNewSinceVisit(); } return; }
+    for (const k of keys) {
+      favSchedLoading.add(k);
+      const tm = teamByKey.get(k);
+      getJSON(`${ESPN}/${LEAGUES[tm.league].espn}/teams/${tm.espnId}/schedule`)
+        .then((j) => scheduleCache.set(k, (j.events || []).map((e) => parseEspnEvent(e, tm.league)).filter(Boolean)))
+        .catch(() => scheduleCache.set(k, []))
+        .finally(() => {
+          favSchedLoading.delete(k);
+          if (!favSchedLoading.size) { favSchedDone = true; markNewSinceVisit(); if (state.view === "home") refreshMyTeams(); }
+        });
+    }
+  }
+  function refreshMyTeams() {
+    const box = $(".myteams");
+    if (!box) return;
+    const fresh = document.createElement("div");
+    fresh.innerHTML = myTeamsHTML();
+    const next = fresh.firstElementChild;
+    if (next) box.replaceWith(next);
+  }
+
+  // "New since your last visit": remember what each followed team's cards showed last time (on this device only).
+  // When a result, a new game or a newly announced channel appears, that card gets a small amber dot for this visit.
+  const newSinceVisit = new Map();
+  function teamSignature(key) {
+    const last = lastResultFor(key), next = nextGameFor(key);
+    return { last: last?.id || "", next: next?.id || "", ch: next ? next.platforms.map((x) => x.id).sort().join(",") : "" };
+  }
+  function markNewSinceVisit() {
+    let seen = {};
+    try { seen = JSON.parse(localStorage.getItem("fc-seen") || "{}") || {}; } catch { /* private mode */ }
+    const now = {};
+    for (const k of state.favs) {
+      if (!teamByKey.has(k)) continue;
+      const sig = teamSignature(k), old = seen[k];
+      now[k] = sig;
+      if (!old) continue; // first time we've seen this team: nothing to compare yet
+      if (sig.last && sig.last !== old.last) newSinceVisit.set(k, "New result");
+      else if (sig.next && sig.next !== old.next) newSinceVisit.set(k, "New game");
+      else if (sig.ch && sig.ch !== old.ch && sig.next === old.next) newSinceVisit.set(k, "Channel added");
+    }
+    try { localStorage.setItem("fc-seen", JSON.stringify(now)); } catch { /* private mode */ }
+  }
+
+  // Countdown text for games starting within a day: "Tips in 2h 14m".
+  function tipsIn(ms) {
+    const m = Math.max(0, Math.round(ms / 60000));
+    if (m < 1) return "Tipping off now";
+    if (m < 60) return `Tips in ${m}m`;
+    return `Tips in ${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
+  }
+  setInterval(() => {
+    for (const el of $$("[data-tip]")) el.textContent = tipsIn(Number(el.dataset.tip) - Date.now());
+  }, 30000);
+
   function myTeamCardHTML(key) {
     const team = teamByKey.get(key);
     if (!team) return "";
-    const g = nextGameFor(key);
+    const g = nextGameFor(key), last = lastResultFor(key);
+    const sideOf = (x) => (`${x.league}:${x.home.id}` === key ? "home" : "away");
+    const oppOf = (x) => (sideOf(x) === "home" ? x.away : x.home);
+    const vsOf = (x) => `${sideOf(x) === "home" || x.neutral ? "vs." : "at"} ${oppOf(x).short || oppOf(x).name}`;
+    const soon = g && g.state === "pre" && g.date - Date.now() < 3 * 3600000;
+    const recentFinal = last && (Date.now() - last.date < 20 * 3600000 || newSinceVisit.get(key) === "New result") && !(g && (g.state === "in" || soon));
     let line, attr;
-    if (g) {
-      const home = `${g.league}:${g.home.id}` === key;
-      const opp = home ? g.away : g.home;
-      const when = g.state === "in" ? "Live now" : `${dayLabel(g.date)} · ${clock(g)}`;
-      const ch = g.platforms.length ? g.platforms.slice(0, 2).map((p) => p.name).join(", ") : "Channel TBA";
-      line = `<span class="mt-when${g.state === "in" ? " is-live" : ""}">${esc(when)}</span><span class="mt-vs">${home || g.neutral ? "vs." : "at"} ${esc(opp.short || opp.name)}</span><span class="mt-ch">${esc(ch)}</span>`;
-      attr = `data-game="${esc(g.id)}" aria-label="${esc(`${team.name}: ${when}, ${home ? "vs." : "at"} ${opp.name}, on ${ch}`)}"`;
+    if (recentFinal) {
+      // Just played: show the result, with the next game underneath.
+      const me = last[sideOf(last)], opp = oppOf(last);
+      const won = me.winner || (!opp.winner && Number(me.score) > Number(opp.score));
+      const score = me.score !== "" && opp.score !== "" ? ` ${me.score}–${opp.score}` : "";
+      const res = `Final: ${won ? "Won" : "Lost"}${score}`;
+      const nextDay = g && g.date - Date.now() < 6 * 86400000 ? g.date.toLocaleDateString([], { weekday: "short" }) : g && dayLabel(g.date);
+      const nextTxt = g ? `Next: ${nextDay} · ${clock(g)}` : "See the full schedule";
+      line = `<span class="mt-when mt-final ${won ? "won" : "lost"}">${esc(res)}</span><span class="mt-vs">${esc(vsOf(last))}</span><span class="mt-ch">${esc(nextTxt)}</span>`;
+      attr = `data-game="${esc(last.id)}" aria-label="${esc(`${team.name}: ${res}, ${vsOf(last)}. ${nextTxt}`)}"`;
+      gameById.set(last.id, last);
+    } else if (g) {
+      const live = g.state === "in";
+      const me = g[sideOf(g)], opp = oppOf(g);
+      const within = !live && g.date - Date.now() < 24 * 3600000;
+      const when = live ? `Live now${me.score !== "" ? ` · ${me.score}–${opp.score}` : ""}` : within ? tipsIn(g.date - Date.now()) : `${dayLabel(g.date)} · ${clock(g)}`;
+      const ch = g.platforms.length ? g.platforms.slice(0, 2).map((x) => x.name).join(", ") : "Channel TBA";
+      const tip = within ? ` data-tip="${g.date.getTime ? g.date.getTime() : +g.date}"` : "";
+      const chLine = within ? `${clock(g)} · ${ch}` : ch;
+      line = `<span class="mt-when${live ? " is-live" : ""}"${tip}>${esc(when)}</span><span class="mt-vs">${esc(vsOf(g))}</span><span class="mt-ch">${esc(chLine)}</span>`;
+      attr = `data-game="${esc(g.id)}" aria-label="${esc(`${team.name}: ${when}, ${vsOf(g)}, on ${ch}`)}"`;
+      gameById.set(g.id, g);
     } else {
-      line = `<span class="mt-when">No games in the next ${DAYS_AHEAD} days</span><span class="mt-ch">See the full schedule</span>`;
+      line = `<span class="mt-when">No upcoming games</span><span class="mt-ch">See the full schedule</span>`;
       attr = `data-team="${esc(key)}" aria-label="${esc(`${team.name}: full schedule`)}"`;
     }
-    return `<button type="button" class="mt-card" data-team-key="${esc(key)}" ${attr} style="--tc:${hex(team.color)}">
-        ${logoHTML(team)}<span class="mt-info"><b>${esc(team.short || team.name)}</b>${line}</span>
-      </button>`;
+    const isNew = newSinceVisit.get(key);
+    const newTag = isNew ? `<span class="mt-new" title="${esc(isNew)} since your last visit"><span class="sr-only">${esc(isNew)} since your last visit</span></span>` : "";
+    const cal = (scheduleCache.get(key) || []).filter((x) => x.state !== "post" && canCalendar(x)).length;
+    const calBtn = LEAGUES[team.league]?.espn ? `<button type="button" class="mt-cal" data-ics-team="${esc(key)}" aria-label="${esc(`Add ${team.name}'s season to my calendar`)}">${ICON.cal}<span>${cal ? `Add ${cal} games to calendar` : "Add season to calendar"}</span></button>` : "";
+    return `<div class="mt-item"><button type="button" class="mt-card" data-team-key="${esc(key)}" ${attr} style="--tc:${hex(team.color)}">
+        ${logoHTML(team)}<span class="mt-info">${isNew ? `<em class="mt-new-label">${esc(isNew)}</em>` : ""}<b>${esc(team.short || team.name)}</b>${line}</span>${newTag}
+      </button>${calBtn}</div>`;
   }
   // "Find your team": search every team and follow it right here, without leaving the page.
   function mtFinderHTML() {
@@ -542,6 +639,11 @@
     else if (e.key === "Escape") { e.target.value = ""; renderMtSuggest(); }
   });
   document.addEventListener("click", (e) => { if (!e.target.closest?.(".mt-find")) { const b = $("#mtSuggest"); if (b) b.hidden = true; } });
+
+  document.addEventListener("click", (e) => {
+    const card = e.target.closest?.(".mt-card");
+    if (card && newSinceVisit.delete(card.dataset.teamKey)) { card.querySelector(".mt-new")?.remove(); card.querySelector(".mt-new-label")?.remove(); }
+  });
 
   function myTeamsHTML() {
     const favs = [...state.favs].filter((k) => teamByKey.has(k));
@@ -1223,7 +1325,7 @@
     else if (state.view === "teams") renderTeams();
     else renderPlatforms();
     if ($("#modal").hidden) document.title = VIEW_TITLES[state.view];
-    if (!state.loading && state.view === "home") requestAnimationFrame(() => { watchSchedule(); flushBeam(); });
+    if (!state.loading && state.view === "home") requestAnimationFrame(() => { watchSchedule(); flushBeam(); ensureFavSchedules(); });
     queuePill();
     if (revealNext && !state.loading) {
       revealNext = false;
@@ -2076,8 +2178,17 @@
     }
     if (t.dataset.icsTeam) {
       const team = teamByKey.get(t.dataset.icsTeam);
-      const games = (scheduleCache.get(t.dataset.icsTeam) || []).filter(canCalendar).sort((a, b) => a.date - b.date);
-      if (team && games.length) { downloadICS(games, `${team.name} · ${SITE}`, `${team.name} schedule`); toast(`${plural(games.length, "game")} saved to a calendar file`); }
+      const key = t.dataset.icsTeam;
+      const save = () => {
+        const games = (scheduleCache.get(key) || []).filter((g) => g.state !== "post" && canCalendar(g)).sort((a, b) => a.date - b.date);
+        if (team && games.length) { downloadICS(games, `${team.name} · ${SITE}`, `${team.name} schedule`); toast(`${plural(games.length, "game")} saved to a calendar file`); }
+        else toast("No upcoming games to add yet");
+      };
+      if (scheduleCache.has(key) || !team) return void save();
+      getJSON(`${ESPN}/${LEAGUES[team.league].espn}/teams/${team.espnId}/schedule`)
+        .then((j) => scheduleCache.set(key, (j.events || []).map((e) => parseEspnEvent(e, team.league)).filter(Boolean)))
+        .catch(() => scheduleCache.set(key, []))
+        .finally(save);
       return;
     }
     if (t.dataset.price === "mine" && !hasServices()) return void openServices();

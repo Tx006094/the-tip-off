@@ -1233,3 +1233,18 @@ main:focus { outline: none; }
   .eb-cta { padding: 5px 11px; }
   .eb-ca { display: none; }
 }
+
+/* My Teams cards: countdown/result, calendar shortcut, "new since your last visit" dot */
+.mt-item { flex: 0 0 auto; width: 260px; display: flex; flex-direction: column; gap: 6px; }
+.mt-item .mt-card { width: 100%; flex: 1 1 auto; }
+.mt-cal {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 34px; border-radius: 10px;
+  border: 1px solid var(--line); background: transparent; color: var(--muted); font-weight: 600; font-size: 13px;
+}
+.mt-cal:hover { color: var(--text); border-color: var(--line-strong); }
+.mt-cal svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+.mt-final.won { color: var(--free) !important; }
+.mt-final.lost { color: var(--muted) !important; }
+.mt-new { position: absolute; top: 10px; right: 10px; width: 9px; height: 9px; border-radius: 50%; background: var(--paid); box-shadow: 0 0 0 3px color-mix(in srgb, var(--paid) 25%, transparent); }
+.mt-new-label { font-style: normal; font-size: 11px; font-weight: 800; color: var(--paid); text-transform: uppercase; letter-spacing: .05em; line-height: 1.2; }
+@media (max-width: 760px) { .mt-item { width: 240px; } }
