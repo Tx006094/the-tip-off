@@ -909,7 +909,7 @@ main:focus { outline: none; }
 .watch .wnote { grid-column: 1 / -1; color: var(--muted); font-size: 13px; line-height: 1.5; }
 .watch .wlink { grid-column: 1 / -1; justify-self: start; font-size: 13px; color: var(--tv); font-weight: 650; display: inline-flex; gap: 4px; align-items: center; }
 .watch .wlink:hover { text-decoration: underline; text-underline-offset: 3px; }
-.m-foot { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
+.m-foot { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 22px; }
 /* Follow / unfollow the two teams, at the top of a game pop-up */
 .m-follow { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 16px; }
 .m-follow .btn { flex: 1 1 0; min-width: 0; height: 40px; padding: 0 12px; }
