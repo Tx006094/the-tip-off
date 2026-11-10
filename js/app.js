@@ -848,7 +848,7 @@
     html += shelfHTML("Live Now", real.filter((g) => g.state === "in"), "", { color: "var(--live)", live: true });
     html += myTeamsHTML();
     schedGames = real.filter((g) => dayKey(g.date) >= today);
-    html += lastNightHTML();
+    if (lastNight) { const have = new Set(schedGames.map((g) => g.id)); schedGames = schedGames.concat(lastNight.filter((g) => !have.has(g.id) && passesFilters(g))); }
     html += scheduleHTML();
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });
@@ -879,11 +879,10 @@
     el.innerHTML = html;
   }
 
-  // ---------- "Last night": yesterday's finals, your teams first ----------
+  // ---------- Last night's finals: the Schedule's "Yesterday" tab and the ticker ----------
   // Loaded after the page appears (two small requests), so it never slows the first screen.
   let lastNight = null;            // null = not loaded yet; [] = loaded, no finals
   let lastNightLoading = false;
-  let lastNightOpen = null;        // null = automatic (open until today's first game starts)
   function loadLastNight() {
     if (lastNight || lastNightLoading) return;
     lastNightLoading = true;
@@ -896,13 +895,12 @@
     Promise.all(jobs).then((lists) => {
       lastNight = lists.flat().filter((g) => g.state === "post" && g.away);
       lastNightLoading = false;
-      const box = $("#lastNight");
-      if (state.view === "home" && box) {
-        const fresh = document.createElement("div");
-        fresh.innerHTML = lastNightHTML();
-        box.replaceWith(fresh.firstElementChild || document.createComment("last night"));
-        fx("show", $$("#lastNight .ln-card"), { y: 8, step: 0.04 });
+      if (state.view === "home" && !state.q) {
+        const have = new Set(schedGames.map((g) => g.id));
+        schedGames = schedGames.concat(lastNight.filter((g) => !have.has(g.id) && passesFilters(g)));
+        refreshSchedule();
       }
+      renderTicker();
     });
   }
   // What makes a result worth a spot: your team, an upset, a close finish, or a ranked team.
@@ -922,56 +920,6 @@
     if (ranked) return { k: "rk", label: "Top 25", score: 1 };
     return null;
   }
-  function lastNightCardHTML(g, tag) {
-    gameById.set(g.id, g);
-    const sa = Number(g.away.score), sh = Number(g.home.score);
-    const line = (tm, win) => `<span class="ln-line${win ? "" : " lost"}"><span class="ln-team">${logoHTML(tm)}${tm.rank ? `<i>${tm.rank}</i>` : ""}${esc(tm.short || tm.name)}</span><b>${esc(tm.score)}</b></span>`;
-    const ev = showcaseName(g);
-    return `<button type="button" class="ln-card${tag.k === "you" ? " mine" : ""}" data-game="${esc(g.id)}" aria-label="${esc(`${tag.label}: ${g.away.name} ${g.away.score}, ${g.home.name} ${g.home.score}, ${g.statusText || "Final"}`)}">
-        <span class="ln-tag ln-${tag.k}">${esc(tag.label)}</span>
-        ${line(g.away, sa > sh)}${line(g.home, sh > sa)}
-        <span class="ln-foot">${esc(g.statusText || "Final")}${ev ? ` · ${esc(ev)}` : ""}</span>
-      </button>`;
-  }
-  function lastNightHTML() {
-    if (!lastNight) return `<div id="lastNight" hidden></div>`;
-    const all = lastNight.filter((g) => state.league === "all" || g.league === state.league);
-    if (!all.length) return `<div id="lastNight" hidden></div>`;
-    const picks = all.map((g) => ({ g, tag: lastNightTag(g) })).filter((x) => x.tag)
-      .sort((x, y) => y.tag.score - x.tag.score || (x.g.home.rank || x.g.away.rank || 99) - (y.g.home.rank || y.g.away.rank || 99))
-      .slice(0, 8);
-    const key = rowKey("Last night");
-    rowLists.set(key, { title: "Last night", sub: "Final scores", games: all });
-    const d = new Date(); d.setDate(d.getDate() - 1);
-    const dayTxt = d.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
-    // Open until today's first game tips off, then fold away so it never competes with live games.
-    const started = state.games.some((g) => dayKey(g.date) === dayKey(new Date()) && g.state !== "pre");
-    const open = lastNightOpen ?? !started;
-    const cards = picks.length ? `<div class="ln-row">${picks.map(({ g, tag }) => lastNightCardHTML(g, tag)).join("")}</div>` : "";
-    return `<section class="last-night${open ? " open" : ""}" id="lastNight" aria-labelledby="lnTitle">
-      <div class="ln-head">
-        <h2 id="lnTitle">Last night</h2>
-        <span class="ln-sub">${esc(dayTxt)} · ${plural(all.length, "final")}${picks.some((x) => x.tag.k === "you") ? " · Your teams first" : ""}</span>
-        <button type="button" class="ln-toggle" data-ln-toggle aria-expanded="${open}">${open ? "Hide" : `Show ${plural(all.length, "result")}`}</button>
-      </div>
-      <div class="ln-body">
-        ${cards}
-        <button type="button" class="ln-all" data-open-row="${esc(key)}">See all ${plural(all.length, "result")} <span aria-hidden="true">→</span></button>
-      </div>
-    </section>`;
-  }
-  document.addEventListener("click", (e) => {
-    const b = e.target.closest?.("[data-ln-toggle]");
-    if (!b) return;
-    const box = $("#lastNight"), open = !box.classList.contains("open");
-    lastNightOpen = open;
-    box.classList.toggle("open", open);
-    b.setAttribute("aria-expanded", String(open));
-    const n = rowLists.get(rowKey("Last night"))?.games.length || 0;
-    b.textContent = open ? "Hide" : `Show ${plural(n, "result")}`;
-    if (open) fx("show", $$("#lastNight .ln-card"), { y: 8, step: 0.04 });
-  });
-
   // ---------- schedule (the TV listings) ----------
   // One day at a time, in tip-off order, each game on one row with its channels and price. Replaces the
   // stack of one-row-per-day shelves, so the whole week is a tab away instead of ten rows down.
@@ -1072,7 +1020,7 @@
     const picked = new Set(schedTeams);
     const lead = new Set([...schedTeams, ...state.favs]); // whose games go first on each day
     if (schedDay === TEAM_TAB && !picked.size) schedDay = null;
-    if (schedDay !== TEAM_TAB && !byDay.has(schedDay)) { schedDay = days[0]; schedAll = false; }
+    if (schedDay !== TEAM_TAB && !byDay.has(schedDay)) { schedDay = days.find((d) => d >= dayKey(new Date())) ?? days[0]; schedAll = false; }
     if (!days.length && schedDay !== TEAM_TAB) {
       return `<div class="notice sched-empty">No ${esc(confLabel(schedConf))} games in the next ${DAYS_AHEAD} days${state.price !== "all" ? " with these filters" : ""}. <button type="button" class="inline-link" data-sched-conf-clear>Show all conferences</button></div>`;
     }
@@ -1085,7 +1033,7 @@
     tabs += days.map((k) => {
       const d = new Date(k);
       const label = dayLabel(d);
-      const name = label === "Today" || label === "Tomorrow" ? label : d.toLocaleDateString(undefined, { weekday: "short" });
+      const name = label === "Today" || label === "Tomorrow" || label === "Yesterday" ? label : d.toLocaleDateString(undefined, { weekday: "short" });
       const date = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
       const dot = byDay.get(k).some((g) => playsIn(g, lead));
       const favsHere = [...state.favs].filter((f) => byDay.get(k).some((g) => playsIn(g, new Set([f])))).join(" ");
@@ -1121,7 +1069,7 @@
         ? `<p class="sched-group">${esc(whose)}</p>${mine.map(schedRowHTML).join("")}<p class="sched-group">All games</p>${shown.map(schedRowHTML).join("")}`
         : shown.map(schedRowHTML).join("");
       const more = rest.length > shown.length
-        ? `<button type="button" class="btn btn-ghost sched-more" data-sched-all>Show all ${all.length} games ${(() => { const d = dayLabel(new Date(schedDay), "long"); return d === "Today" || d === "Tomorrow" ? d.toLowerCase() : `on ${esc(d)}`; })()}</button>` : "";
+        ? `<button type="button" class="btn btn-ghost sched-more" data-sched-all>Show all ${all.length} games ${(() => { const d = dayLabel(new Date(schedDay), "long"); return d === "Today" || d === "Tomorrow" || d === "Yesterday" ? d.toLowerCase() : `on ${esc(d)}`; })()}</button>` : "";
       body = `<div class="sched-list">${list}</div>${more}`;
     }
     return `${chips}<div class="sched-days" role="group" aria-label="Choose a day">${tabs}</div>${body}`;
@@ -2049,7 +1997,12 @@
     const live = games.filter((g) => g.state === "in");
     const finals = games.filter((g) => g.state === "post" && dayKey(g.date) === today).sort((a, b) => b.date - a.date);
     const soon = games.filter((g) => g.state === "pre" && g.date - now < 30 * 3600000).sort((a, b) => a.date - b.date);
-    return [...live, ...finals.slice(0, 20), ...soon.slice(0, 30)];
+    // Last night's finals worth a look: your teams, upsets, thrillers, Top 25.
+    const ids = new Set(games.map((g) => g.id));
+    const yest = (lastNight || []).filter((g) => !ids.has(g.id) && (state.league === "all" || g.league === state.league))
+      .map((g) => ({ g, tag: lastNightTag(g) })).filter((x) => x.tag)
+      .sort((x, y) => y.tag.score - x.tag.score).slice(0, 15).map((x) => x.g);
+    return [...live, ...finals.slice(0, 20), ...yest, ...soon.slice(0, 30)];
   }
   const tickerTeam = (t, bold) => `${t.rank ? `<span class="rk">${t.rank}</span> ` : ""}<span class="${bold ? "w" : ""}">${esc(t.abbr || t.short)}</span>`;
 
@@ -2064,7 +2017,10 @@
         ${tickerTeam(g.away)} ${g.neutral ? "vs" : "@"} ${tickerTeam(g.home)}
         ${ch ? `<span class="t-ch ${ch.access}">${esc(ch.name)}</span>` : ""}</button>`;
     }
-    const status = g.state === "in" ? `<span class="t-live">${esc(g.statusText || "Live")}</span>` : `<span class="t-final">Final</span>`;
+    const yesterday = g.state === "post" && dayKey(g.date) < dayKey(new Date());
+    const tag = yesterday ? lastNightTag(g) : null;
+    const status = g.state === "in" ? `<span class="t-live">${esc(g.statusText || "Live")}</span>`
+      : yesterday ? `<span class="t-final">Last night${tag && tag.k !== "rk" ? ` · ${esc(tag.label)}` : ""}</span>` : `<span class="t-final">Final</span>`;
     const fin = g.state === "post";
     return `<button type="button" class="t-item" data-game="${esc(g.id)}"${tab} aria-label="${esc(matchupLabel(g))}: ${esc(g.away.score)} to ${esc(g.home.score)}">${lgTag}${status}
       ${tickerTeam(g.away, fin && g.away.winner)} <b>${esc(g.away.score)}</b>
