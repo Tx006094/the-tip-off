@@ -1269,8 +1269,11 @@ main:focus { outline: none; }
    so tall and wide logos look the same size and the event label sits evenly between them */
 .card-art { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; justify-items: center; gap: 0; }
 .card-art img, .card-art .mono { width: min(58%, 84px); aspect-ratio: 1; height: auto; object-fit: contain; grid-row: 1; }
-.card-art img:first-of-type, .card-art .mono:first-of-type { grid-column: 1; }
+/* Away logo (before the "@"/"vs") goes left, home logo (after it) goes right. Works for real logos and
+   for the initials circle shown when a team (often a non-Division I opponent) has no logo. */
+.card-art > :is(img, .mono) { grid-column: 1; }
 .card-art .at { grid-column: 2; grid-row: 1; }
-.card-art > :is(img, .mono):last-of-type { grid-column: 3; }
+.card-art > .at ~ :is(img, .mono) { grid-column: 3; }
+.card-art .mono { display: grid; place-items: center; border-radius: 50%; font-size: 18px; }
 .card-art:has(.card-event) > :is(img, .mono, .at) { margin-bottom: 26px; }
 .card-art .art-title { grid-column: 1 / -1; }
