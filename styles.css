@@ -245,8 +245,10 @@ main:focus { outline: none; }
   color: var(--event); background: rgba(232, 213, 163, .1); border: 1px solid rgba(232, 213, 163, .45);
 }
 .event-tag svg { width: 13px; height: 13px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+/* Event name on a game card: centred across both teams; long names wrap to a second line instead of running off one side */
 .card-event {
-  position: absolute; left: 10px; bottom: 9px; z-index: 2; max-width: calc(100% - 20px);
+  position: absolute; left: 10px; right: 10px; bottom: 9px; margin-inline: auto; width: fit-content; z-index: 2; max-width: calc(100% - 20px);
+  justify-content: center; text-align: center; white-space: normal; line-height: 1.2;
   background: rgba(10, 10, 12, .8);
 }
 .hero-event { align-self: flex-start; margin: -2px 0 8px; font-size: 12px; padding: 5px 10px 5px 8px; background: rgba(10, 10, 12, .55); }
