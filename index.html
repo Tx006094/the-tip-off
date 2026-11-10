@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261109j" />
+  <link rel="stylesheet" href="styles.css?v=20261109k" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -90,9 +90,12 @@
 
   <!-- Event banner: hides itself once the event is over -->
   <a class="event-banner" id="eventBanner" href="/draft-lottery" data-ends="2026-11-16T01:30:00Z">
-    <span class="eb-tag">WNBA Draft Lottery</span>
-    <span class="eb-when"><b id="ebTime">Sun, Nov 15 · 7:30 PM ET</b> on <b>ESPN</b><span class="eb-ca"> (TSN in Canada)</span></span>
-    <span class="eb-cta">See the odds <span aria-hidden="true">→</span></span>
+    <span class="eb-ball" aria-hidden="true">#1</span>
+    <span class="eb-text"><b>WNBA Draft Lottery</b><span><span id="ebTime">Sun, Nov 15 · 7:30 PM ET</span> · ESPN<span class="eb-ca"> · TSN in Canada</span></span></span>
+    <span class="eb-odds" aria-label="Best odds at the No. 1 pick: Houston 32.9%, Toronto 32.9%, Washington 16.1%">
+      <span class="eb-o">HOU<i>32.9%</i></span><span class="eb-o">TOR<i>32.9%</i></span><span class="eb-o">WSH<i>16.1%</i></span>
+    </span>
+    <span class="eb-cta"><span class="eb-long">All odds</span><span class="eb-short">Odds</span> <span aria-hidden="true">→</span></span>
   </a>
   <script>
     (function () {
@@ -321,12 +324,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261109j"></script>
-  <script src="js/services.js?v=20261109j"></script>
-  <script src="js/leagues.js?v=20261109j"></script>
-  <script src="js/teams-data.js?v=20261109j"></script>
-  <script src="js/news-data.js?v=20261109j"></script>
-  <script src="js/motion-fx.js?v=20261109j"></script>
-  <script src="js/app.js?v=20261109j"></script>
+  <script src="js/platforms.js?v=20261109k"></script>
+  <script src="js/services.js?v=20261109k"></script>
+  <script src="js/leagues.js?v=20261109k"></script>
+  <script src="js/teams-data.js?v=20261109k"></script>
+  <script src="js/news-data.js?v=20261109k"></script>
+  <script src="js/motion-fx.js?v=20261109k"></script>
+  <script src="js/app.js?v=20261109k"></script>
 </body>
 </html>
