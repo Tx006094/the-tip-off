@@ -941,6 +941,7 @@
     const days = Math.round(h / 24);
     return days === 1 ? "Yesterday" : `${days} days ago`;
   }
+  const NEWS_LOGOS = { unrivaled: "assets/brand/unrivaled-logo.svg" };
   function newsSectionHTML() {
     // Same order as the ticker: leagues take turns, newest first within each league.
     const list = (state.news || []).filter((n) => state.league === "all" || n.league === state.league).slice(0, 12);
@@ -948,7 +949,11 @@
     const src = (n) => { try { const h = new URL(n.url).hostname.replace(/^www\./, ""); return /espn/.test(h) ? "ESPN" : /unrivaled/.test(h) ? "Unrivaled" : h; } catch { return ""; } };
     const items = list.map((n) => {
       const lg = LEAGUES[n.league];
-      const thumb = n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy" decoding="async">` : `<span class="nw-ph" style="--c:${lg.color}">${esc(lg.short)}</span>`;
+      // No photo: the league's own logo where we have it (Unrivaled), otherwise a tile in the league colour.
+      const leagueLogo = NEWS_LOGOS[n.league];
+      const thumb = n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy" decoding="async">`
+        : leagueLogo ? `<span class="nw-ph nw-logo" style="--c:${lg.color}"><img src="${leagueLogo}" alt=""></span>`
+        : `<span class="nw-ph" style="--c:${lg.color}">${esc(lg.short)}</span>`;
       return `<a class="nw-item" href="${esc(n.url)}" target="_blank" rel="noopener">
           <span class="nw-thumb">${thumb}</span>
           <span class="nw-text"><span class="nw-tag" style="--c:${lg.color}">${esc(lg.short)}</span><b>${esc(n.headline)}</b><small>${esc([src(n), ago(n.date)].filter(Boolean).join(" · "))}</small></span>

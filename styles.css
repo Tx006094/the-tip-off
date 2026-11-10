@@ -1301,3 +1301,4 @@ main:focus { outline: none; }
   .nw-text b { font-size: 14px; }
   .nw-more { width: calc(100% - 2 * var(--edge)); }
 }
+.nw-logo img { width: 36% !important; height: auto !important; object-fit: contain; }
