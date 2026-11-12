@@ -66,7 +66,7 @@
     .btn:hover { border-color: var(--text); }
     .btn.primary { background: #fff; color: #0b0b0d; border-color: #fff; }
     .btn[hidden] { display: none; }
-    .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
+    .btn svg { width: 18px; height: 18px; flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 2; }
     .copied { color: #34d399; font-weight: 600; font-size: 14px; }
     h2 { font: 800 26px/1.1 Archivo, sans-serif; font-stretch: 85%; text-transform: uppercase; margin: 0 0 14px; }
     .steps { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-bottom: 40px; padding: 0; list-style: none; counter-reset: s; }
@@ -84,7 +84,7 @@
     .ig span { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px; background: linear-gradient(45deg, #feda75, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5); }
     .ig svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2.2; }
     /* Download the how-to guide: cover thumbnail beside the button */
-    .guide-dl { display: flex; align-items: center; gap: 22px; background: var(--surface); border: 1px solid #f5a524; border-radius: 16px; padding: 20px 22px; margin-bottom: 32px; }
+    .guide-dl { display: flex; flex-direction: row-reverse; justify-content: space-between; align-items: center; gap: 22px; background: var(--surface); border: 1px solid #f5a524; border-radius: 16px; padding: 20px 22px; margin-bottom: 32px; }
     .guide-dl h2 { color: #f5a524; }
     .guide-cover { flex: none; width: 108px; border-radius: 8px; overflow: hidden; border: 1px solid #3a3a42; box-shadow: 0 8px 22px rgba(0,0,0,.45); transform: rotate(-2deg); transition: transform .2s; } /* taste-skill-ignore: paper-like cover */
     .guide-cover:hover { transform: rotate(0deg) scale(1.03); }
@@ -111,7 +111,14 @@
       .dek { font-size: 16px; }
       .btn { flex: 1 1 auto; justify-content: center; }
       .cta { width: 100%; min-width: 0; }
-      .guide-dl { flex-direction: column; align-items: flex-start; text-align: left; padding: 20px 22px; }
+      /* Phones: heading and text first (like For creators), then the cover, then the button */
+      .guide-dl { flex-direction: column; align-items: flex-start; text-align: left; padding: 20px 22px; gap: 0; }
+      .guide-text { display: contents; }
+      .guide-text h2 { order: 1; }
+      .guide-text p { order: 2; }
+      .guide-cover { order: 3; margin: 2px 0 16px; }
+      .guide-btn { order: 4; }
+      .guide-text small { order: 5; }
       .guide-cover { width: 120px; }
       .guide-btn { width: 100%; font-size: 15px; white-space: nowrap; padding: 0 12px; }
       .brand .pin { height: 40px; } .brand .word { height: 32px; }
