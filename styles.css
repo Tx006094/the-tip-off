@@ -1313,3 +1313,12 @@ main:focus { outline: none; }
 @media (min-width: 761px) and (max-width: 1099px) {
   .shelf:not(.teams-shelf) { grid-auto-columns: calc((100% - 2 * 14px) / 3); }
 }
+
+/* Footer: Instagram link (quiet outline pill with a small gradient icon) */
+.footer-base { display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
+.ig-link { display: inline-flex; align-items: center; gap: 8px; flex: none; padding: 6px 14px 6px 7px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--text); font-weight: 600; font-size: 14px; text-decoration: none; }
+.ig-link:hover { border-color: var(--text); }
+.ig-glyph { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px; background: linear-gradient(45deg, #feda75, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5); } /* taste-skill-ignore: Instagram brand gradient */
+.ig-glyph svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2.2; }
+.ig-glyph .dot { fill: #fff; stroke: none; }
+@media (max-width: 760px) { .footer-base { flex-direction: column-reverse; align-items: flex-start; } }
