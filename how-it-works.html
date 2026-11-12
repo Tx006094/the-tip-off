@@ -61,6 +61,7 @@
     .btn { display: inline-flex; align-items: center; gap: 8px; height: 46px; padding: 0 18px; border-radius: 12px; font: 700 15px/1 Inter, sans-serif; text-decoration: none; cursor: pointer; border: 1px solid var(--line); background: var(--surface); color: var(--text); }
     .btn:hover { border-color: var(--text); }
     .btn.primary { background: #fff; color: #0b0b0d; border-color: #fff; }
+    .btn[hidden] { display: none; }
     .btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; }
     .copied { color: #34d399; font-weight: 600; font-size: 14px; }
     h2 { font: 800 26px/1.1 Archivo, sans-serif; font-stretch: 85%; text-transform: uppercase; margin: 0 0 14px; }
@@ -147,6 +148,11 @@
         }).catch(function () { window.prompt("Copy this link:", url); });
       }
       document.getElementById("copyBtn").addEventListener("click", copy);
+      // No share sheet (most desktop browsers): one button, Copy link, as the main action.
+      if (!navigator.share) {
+        document.getElementById("shareBtn").hidden = true;
+        document.getElementById("copyBtn").classList.add("primary");
+      }
       document.getElementById("shareBtn").addEventListener("click", function () {
         if (navigator.share) navigator.share({ title: "How The Tip-Off works", text: "Find where to watch every women's basketball game:", url: url }).catch(function () {});
         else copy();
