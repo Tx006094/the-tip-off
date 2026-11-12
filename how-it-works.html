@@ -83,6 +83,15 @@
     .ig:hover { border-color: var(--text); }
     .ig span { width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px; background: linear-gradient(45deg, #feda75, #fa7e1e 25%, #d62976 55%, #962fbf 80%, #4f5bd5); }
     .ig svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2.2; }
+    /* Download the how-to guide: cover thumbnail beside the button */
+    .guide-dl { display: flex; align-items: center; gap: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin-bottom: 32px; }
+    .guide-cover { flex: none; width: 108px; border-radius: 8px; overflow: hidden; border: 1px solid #3a3a42; box-shadow: 0 8px 22px rgba(0,0,0,.45); transform: rotate(-2deg); transition: transform .2s; } /* taste-skill-ignore: paper-like cover */
+    .guide-cover:hover { transform: rotate(0deg) scale(1.03); }
+    .guide-cover img { width: 100%; height: auto; display: block; }
+    .guide-text h2 { margin-bottom: 6px; }
+    .guide-text p { color: var(--muted); margin: 0 0 14px; font-size: 15px; }
+    .guide-btn { height: 50px; }
+    .guide-text small { display: block; color: var(--dim); font-size: 12px; margin-top: 8px; }
     /* End-of-page call to action: the site's main white button, large and easy to tap */
     .cta-wrap { text-align: center; margin: 8px 0 0; padding: 28px 0 8px; border-top: 1px solid var(--line); }
     .cta-wrap p { color: var(--muted); margin: 0 0 14px; font-size: 16px; }
@@ -101,6 +110,9 @@
       .dek { font-size: 16px; }
       .btn { flex: 1 1 auto; justify-content: center; }
       .cta { width: 100%; min-width: 0; }
+      .guide-dl { flex-direction: column; text-align: center; padding: 22px 18px; }
+      .guide-cover { width: 120px; }
+      .guide-btn { width: 100%; font-size: 15px; white-space: nowrap; padding: 0 12px; }
       .brand .pin { height: 40px; } .brand .word { height: 32px; }
     }
   </style>
@@ -145,6 +157,20 @@
           <li><b>thetipoffguide.com</b> always shows today's games first, so the same link works every day.</li>
         </ul>
         <a class="ig" href="https://www.instagram.com/thetipoffguide/" target="_blank" rel="noopener me"><span aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.4" cy="6.6" r="1.1" fill="#fff" stroke="none"/></svg></span>Questions? DM @thetipoffguide</a>
+      </section>
+
+      <section class="guide-dl" aria-labelledby="guideTitle">
+        <a class="guide-cover" href="assets/guide/the-tip-off-how-to-guide.pdf" download="The-Tip-Off-How-To-Guide.pdf" tabindex="-1" aria-hidden="true">
+          <img src="assets/guide/the-tip-off-how-to-cover.jpg" width="463" height="600" alt="" loading="lazy" decoding="async" />
+        </a>
+        <div class="guide-text">
+          <h2 id="guideTitle">Save or print the guide</h2>
+          <p>The same how-to steps with screenshots, in a 2-page PDF you can keep, print or send.</p>
+          <a class="btn primary guide-btn" href="assets/guide/the-tip-off-how-to-guide.pdf" download="The-Tip-Off-How-To-Guide.pdf">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download the How-to Guide (PDF)
+          </a>
+          <small>PDF · 2 pages · 620 KB</small>
+        </div>
       </section>
 
       <div class="cta-wrap">
