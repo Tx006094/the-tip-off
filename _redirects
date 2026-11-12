@@ -1,0 +1,3 @@
+# Short links (Cloudflare reads this file when it publishes the site)
+/start    /how-it-works  301
+/start/   /how-it-works  301
