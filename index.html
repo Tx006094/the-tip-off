@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261113a" />
+  <link rel="stylesheet" href="styles.css?v=20261113b" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -101,7 +101,15 @@
     (function () {
       var b = document.getElementById("eventBanner");
       var end = new Date(b.dataset.ends), start = new Date("2026-11-15T19:30:00-05:00"), now = new Date();
-      if (now > end) { b.remove(); return; }
+      // After the lottery the banner turns into a mock draft banner until draft day (April 12, 2027), then hides.
+      if (now > new Date("2027-04-13T12:00:00Z")) { b.remove(); return; }
+      if (now > end) {
+        b.querySelector(".eb-tag").textContent = "2027 WNBA Draft";
+        b.querySelector(".eb-when").innerHTML = "<b>April 12, 2027</b> · Who goes No. 1?";
+        b.querySelector(".eb-links").innerHTML = '<a class="eb-cta eb-mock" href="/draft-lottery#simulator">Make your mock draft <span aria-hidden="true">→</span></a>' +
+          '<a class="eb-cta" href="/draft-lottery">Draft order <span aria-hidden="true">→</span></a>';
+        return;
+      }
       if (now >= start) { document.getElementById("ebTime").textContent = "Live now"; b.classList.add("is-live"); return; }
       try {
         var t = start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", timeZoneName: "short" });
@@ -328,12 +336,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261113a"></script>
-  <script src="js/services.js?v=20261113a"></script>
-  <script src="js/leagues.js?v=20261113a"></script>
-  <script src="js/teams-data.js?v=20261113a"></script>
-  <script src="js/news-data.js?v=20261113a"></script>
-  <script src="js/motion-fx.js?v=20261113a"></script>
-  <script src="js/app.js?v=20261113a"></script>
+  <script src="js/platforms.js?v=20261113b"></script>
+  <script src="js/services.js?v=20261113b"></script>
+  <script src="js/leagues.js?v=20261113b"></script>
+  <script src="js/teams-data.js?v=20261113b"></script>
+  <script src="js/news-data.js?v=20261113b"></script>
+  <script src="js/motion-fx.js?v=20261113b"></script>
+  <script src="js/app.js?v=20261113b"></script>
 </body>
 </html>
