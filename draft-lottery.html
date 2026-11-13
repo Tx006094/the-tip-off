@@ -77,7 +77,7 @@
     .how ul { margin: 8px 0 0; padding-left: 20px; color: var(--muted); }
     .how li { margin-bottom: 6px; }
     .how li b { color: var(--text); }
-    .cta { display: inline-flex; align-items: center; gap: 8px; background: #fff; color: #0b0b0d; text-decoration: none; font-weight: 700; border-radius: 12px; padding: 12px 18px; }
+    .cta { display: flex; width: fit-content; margin: 0 auto; align-items: center; gap: 8px; background: #fff; color: #0b0b0d; text-decoration: none; font-weight: 700; border-radius: 12px; padding: 12px 18px; }
     .source { color: var(--dim); font-size: 13px; margin-top: 28px; }
     @media (max-width: 560px) {
       .when { grid-template-columns: 1fr; }
@@ -90,7 +90,7 @@
     /* Lottery simulator + mock draft */
     .sim { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin-bottom: 28px; }
     .sim .sub { margin-bottom: 14px; }
-    .sim-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .sim-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: center; margin-bottom: 14px; }
     .sbtn { height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #3a3a42; background: transparent; color: var(--text); font: 700 15px/1 Inter, sans-serif; cursor: pointer; }
     .sbtn:hover { border-color: var(--text); }
     .sbtn.primary { background: var(--wnba); border-color: var(--wnba); color: #1a0a00; }
@@ -135,12 +135,12 @@
     /* Draft room: board on the left, player pool on the right (sticky) */
     .room-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 16px; align-items: start; }
     .room-pool { position: sticky; top: 12px; }
-    .done { border: 1px solid #34d399; border-radius: 14px; padding: 14px; color: var(--muted); font-size: 14px; }
+    .done { border: 1px solid #34d399; border-radius: 14px; padding: 14px; color: var(--muted); font-size: 14px; text-align: center; }
     .done b { display: block; color: #34d399; margin-bottom: 4px; }
     .mock-board .so { grid-template-columns: 30px 30px minmax(0, 1fr) minmax(0, 1.25fr); }
     .so .abbr { display: none; }
     .so .drawtag { display: inline-block; margin-top: 2px; font-size: 11px; font-weight: 700; color: var(--wnba); }
-    .odds-check { margin-top: 16px; }
+    .odds-check { margin-top: 16px; text-align: center; }
     .linkbtn { background: none; border: 0; padding: 0; color: #ff8a3d; font: 600 14px Inter, sans-serif; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
     @media (max-width: 760px) {
       /* Phones: player list first, then a compact one-line-per-pick board */
