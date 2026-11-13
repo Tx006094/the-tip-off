@@ -325,7 +325,7 @@
         var o = order(), cur = current();
         $("mockBoard").innerHTML = o.map(function (e, i) {
           var p = picks[i];
-          var lotTag = e.lot ? (ran ? (e.drawn ? "Won the draw" : "") : (e.odds / 10).toFixed(1) + "% for No. 1") : "";
+          var lotTag = e.lot ? (ran ? (e.drawn ? "Drawn No. " + (i + 1) : "") : (e.odds / 10).toFixed(1) + "% for No. 1") : "";
           return '<li class="so' + (i === cur ? " current" : "") + (ran && e.drawn ? " drawn" : "") + '"' + (animate ? ' style="animation-delay:' + (i * 0.05) + 's"' : ' style="animation:none"') + '><span class="n">' + (i + 1) + "</span>" + logo(e.t) +
             '<span class="team"><b class="full">' + esc(T[e.t].name) + '</b><b class="abbr">' + e.t + "</b>" + (e.note ? "<small>" + esc(via(e.note) || e.note) + "</small>" : "") +
             (lotTag ? '<span class="drawtag">' + lotTag + "</span>" : "") + "</span>" +
