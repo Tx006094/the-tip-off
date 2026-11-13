@@ -942,6 +942,32 @@
     return days === 1 ? "Yesterday" : `${days} days ago`;
   }
   const NEWS_LOGOS = { unrivaled: "assets/brand/unrivaled-logo.svg" };
+  // ---------- Podcast (The IX Podcast) ----------
+  // One switch: false hides the Podcast tab and the home page episode card. Episodes come from js/podcast-data.js,
+  // refreshed each morning by scripts/update_podcast.py. The /podcast page has its own copy of the player.
+  const PODCAST_ON = true;
+  const podcastEpisodes = () => (PODCAST_ON && typeof SITE_PODCAST !== "undefined" && SITE_PODCAST.episodes) || [];
+  function podcastCardHTML() {
+    const ep = podcastEpisodes()[0];
+    if (!ep) return "";
+    return `<button type="button" class="nw-item nw-pod" data-podcast="${esc(ep.id)}" aria-label="${esc(`Play the latest IX Podcast episode: ${ep.title}`)}">
+        <span class="nw-thumb"><img src="https://i.ytimg.com/vi/${esc(ep.id)}/mqdefault.jpg" alt="" loading="lazy" decoding="async"><span class="nw-playicon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4l14 8-14 8z"/></svg></span></span>
+        <span class="nw-text"><span class="nw-tag" style="--c:#ff6a13">Podcast</span><b>${esc(ep.title)}</b><small>The IX Podcast · Latest episode</small></span>
+      </button>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.("[data-podcast]");
+    if (!b) return;
+    const ep = podcastEpisodes().find((x) => x.id === b.dataset.podcast);
+    if (!ep) return;
+    openModal(`<div class="m-body pod-modal">
+        <p class="pod-kicker">The IX Podcast</p>
+        <h2 class="pod-title">${esc(ep.title)}</h2>
+        <div class="pod-frame"><iframe src="https://www.youtube-nocookie.com/embed/${esc(ep.id)}?autoplay=1&rel=0" title="${esc(ep.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe></div>
+        <div class="pod-links"><a class="btn btn-primary" href="/podcast">All episodes</a><a class="btn btn-ghost" href="https://www.youtube.com/@theixpodcast?sub_confirmation=1" target="_blank" rel="noopener">Subscribe on YouTube</a></div>
+      </div>`, "The IX Podcast");
+  });
+  if (!PODCAST_ON) document.querySelectorAll("[data-podcast-link]").forEach((el) => el.remove());
   function newsSectionHTML() {
     // Same order as the ticker: leagues take turns, newest first within each league.
     const list = (state.news || []).filter((n) => state.league === "all" || n.league === state.league).slice(0, 12);
@@ -962,7 +988,7 @@
     const leagues = [...new Set(list.map((n) => LEAGUES[n.league].short))].join(" · ");
     return `<section class="news-sec" id="headlines" aria-labelledby="newsTitle">
       ${secHead("Latest headlines", leagues).replace("<h2>", '<h2 id="newsTitle">')}
-      <div class="nw-grid">${items}</div>
+      <div class="nw-grid">${podcastCardHTML()}${items}</div>
       ${list.length > 4 ? `<button type="button" class="nw-more" data-news-more aria-expanded="false">More headlines <span aria-hidden="true">→</span></button>` : ""}
     </section>`;
   }
