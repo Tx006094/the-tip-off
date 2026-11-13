@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>2027 WNBA Draft Lottery: Date, Time, TV Channel and Odds | The Tip-Off</title>
-  <meta name="description" content="The 2027 WNBA Draft Lottery is Sunday, Nov. 15 at 7:30 PM ET on ESPN (TSN in Canada). See every team's odds at the No. 1 pick: Houston and Toronto lead at 32.9%." />
+  <title>2027 WNBA Draft Lottery: Odds, Simulator and Mock Draft | The Tip-Off</title>
+  <meta name="description" content="The 2027 WNBA Draft Lottery is Sunday, Nov. 15 at 7:30 PM ET on ESPN (TSN in Canada). See every team's odds, run the lottery yourself and make your own first-round mock draft." />
   <link rel="canonical" href="https://thetipoffguide.com/draft-lottery" />
   <meta name="theme-color" content="#0b0b0d" />
   <meta property="og:type" content="article" />
@@ -86,6 +86,52 @@
       .pct b { font-size: 20px; }
       .brand .pin { height: 40px; } .brand .word { height: 32px; }
     }
+
+    /* Lottery simulator + mock draft */
+    .sim { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px 22px; margin-bottom: 28px; }
+    .sim .sub { margin-bottom: 14px; }
+    .sim-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    .sbtn { height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid #3a3a42; background: transparent; color: var(--text); font: 700 15px/1 Inter, sans-serif; cursor: pointer; }
+    .sbtn:hover { border-color: var(--text); }
+    .sbtn.primary { background: var(--wnba); border-color: var(--wnba); color: #1a0a00; }
+    .sbtn.primary:hover { filter: brightness(1.08); }
+    .copied { color: #34d399; font-weight: 600; font-size: 14px; }
+    .sim-order, .mock-board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+    .so { display: grid; grid-template-columns: 38px 32px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid transparent; animation: pop .35s ease both; }
+    .so.drawn { border-color: var(--wnba); }
+    .so .n { font: 800 18px/1 Archivo, sans-serif; color: var(--dim); text-align: center; }
+    .so.drawn .n { color: var(--wnba); }
+    .so img, .so .mono { width: 32px; height: 32px; object-fit: contain; }
+    .so .mono { display: grid; place-items: center; border-radius: 50%; background: var(--wnba); color: #1a0a00; font: 800 10px/1 Archivo, sans-serif; }
+    .so b { font-size: 15px; } .so small { display: block; color: var(--dim); font-size: 12px; }
+    .so .tag { font-size: 11px; font-weight: 700; color: var(--wnba); white-space: nowrap; }
+    @keyframes pop { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .sim-stats { color: var(--muted); font-size: 14px; margin: 12px 0 0; }
+    .mock-board .so { grid-template-columns: 38px 32px minmax(0, 1fr) minmax(0, 1.2fr); }
+    .mock-board .pick { font-size: 14px; } .mock-board .pick b { font-size: 14px; }
+    .mock-board .pick.empty { color: var(--dim); font-style: italic; }
+    .mock-board .so.current { border-color: #f5a524; background: #221a0c; }
+    .mock-board button.undo { background: none; border: 0; color: var(--dim); font-size: 12px; cursor: pointer; padding: 0 0 0 6px; }
+    .pool { margin: 0 0 14px; border: 1px solid #f5a524; border-radius: 14px; overflow: hidden; }
+    .pool[hidden] { display: none; }
+    .pool-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 12px 14px; background: #221a0c; }
+    .pool-head b { color: #f5a524; font-size: 15px; }
+    .pool-head input { flex: 1 1 200px; max-width: 280px; height: 38px; border-radius: 10px; border: 1px solid #3a3a42; background: var(--bg); color: var(--text); padding: 0 12px; font: 400 16px Inter, sans-serif; }
+    .pool-list { list-style: none; margin: 0; padding: 6px; max-height: 300px; overflow-y: auto; display: grid; gap: 4px; }
+    .pool-list button { width: 100%; display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; padding: 9px 10px; border-radius: 10px; border: 0; background: transparent; color: var(--text); font: 400 15px Inter, sans-serif; cursor: pointer; }
+    .pool-list button:hover, .pool-list button:focus-visible { background: var(--surface-2); outline: none; }
+    .pool-list .rk { color: var(--dim); font-weight: 700; text-align: center; }
+    .pool-list small { color: var(--muted); font-size: 13px; }
+    .pool-list .pos { color: var(--dim); font-size: 12px; font-weight: 700; }
+    .note { color: var(--dim); font-size: 13px; margin: 14px 0 0; }
+    @media (max-width: 560px) {
+      .sim { padding: 16px; }
+      .sbtn { flex: 1 1 auto; }
+      .mock-board .so { grid-template-columns: 26px 28px minmax(0, 1fr); }
+      .mock-board .so .pick { grid-column: 2 / -1; }
+      .so { grid-template-columns: 26px 28px minmax(0, 1fr) auto; padding: 8px 10px; }
+      .so img, .so .mono { width: 28px; height: 28px; }
+    }
   </style>
 </head>
 <body>
@@ -128,10 +174,184 @@
         </ul>
       </section>
 
+      <section class="sim" id="simulator" aria-labelledby="simTitle">
+        <h2 id="simTitle">Lottery simulator</h2>
+        <p class="sub">Run the lottery with the real odds. Two picks are drawn; the rest go by record (Houston can't fall past No. 3, Toronto stays in the top four).</p>
+        <div class="sim-actions">
+          <button type="button" class="sbtn primary" id="runLottery">Run the lottery</button>
+          <button type="button" class="sbtn" id="run100">Run it 1,000 times</button>
+        </div>
+        <ol class="sim-order" id="lotteryOrder" aria-live="polite"></ol>
+        <p class="sim-stats" id="simStats" hidden></p>
+      </section>
+
+      <section class="sim" id="mock" aria-labelledby="mockTitle">
+        <h2 id="mockTitle">First-round mock draft</h2>
+        <p class="sub">Make every first-round pick yourself, or let us auto-draft the best available player. The lottery picks follow your last lottery run.</p>
+        <div class="sim-actions">
+          <button type="button" class="sbtn primary" id="autoDraft">Auto-draft the rest</button>
+          <button type="button" class="sbtn" id="resetDraft">Start over</button>
+          <button type="button" class="sbtn" id="shareDraft">Share my mock draft</button>
+          <span class="copied" id="draftCopied" hidden>Copied</span>
+        </div>
+        <div class="pool" id="pool">
+          <div class="pool-head"><b id="clock">On the clock</b><input type="search" id="poolFind" placeholder="Search players or schools" autocomplete="off" /></div>
+          <ul class="pool-list" id="poolList"></ul>
+        </div>
+        <ol class="mock-board" id="mockBoard"></ol>
+        <p class="note">Prospects and rankings come from published 2027 mock drafts (consensus big board and ESPN, Nov. 13, 2026). The official eligible list comes out next spring, and some seniors may return to college. Picks 8–15 use ESPN's projected order; the official order is still to come.</p>
+      </section>
+
       <a class="cta" href="/">See where to watch every game →</a>
       <p class="source">Odds and broadcast details as announced by the WNBA, reported by NBC Sports. Times can change, so check ESPN's listings on the day.</p>
     </main>
   </div>
+  <script>
+    // ---------- Lottery simulator + first-round mock draft ----------
+    (function () {
+      var LOGO = function (abbr) { return "https://a.espncdn.com/combiner/i?img=/i/teamlogos/wnba/500/" + abbr + ".png&w=64&h=64"; };
+      var T = {
+        HOU: { name: "Houston Comets", logo: "https://cdn.wnba.com/logos/wnba/1611661316/primary/D/logo.svg" },
+        TOR: { name: "Toronto Tempo", logo: "https://cdn.wnba.com/logos/wnba/1611661332/primary/D/logo.svg" },
+        WSH: { name: "Washington Mystics", logo: LOGO("wsh") },
+        SEA: { name: "Seattle Storm", logo: LOGO("sea") },
+        POR: { name: "Portland Fire", logo: LOGO("por") },
+        LA: { name: "Los Angeles Sparks", logo: LOGO("la") },
+        NY: { name: "New York Liberty", logo: LOGO("ny") },
+        DAL: { name: "Dallas Wings", logo: LOGO("dal") },
+        IND: { name: "Indiana Fever", logo: LOGO("ind") },
+        CHI: { name: "Chicago Sky", logo: LOGO("chi") },
+        GS: { name: "Golden State Valkyries", logo: LOGO("gs") },
+        MIN: { name: "Minnesota Lynx", logo: LOGO("min") }
+      };
+      // Lottery entries in record order (worst first). Chances out of 1,000, as announced.
+      var LOTTERY = [
+        { t: "HOU", odds: 329, note: "" },
+        { t: "TOR", odds: 329, note: "" },
+        { t: "WSH", odds: 161, note: "from Chicago" },
+        { t: "SEA", odds: 93, note: "" },
+        { t: "POR", odds: 52, note: "" },
+        { t: "LA", odds: 24, note: "" },
+        { t: "LA", odds: 12, note: "from Phoenix" }
+      ];
+      // Picks 8–15: ESPN's projected order (Nov. 13, 2026). Official order still to come.
+      var REST = ["NY", "DAL", "IND", "CHI", "CHI", "DAL", "GS", "MIN"];
+      // Consensus big board (top 30), Nov. 13, 2026. Position left blank where the sources don't list one.
+      var POOL = [
+        ["JuJu Watkins", "USC", "G"], ["Madison Booker", "Texas", "F"], ["Hannah Hidalgo", "Notre Dame", "G"],
+        ["S'Mya Nichols", "Kansas", "G"], ["Mikaylah Williams", "LSU", "G"], ["MiLaysia Fulwiley", "LSU", "G"],
+        ["Audi Crooks", "Iowa State", "C"], ["Oluchi Okananwa", "Maryland", "G"], ["Ashlyn Watkins", "South Carolina", "F"],
+        ["Clara Strack", "Kentucky", "C"], ["Taliah Scott", "Baylor", "G"], ["Talaysia Cooper", "Ole Miss", "G"],
+        ["Nunu Agara", "Maryland", "F"], ["Daniele Paunksnyte", "Lithuania", ""], ["Grace Slaughter", "Missouri", ""],
+        ["Chloe Kitts", "South Carolina", "F"], ["Sarah Cissé", "France", "C"], ["Tessa Johnson", "South Carolina", "G"],
+        ["Khamil Pierre", "NC State", "F"], ["Zhang Ziyu", "China", "C"], ["Sayvia Sellers", "Washington", ""],
+        ["Kymora Johnson", "Virginia", "G"], ["Aïnhoa Risacher", "ASVEL (France)", "F"], ["Timea Gardiner", "UCLA", "F"],
+        ["Addy Brown", "UCLA", "F"], ["Zoe Brooks", "NC State", ""], ["Jadyn Donovan", "Duke", "G"],
+        ["Natalie Potts", "Nebraska", ""], ["Carys Baker", "Louisville", "F"], ["McKinna Brackens", "Arizona State", ""]
+      ].map(function (p, i) { return { rank: i + 1, name: p[0], school: p[1], pos: p[2] }; });
+
+      var $ = function (id) { return document.getElementById(id); };
+      var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); };
+      var logo = function (t) { return '<img src="' + T[t].logo + '" alt="" loading="lazy" onerror="this.outerHTML=\'<span class=mono>' + t + '</span>\'">'; };
+
+      /** One lottery: draw No. 1 and No. 2 by chances, then the rest in record order. */
+      function drawLottery() {
+        var left = LOTTERY.slice(), out = [];
+        for (var d = 0; d < 2; d++) {
+          var total = left.reduce(function (a, e) { return a + e.odds; }, 0), r = Math.random() * total, i = 0;
+          while ((r -= left[i].odds) > 0) i++;
+          out.push(Object.assign({ drawn: true }, left.splice(i, 1)[0]));
+        }
+        return out.concat(left.map(function (e) { return Object.assign({ drawn: false }, e); }));
+      }
+      var lottery = LOTTERY.map(function (e) { return Object.assign({ drawn: false }, e); }); // before any run: projected by record
+      var ran = false;
+
+      function renderLottery() {
+        $("lotteryOrder").innerHTML = lottery.map(function (e, i) {
+          return '<li class="so' + (e.drawn ? " drawn" : "") + '" style="animation-delay:' + (i * 0.08) + 's"><span class="n">' + (i + 1) + "</span>" + logo(e.t) +
+            "<span><b>" + esc(T[e.t].name) + "</b>" + (e.note ? "<small>" + esc(e.note) + "</small>" : "") + "</span>" +
+            '<span class="tag">' + (ran ? (e.drawn ? "Won the draw" : "By record") : (e.odds / 10).toFixed(1) + "% for No. 1") + "</span></li>";
+        }).join("");
+      }
+      $("runLottery").addEventListener("click", function () {
+        lottery = drawLottery(); ran = true; renderLottery(); resetDraft();
+        $("runLottery").textContent = "Run it again";
+      });
+      $("run100").addEventListener("click", function () {
+        var n = 1000, first = {}, top2 = {};
+        for (var k = 0; k < n; k++) {
+          var r = drawLottery();
+          var a = r[0].t + (r[0].note ? " (" + r[0].note + ")" : "");
+          first[a] = (first[a] || 0) + 1;
+        }
+        var parts = Object.keys(first).sort(function (x, y) { return first[y] - first[x]; })
+          .map(function (k2) { var via = k2.indexOf("from Phoenix") > 0 ? " (via PHX)" : k2.indexOf("from Chicago") > 0 ? " (via CHI)" : "";
+            return T[k2.split(" ")[0]].name.split(" ").pop() + via + " " + Math.round(first[k2] / 10) + "%"; });
+        $("simStats").hidden = false;
+        $("simStats").textContent = "No. 1 pick in 1,000 runs: " + parts.join(" · ") + ".";
+      });
+
+      // ---------- Mock draft ----------
+      var picks = [];
+      var order = function () {
+        return lottery.map(function (e) { return { t: e.t, note: e.note } }).concat(REST.map(function (t) { return { t: t, note: "" }; }));
+      };
+      var taken = function () { return picks.filter(Boolean).map(function (p) { return p.name; }); };
+      function current() { for (var i = 0; i < 15; i++) if (!picks[i]) return i; return -1; }
+      function renderBoard() {
+        var o = order(), cur = current();
+        $("mockBoard").innerHTML = o.map(function (e, i) {
+          var p = picks[i];
+          return '<li class="so' + (i === cur ? " current" : "") + '"><span class="n">' + (i + 1) + "</span>" + logo(e.t) +
+            "<span><b>" + esc(T[e.t].name) + "</b>" + (e.note ? "<small>" + esc(e.note) + "</small>" : "") + "</span>" +
+            (p ? '<span class="pick"><b>' + esc(p.name) + "</b><small>" + esc([p.pos, p.school].filter(Boolean).join(" · ")) + '</small><button type="button" class="undo" data-undo="' + i + '">Change</button></span>'
+               : '<span class="pick empty">' + (i === cur ? "On the clock" : "") + "</span>") + "</li>";
+        }).join("");
+        var pool = $("pool");
+        pool.hidden = cur < 0;
+        if (cur >= 0) $("clock").textContent = "Pick " + (cur + 1) + ": " + T[o[cur].t].name + " on the clock";
+        renderPool();
+      }
+      function renderPool() {
+        var q = ($("poolFind").value || "").toLowerCase().trim(), gone = taken();
+        var list = POOL.filter(function (p) { return gone.indexOf(p.name) < 0 && (!q || (p.name + " " + p.school).toLowerCase().indexOf(q) >= 0); });
+        $("poolList").innerHTML = list.length ? list.map(function (p) {
+          return '<li><button type="button" data-pick="' + esc(p.name) + '"><span class="rk">' + p.rank + "</span><span><b>" + esc(p.name) + "</b><br><small>" + esc(p.school) + "</small></span>" +
+            '<span class="pos">' + esc(p.pos) + "</span></button></li>";
+        }).join("") : '<li style="padding:12px;color:var(--dim)">No players match.</li>';
+      }
+      function resetDraft() { picks = []; $("poolFind").value = ""; renderBoard(); }
+      $("poolList").addEventListener("click", function (ev) {
+        var b = ev.target.closest("[data-pick]"); if (!b) return;
+        var cur = current(); if (cur < 0) return;
+        picks[cur] = POOL.find(function (p) { return p.name === b.dataset.pick; });
+        $("poolFind").value = ""; renderBoard();
+      });
+      $("mockBoard").addEventListener("click", function (ev) {
+        var b = ev.target.closest("[data-undo]"); if (!b) return;
+        picks[Number(b.dataset.undo)] = null; renderBoard();
+        $("pool").scrollIntoView({ behavior: "smooth", block: "nearest" });
+      });
+      $("poolFind").addEventListener("input", renderPool);
+      $("autoDraft").addEventListener("click", function () {
+        for (var i = 0; i < 15; i++) if (!picks[i]) { var gone = taken(); picks[i] = POOL.find(function (p) { return gone.indexOf(p.name) < 0; }); }
+        renderBoard();
+      });
+      $("resetDraft").addEventListener("click", resetDraft);
+      $("shareDraft").addEventListener("click", function () {
+        var o = order();
+        var lines = o.map(function (e, i) { return (i + 1) + ". " + T[e.t].name.split(" ").slice(-1)[0] + (e.note === "from Phoenix" ? " (via PHX)" : e.note === "from Chicago" ? " (via CHI)" : "") + ": " + (picks[i] ? picks[i].name : "TBD"); });
+        var text = "My 2027 WNBA first-round mock draft\n" + lines.join("\n") + "\n\nMake yours: https://thetipoffguide.com/draft-lottery";
+        if (navigator.share) { navigator.share({ title: "My 2027 WNBA mock draft", text: text }).catch(function () {}); return; }
+        (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function () {
+          $("draftCopied").hidden = false; setTimeout(function () { $("draftCopied").hidden = true; }, 2200);
+        }).catch(function () { window.prompt("Copy your mock draft:", text); });
+      });
+
+      renderLottery(); renderBoard();
+    })();
+  </script>
   <script>
     // Show the start time in the visitor's own time zone too.
     try {
