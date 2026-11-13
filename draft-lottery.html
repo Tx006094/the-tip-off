@@ -112,7 +112,7 @@
     .mock-board .pick.empty { color: var(--dim); font-style: italic; }
     .mock-board .so.current { border-color: #f5a524; background: #221a0c; }
     .mock-board button.undo { background: none; border: 0; color: var(--dim); font-size: 12px; cursor: pointer; padding: 0 0 0 6px; }
-    .pool { margin: 0 0 14px; border: 1px solid #f5a524; border-radius: 14px; overflow: hidden; }
+    .pool { margin: 0; border: 1px solid #f5a524; border-radius: 14px; overflow: hidden; }
     .pool[hidden] { display: none; }
     .pool-head { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; justify-content: space-between; padding: 12px 14px; background: #221a0c; }
     .pool-head b { color: #f5a524; font-size: 15px; }
@@ -131,6 +131,32 @@
       .mock-board .so .pick { grid-column: 2 / -1; }
       .so { grid-template-columns: 26px 28px minmax(0, 1fr) auto; padding: 8px 10px; }
       .so img, .so .mono { width: 28px; height: 28px; }
+    }
+    /* Draft room: board on the left, player pool on the right (sticky) */
+    .room-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 340px); gap: 16px; align-items: start; }
+    .room-pool { position: sticky; top: 12px; }
+    .done { border: 1px solid #34d399; border-radius: 14px; padding: 14px; color: var(--muted); font-size: 14px; }
+    .done b { display: block; color: #34d399; margin-bottom: 4px; }
+    .mock-board .so { grid-template-columns: 30px 30px minmax(0, 1fr) minmax(0, 1.25fr); }
+    .so .abbr { display: none; }
+    .so .drawtag { display: inline-block; margin-top: 2px; font-size: 11px; font-weight: 700; color: var(--wnba); }
+    .odds-check { margin-top: 16px; }
+    .linkbtn { background: none; border: 0; padding: 0; color: #ff8a3d; font: 600 14px Inter, sans-serif; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+    @media (max-width: 760px) {
+      /* Phones: player list first, then a compact one-line-per-pick board */
+      .room-grid { grid-template-columns: 1fr; }
+      .room-pool { position: static; order: -1; }
+      .mock-board .so { grid-template-columns: 22px 26px 64px minmax(0, 1fr); gap: 8px; padding: 8px 10px; }
+      .mock-board .pick b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .so .drawtag { font-size: 10px; white-space: nowrap; }
+      .mock-board .so .pick { grid-column: auto; }
+      .mock-board .so img, .mock-board .so .mono { width: 26px; height: 26px; }
+      .so .full { display: none; }
+      .so .abbr { display: block; font-weight: 800; font-size: 14px; }
+      .so .team small { font-size: 10px; }
+      .mock-board .pick b { font-size: 14px; }
+      .mock-board .pick small { display: inline; }
+      .mock-board .pick .undo { padding-left: 6px; }
     }
   </style>
 </head>
@@ -174,31 +200,32 @@
         </ul>
       </section>
 
-      <section class="sim" id="simulator" aria-labelledby="simTitle">
-        <h2 id="simTitle">Lottery simulator</h2>
-        <p class="sub">Run the lottery with the real odds. Two picks are drawn; the rest go by record (Houston can't fall past No. 3, Toronto stays in the top four).</p>
+      <section class="sim room" id="simulator" aria-labelledby="simTitle">
+        <h2 id="simTitle">Lottery and mock draft</h2>
+        <p class="sub">Run the lottery with the real odds (two picks are drawn; the rest go by record), then make every first-round pick yourself or auto-draft the best available player.</p>
         <div class="sim-actions">
           <button type="button" class="sbtn primary" id="runLottery">Run the lottery</button>
-          <button type="button" class="sbtn" id="run100">Run it 1,000 times</button>
-        </div>
-        <ol class="sim-order" id="lotteryOrder" aria-live="polite"></ol>
-        <p class="sim-stats" id="simStats" hidden></p>
-      </section>
-
-      <section class="sim" id="mock" aria-labelledby="mockTitle">
-        <h2 id="mockTitle">First-round mock draft</h2>
-        <p class="sub">Make every first-round pick yourself, or let us auto-draft the best available player. The lottery picks follow your last lottery run.</p>
-        <div class="sim-actions">
-          <button type="button" class="sbtn primary" id="autoDraft">Auto-draft the rest</button>
+          <button type="button" class="sbtn" id="autoDraft">Auto-draft</button>
           <button type="button" class="sbtn" id="resetDraft">Start over</button>
           <button type="button" class="sbtn" id="shareDraft">Share my mock draft</button>
           <span class="copied" id="draftCopied" hidden>Copied</span>
         </div>
-        <div class="pool" id="pool">
-          <div class="pool-head"><b id="clock">On the clock</b><input type="search" id="poolFind" placeholder="Search players or schools" autocomplete="off" /></div>
-          <ul class="pool-list" id="poolList"></ul>
+        <div class="room-grid">
+          <div class="room-board">
+            <ol class="mock-board" id="mockBoard" aria-live="polite"></ol>
+          </div>
+          <div class="room-pool">
+            <div class="pool" id="pool">
+              <div class="pool-head"><b id="clock">On the clock</b><input type="search" id="poolFind" placeholder="Search players or schools" autocomplete="off" /></div>
+              <ul class="pool-list" id="poolList"></ul>
+            </div>
+            <div class="done" id="draftDone" hidden><b>Your first round is set.</b><span>Share it, or tap Change on any pick to redo it.</span></div>
+          </div>
         </div>
-        <ol class="mock-board" id="mockBoard"></ol>
+        <div class="odds-check">
+          <button type="button" class="linkbtn" id="run100">How often does each team win? Simulate 1,000 lotteries</button>
+          <p class="sim-stats" id="simStats" hidden></p>
+        </div>
         <p class="note">Prospects and rankings come from published 2027 mock drafts (consensus big board and ESPN, Nov. 13, 2026). The official eligible list comes out next spring, and some seniors may return to college. Picks 8–15 use ESPN's projected order; the official order is still to come.</p>
       </section>
 
@@ -267,15 +294,9 @@
       var lottery = LOTTERY.map(function (e) { return Object.assign({ drawn: false }, e); }); // before any run: projected by record
       var ran = false;
 
-      function renderLottery() {
-        $("lotteryOrder").innerHTML = lottery.map(function (e, i) {
-          return '<li class="so' + (e.drawn ? " drawn" : "") + '" style="animation-delay:' + (i * 0.08) + 's"><span class="n">' + (i + 1) + "</span>" + logo(e.t) +
-            "<span><b>" + esc(T[e.t].name) + "</b>" + (e.note ? "<small>" + esc(e.note) + "</small>" : "") + "</span>" +
-            '<span class="tag">' + (ran ? (e.drawn ? "Won the draw" : "By record") : (e.odds / 10).toFixed(1) + "% for No. 1") + "</span></li>";
-        }).join("");
-      }
+      function renderLottery() { renderBoard(true); }
       $("runLottery").addEventListener("click", function () {
-        lottery = drawLottery(); ran = true; renderLottery(); resetDraft();
+        lottery = drawLottery(); ran = true; picks = []; $("poolFind").value = ""; renderBoard(true);
         $("runLottery").textContent = "Run it again";
       });
       $("run100").addEventListener("click", function () {
@@ -295,21 +316,25 @@
       // ---------- Mock draft ----------
       var picks = [];
       var order = function () {
-        return lottery.map(function (e) { return { t: e.t, note: e.note } }).concat(REST.map(function (t) { return { t: t, note: "" }; }));
+        return lottery.map(function (e) { return { t: e.t, note: e.note, drawn: e.drawn, odds: e.odds, lot: true }; }).concat(REST.map(function (t) { return { t: t, note: "" }; }));
       };
+      var via = function (note) { return note === "from Phoenix" ? "via PHX" : note === "from Chicago" ? "via CHI" : ""; };
       var taken = function () { return picks.filter(Boolean).map(function (p) { return p.name; }); };
       function current() { for (var i = 0; i < 15; i++) if (!picks[i]) return i; return -1; }
-      function renderBoard() {
+      function renderBoard(animate) {
         var o = order(), cur = current();
         $("mockBoard").innerHTML = o.map(function (e, i) {
           var p = picks[i];
-          return '<li class="so' + (i === cur ? " current" : "") + '"><span class="n">' + (i + 1) + "</span>" + logo(e.t) +
-            "<span><b>" + esc(T[e.t].name) + "</b>" + (e.note ? "<small>" + esc(e.note) + "</small>" : "") + "</span>" +
+          var lotTag = e.lot ? (ran ? (e.drawn ? "Won the draw" : "") : (e.odds / 10).toFixed(1) + "% for No. 1") : "";
+          return '<li class="so' + (i === cur ? " current" : "") + (ran && e.drawn ? " drawn" : "") + '"' + (animate ? ' style="animation-delay:' + (i * 0.05) + 's"' : ' style="animation:none"') + '><span class="n">' + (i + 1) + "</span>" + logo(e.t) +
+            '<span class="team"><b class="full">' + esc(T[e.t].name) + '</b><b class="abbr">' + e.t + "</b>" + (e.note ? "<small>" + esc(via(e.note) || e.note) + "</small>" : "") +
+            (lotTag ? '<span class="drawtag">' + lotTag + "</span>" : "") + "</span>" +
             (p ? '<span class="pick"><b>' + esc(p.name) + "</b><small>" + esc([p.pos, p.school].filter(Boolean).join(" · ")) + '</small><button type="button" class="undo" data-undo="' + i + '">Change</button></span>'
                : '<span class="pick empty">' + (i === cur ? "On the clock" : "") + "</span>") + "</li>";
         }).join("");
         var pool = $("pool");
         pool.hidden = cur < 0;
+        $("draftDone").hidden = cur >= 0;
         if (cur >= 0) $("clock").textContent = "Pick " + (cur + 1) + ": " + T[o[cur].t].name + " on the clock";
         renderPool();
       }
@@ -322,11 +347,13 @@
         }).join("") : '<li style="padding:12px;color:var(--dim)">No players match.</li>';
       }
       function resetDraft() { picks = []; $("poolFind").value = ""; renderBoard(); }
+      // On phones, after a pick bring the player list back into view for the next team.
+      function afterPick() { if (innerWidth <= 760 && current() >= 0) $("pool").scrollIntoView({ behavior: "smooth", block: "start" }); }
       $("poolList").addEventListener("click", function (ev) {
         var b = ev.target.closest("[data-pick]"); if (!b) return;
         var cur = current(); if (cur < 0) return;
         picks[cur] = POOL.find(function (p) { return p.name === b.dataset.pick; });
-        $("poolFind").value = ""; renderBoard();
+        $("poolFind").value = ""; renderBoard(); afterPick();
       });
       $("mockBoard").addEventListener("click", function (ev) {
         var b = ev.target.closest("[data-undo]"); if (!b) return;
@@ -349,7 +376,7 @@
         }).catch(function () { window.prompt("Copy your mock draft:", text); });
       });
 
-      renderLottery(); renderBoard();
+      renderBoard(true);
     })();
   </script>
   <script>
