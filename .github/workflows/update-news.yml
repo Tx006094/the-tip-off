@@ -17,16 +17,14 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fetch headlines
         run: python3 scripts/update_news.py
-      - name: Fetch podcast episodes
-        run: python3 scripts/update_podcast.py
       - name: Commit if anything changed
         run: |
-          if git diff --quiet -- js/news-data.js js/podcast-data.js; then
-            echo "Headlines and podcast unchanged."
+          if git diff --quiet -- js/news-data.js; then
+            echo "Headlines unchanged."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-            git add js/news-data.js js/podcast-data.js
-            git commit -m "Update headlines and podcast episodes"
+            git add js/news-data.js
+            git commit -m "Update headlines"
             git push
           fi

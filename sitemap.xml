@@ -17,9 +17,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-  <url>
-    <loc>https://thetipoffguide.com/podcast</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.7</priority>
-  </url>
 </urlset>
