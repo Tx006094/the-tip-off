@@ -1356,3 +1356,6 @@ main:focus { outline: none; }
 @media (max-width: 560px) { .ix-lockup { flex-direction: column; gap: 10px; } .ix-x { font-size: 22px; } }
 .ix-h1 .nowrap { white-space: nowrap; }
 @media (min-width: 900px) { .ix-h1 { max-width: 22ch; font-size: clamp(56px, 6.4vw, 92px); } .ix-inner { padding-block: 44px; } }
+/* IX lockup: logos sit close to the × */
+.ix-lockup { gap: clamp(8px, 1.4vw, 14px); }
+.ix-logo { border-radius: 0; }
