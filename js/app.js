@@ -2466,6 +2466,12 @@
     $("#filterToggle").setAttribute("aria-expanded", String(open));
     if (open) { fx("thumb", $("#priceSeg"), { animate: false }); fx("thumb", $("#regionSeg"), { animate: false }); }
   });
+  // Computers: there's room, so the filters start open (phones keep them folded).
+  if (innerWidth > 760 && $("#filterToggle")) {
+    $("#filters").classList.add("open");
+    $("#filterToggle").setAttribute("aria-expanded", "true");
+    requestAnimationFrame(() => { fx("thumb", $("#priceSeg"), { animate: false }); fx("thumb", $("#regionSeg"), { animate: false }); });
+  }
   document.addEventListener("click", (e) => {
     const b = e.target.closest?.("[data-more-watch]");
     if (!b) return;
