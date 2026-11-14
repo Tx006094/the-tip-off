@@ -847,7 +847,6 @@
     }
 
     const real = filtered.filter((g) => !g.tba);
-    if (state.price === "mine") html += mineBarHTML();
     const hero = pickHero(filtered);
     if (hero) html += featureHTML(hero, real);
 
@@ -1374,7 +1373,6 @@
     let html = `<div class="page-head"><h1>Streaming services &amp; prices${ca ? " in Canada" : ""}</h1>
       <p class="dek">Explore the TV channels and streaming services bringing women's basketball to fans across the U.S. and Canada. Compare subscription prices, discover free viewing options, and see how many games each service carries this week. Switch between the U.S. and Canada to find options available in your country, then select any service to view its upcoming games.</p>
       <button type="button" class="btn btn-ghost page-cta" data-open-services>${ICON.tv}${hasServices() ? "Edit my viewing options" : "My Viewing Options"}</button></div>`;
-    if (state.price === "mine") html += mineBarHTML();
     for (const [title, sub, fn, color] of groups) {
       const g = list.filter(fn);
       if (!g.length) continue;
@@ -2282,7 +2280,10 @@
         .finally(save);
       return;
     }
-    if (t.dataset.price === "mine" && !hasServices()) return void openServices();
+    if (t.dataset.price === "mine") {
+      if (!hasServices()) return void openServices();
+      state.price = "mine"; render(); return void openServices();
+    }
     if (t.dataset.close !== undefined) return closeModal();
     if (t.dataset.share !== undefined) return shareCurrent();
     if (t.dataset.retry !== undefined) { t.disabled = true; return refreshLive(true); }
