@@ -39,7 +39,7 @@
   <link rel="preconnect" href="https://site.api.espn.com" crossorigin />
   <link rel="preconnect" href="https://a.espncdn.com" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
-  <link rel="stylesheet" href="styles.css?v=20261113b" />
+  <link rel="stylesheet" href="styles.css?v=20261113d" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -87,6 +87,27 @@
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
+
+  <!-- The IX Podcast announcement: hides itself after Dec 15, 2026 -->
+  <section class="ix-hero" id="ixHero" data-ends="2026-12-15T12:00:00Z" aria-labelledby="ixTitle">
+    <div class="ix-inner">
+      <span class="ix-tag"><i aria-hidden="true"></i>OFFICIAL · NOV 2026</span>
+      <div class="ix-lockup" aria-label="The Tip-Off and The IX Podcast">
+        <span class="ix-tipoff"><img src="assets/brand/tipoff-pin.png" width="153" height="192" alt="" /><img src="assets/brand/tipoff-wordmark.png" width="400" height="126" alt="The Tip-Off" /></span>
+        <span class="ix-x" aria-hidden="true">×</span>
+        <img class="ix-logo" src="assets/ix/ix-podcast-logo.jpg" width="1000" height="154" alt="The IX Podcast" />
+      </div>
+      <h2 class="ix-h1" id="ixTitle">The <span class="nowrap">Tip-Off</span> just got <em>louder.</em></h2>
+      <p class="ix-sub">The IX Podcast is officially joining The Tip-Off Guide.</p>
+      <p class="ix-body">The games. The stories. The conversations. All in one place.</p>
+      <div class="ix-ctas">
+        <a class="ix-btn ix-primary" href="/watch"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4l14 8-14 8z"/></svg>Listen Now</a>
+        <a class="ix-btn ix-ghost" href="#schedule">Find Tonight's Games</a>
+      </div>
+      <a class="ix-more" href="/news/the-ix-joins">Read the announcement →</a>
+    </div>
+  </section>
+  <script>(function(){var b=document.getElementById("ixHero");if(new Date()>new Date(b.dataset.ends))b.remove();})();</script>
 
   <!-- Event banner: hides itself once the event is over -->
   <div class="event-banner" id="eventBanner" data-ends="2026-11-16T01:30:00Z">
@@ -336,12 +357,12 @@
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-  <script src="js/platforms.js?v=20261113b"></script>
-  <script src="js/services.js?v=20261113b"></script>
-  <script src="js/leagues.js?v=20261113b"></script>
-  <script src="js/teams-data.js?v=20261113b"></script>
-  <script src="js/news-data.js?v=20261113b"></script>
-  <script src="js/motion-fx.js?v=20261113b"></script>
-  <script src="js/app.js?v=20261113b"></script>
+  <script src="js/platforms.js?v=20261113d"></script>
+  <script src="js/services.js?v=20261113d"></script>
+  <script src="js/leagues.js?v=20261113d"></script>
+  <script src="js/teams-data.js?v=20261113d"></script>
+  <script src="js/news-data.js?v=20261113d"></script>
+  <script src="js/motion-fx.js?v=20261113d"></script>
+  <script src="js/app.js?v=20261113d"></script>
 </body>
 </html>
