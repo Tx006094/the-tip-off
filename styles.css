@@ -1426,3 +1426,10 @@ main:focus { outline: none; }
   .m-event .event-tag { font-size: 18px; padding: 9px 18px 9px 14px; border-radius: 10px; gap: 9px; }
   .m-event .event-tag svg { width: 21px; height: 21px; }
 }
+
+/* Game pop-up: team logo + name open the schedule; a small Follow button under each name */
+.m-team-link { display: contents; font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+.m-team-link:hover .nm { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(255,255,255,.4); }
+.m-team-link:focus-visible .nm { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+.m-team .m-fav { height: 30px; min-height: 0; padding: 0 12px; margin-top: 8px; font-size: 13px; gap: 5px; border-radius: 999px; background: rgba(0,0,0,.28); }
+.m-team .m-fav svg { width: 14px; height: 14px; }

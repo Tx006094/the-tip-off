@@ -1897,17 +1897,18 @@
     const lg = LEAGUES[g.league];
     let top;
     if (g.away) {
-      const side = (t) => `<div class="m-team">${logoHTML(t)}<div class="nm">${t.rank ? `<span class="rk">#${t.rank}</span> ` : ""}${esc(t.name)}</div>${g.state !== "pre" && t.score !== "" ? `<div class="sc">${esc(t.score)}</div>` : ""}</div>`;
+      // Each team: logo + name open its schedule; a small Follow button sits under the name.
+      const side = (t) => {
+        const key = t.id ? `${g.league}:${t.id}` : "";
+        const face = `${logoHTML(t)}<div class="nm">${t.rank ? `<span class="rk">#${t.rank}</span> ` : ""}${esc(t.name)}</div>`;
+        return `<div class="m-team">${key ? `<button type="button" class="m-team-link" data-team="${esc(key)}" aria-label="${esc(t.name)} schedule" title="See the ${esc(t.short || t.name)} schedule">${face}</button>` : face}${g.state !== "pre" && t.score !== "" ? `<div class="sc">${esc(t.score)}</div>` : ""}${key && teamByKey.has(key) ? favButton(key, t.short || t.name, true) : ""}</div>`;
+      };
       top = `<h2 class="sr-only" id="modalTitle">${esc(matchupLabel(g))}</h2><div class="m-matchup">${side(g.away)}<div class="m-vs" aria-hidden="true">${g.neutral ? "VS" : "@"}</div>${side(g.home)}</div>`;
     } else {
       top = `<h2 class="m-title" id="modalTitle">${esc(g.title)}</h2><div class="m-when">${esc(g.subtitle || "")}</div>`;
     }
     const when = g.state === "in" ? `<span class="pill live">Live</span> ${esc(g.statusText)}` : g.state === "post" ? esc(g.statusText || "Final") : esc(whenLabel(g, "long"));
     const place = [g.venue, g.city].filter(Boolean).join(" · ");
-    // Follow/unfollow both teams right from the game (also how My Teams cards lead to unfollowing).
-    const followRow = g.away ? [g.away, g.home].filter((t) => t.id && teamByKey.has(`${g.league}:${t.id}`))
-      .map((t) => favButton(`${g.league}:${t.id}`, t.short || t.name)).join("") : "";
-    const teamBtns = g.away ? [g.away, g.home].filter((t) => t.id).map((t) => `<button type="button" class="btn btn-ghost" data-team="${esc(`${g.league}:${t.id}`)}">${esc(t.short)} schedule</button>`).join("") : "";
     const html = `<div class="m-hero" style="${artBackground(g)}">
         <span class="eyebrow" style="--c:${lg.color};justify-content:center"><span class="league-tag">${esc(lg.name)}</span></span>
         ${showcaseName(g) ? `<div class="m-event">${eventTag(g)}</div>` : ""}
@@ -1918,14 +1919,12 @@
         ${back === "free" ? `<button type="button" class="btn btn-ghost picker-back" data-open-free>${ICON.left}All free games</button>` : ""}
         ${back === "big" ? `<button type="button" class="btn btn-ghost picker-back" data-open-big>${ICON.left}All big games</button>` : ""}
         ${back === "row" && rowLists.has(openRowKey) ? `<button type="button" class="btn btn-ghost picker-back" data-open-row="${esc(openRowKey)}">${ICON.left}All ${esc(rowLists.get(openRowKey).title)}</button>` : ""}
-        ${followRow ? `<div class="m-follow" role="group" aria-label="My Teams">${followRow}</div>` : ""}
         ${watchListHTML(g.platforms, g.expected, g.regionNote)}
         ${g.expected ? `<p class="m-small">These are the channels expected under the league's TV deal. Exact channels for each game are confirmed closer to the date.</p>` : ""}
         <div class="m-foot">
           ${calMenuHTML(g)}
           <button type="button" class="btn btn-ghost" data-share>${ICON.share}Share</button>
           ${g.link ? `<a class="btn btn-ghost" href="${esc(g.link)}" target="_blank" rel="noopener">Game details ${ICON.ext}</a>` : ""}
-          ${teamBtns}
         </div>
         <p class="m-small">Prices are approximate. Blackouts and regional restrictions may apply.</p>
       </div>`;
@@ -1939,11 +1938,11 @@
   }
 
   /** The follow/unfollow toggle. With a team name it reads "Follow UConn" / "Following UConn". */
-  function favButton(key, name = "") {
+  function favButton(key, name = "", compact = false) {
     const on = state.favs.has(key);
-    const label = name ? (on ? `Following ${name}` : `Follow ${name}`) : (on ? "In My Teams" : "Add to My Teams");
+    const label = compact ? (on ? "Following" : "Follow") : name ? (on ? `Following ${name}` : `Follow ${name}`) : (on ? "In My Teams" : "Add to My Teams");
     const aria = on ? `${name || "This team"} is in My Teams. Tap to unfollow.` : `Add ${name || "this team"} to My Teams`;
-    return `<button type="button" class="btn btn-ghost ${on ? "is-on" : ""}" data-fav="${esc(key)}"${name ? ` data-fav-name="${esc(name)}"` : ""} aria-pressed="${on}" aria-label="${esc(aria)}">${ICON.star}${esc(label)}</button>`;
+    return `<button type="button" class="btn btn-ghost ${compact ? "m-fav " : ""}${on ? "is-on" : ""}" data-fav="${esc(key)}"${name ? ` data-fav-name="${esc(name)}"` : ""}${compact ? " data-fav-compact" : ""} aria-pressed="${on}" aria-label="${esc(aria)}">${ICON.star}${esc(label)}</button>`;
   }
 
   async function openTeam(key) {
@@ -2339,7 +2338,7 @@
       state.favs.has(k) ? state.favs.delete(k) : state.favs.add(k);
       state.favs.has(k) ? pendingBeam.add(k) : pendingBeam.delete(k);
       saveFavs();
-      t.outerHTML = favButton(k, t.dataset.favName || "");
+      t.outerHTML = favButton(k, t.dataset.favName || "", t.dataset.favCompact !== undefined);
       fx("pop", $(`[data-fav="${CSS.escape(k)}"] svg`), 1.4);
       $(`[data-fav="${CSS.escape(k)}"]`)?.focus();
       toast(state.favs.has(k) ? "Added to My Teams" : "Removed from My Teams");
