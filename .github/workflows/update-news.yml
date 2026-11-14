@@ -1,4 +1,4 @@
-# Every morning: refreshes the Unrivaled headlines in js/news-data.js and adds any new TheIXPodcast episodes to watch.html.
+# Every morning: refreshes the Unrivaled and UpShot League headlines in js/news-data.js and adds any new TheIXPodcast episodes to watch.html.
 # When the file changes it commits it, and Cloudflare Pages republishes the site automatically.
 name: Update headlines
 

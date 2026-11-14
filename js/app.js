@@ -322,7 +322,9 @@
         const date = a.published ? new Date(a.published) : new Date(SITE_NEWS.updated);
         if (!LEAGUES[a.league] || !a.headline || !a.url || date < cutoff) continue;
         if (!byLeague.has(a.league)) byLeague.set(a.league, []);
-        byLeague.get(a.league).push({ id: `news-${a.id}`, league: a.league, headline: a.headline, url: a.url, date });
+        // Photos only from the league's own site (UpShot League posts come with one).
+        const img = /^https:\/\/upshotleague\.com\/wp-content\//.test(a.img || "") ? a.img : "";
+        byLeague.get(a.league).push({ id: `news-${a.id}`, league: a.league, headline: a.headline, url: a.url, date, img });
       }
       lists.push(...byLeague.values());
     }
@@ -945,7 +947,7 @@
     // Same order as the ticker: leagues take turns, newest first within each league.
     const list = (state.news || []).filter((n) => state.league === "all" || n.league === state.league).slice(0, 12);
     if (!list.length) return "";
-    const src = (n) => { try { const h = new URL(n.url).hostname.replace(/^www\./, ""); return /espn/.test(h) ? "ESPN" : /unrivaled/.test(h) ? "Unrivaled" : h; } catch { return ""; } };
+    const src = (n) => { try { const h = new URL(n.url).hostname.replace(/^www\./, ""); return /espn/.test(h) ? "ESPN" : /unrivaled/.test(h) ? "Unrivaled" : /upshotleague/.test(h) ? "UpShot League" : h; } catch { return ""; } };
     const items = list.map((n) => {
       const lg = LEAGUES[n.league];
       // No photo: the league's own logo where we have it (Unrivaled), otherwise a tile in the league colour.
