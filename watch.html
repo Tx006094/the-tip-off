@@ -37,6 +37,12 @@
     .main { scroll-margin-top:16px; }
     .frame { position:relative; aspect-ratio:16/9; border-radius:16px; overflow:hidden; background:#000; border:1px solid var(--line-strong); }
     .frame iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
+    .cover { position:absolute; inset:0; width:100%; height:100%; padding:0; border:0; background:#000; cursor:pointer; }
+    .cover img { width:100%; height:100%; object-fit:cover; display:block; }
+    .bigplay { position:absolute; left:50%; top:50%; width:76px; height:76px; margin:-38px 0 0 -38px; border-radius:50%; background:var(--accent); display:grid; place-items:center; box-shadow:0 8px 30px rgba(0,0,0,.5); transition:transform .15s; }
+    .bigplay svg { width:30px; height:30px; fill:#fff; margin-left:4px; }
+    .cover:hover .bigplay { transform:scale(1.08); }
+    .cover:focus-visible { outline:3px solid var(--accent); outline-offset:-3px; }
     .now small { display:block; margin-top:14px; color:var(--accent); font-weight:700; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
     .now h1 { margin:4px 0 0; font:800 clamp(20px,2.4vw,26px)/1.2 var(--font-display); font-stretch:85%; }
     .list { list-style:none; margin:0; padding:0; display:grid; gap:10px; max-height:calc(100vh - 40px); overflow:auto; position:sticky; top:16px; }
@@ -91,9 +97,15 @@
     ];
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-    function play(i, autoplay) {
+    // Picking an episode shows its cover art with a play button; the video loads only when the viewer presses play.
+    function play(i) {
       const v = VIDEOS[i];
-      $("#frame").innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0${autoplay ? "&autoplay=1" : ""}" title="${esc(v.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+      $("#frame").innerHTML = `<button type="button" class="cover" aria-label="Play ${esc(v.title)}">
+          <img src="https://img.youtube.com/vi/${v.id}/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v.id}/hqdefault.jpg'" alt="${esc(v.title)} cover art">
+          <span class="bigplay" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4l14 8-14 8z"/></svg></span></button>`;
+      $("#frame .cover").addEventListener("click", () => {
+        $("#frame").innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0&autoplay=1" title="${esc(v.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
+      });
       $("#nowTitle").textContent = v.title;
       document.querySelectorAll(".tile").forEach((t, j) => t.setAttribute("aria-current", j === i ? "true" : "false"));
     }
@@ -102,10 +114,10 @@
         <span><b>${esc(v.title)}</b></span></button></li>`).join("");
     $("#list").addEventListener("click", (e) => {
       const b = e.target.closest(".tile"); if (!b) return;
-      play(+b.dataset.i, true);
+      play(+b.dataset.i);
       if (innerWidth <= 860) $("#mainPlayer").scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    play(0, false);
+    play(0);
   </script>
 </body>
 </html>
