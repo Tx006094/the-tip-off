@@ -1374,3 +1374,32 @@ main:focus { outline: none; }
 }
 .ix-lockup img { display: inline-block; max-width: none; }
 @media (max-width: 560px) { .ix-lockup img { display: block; } }
+
+/* Phones: a slimmer header that stays put, a tidier Filters panel, and the IX logos side by side */
+@media (max-width: 760px) {
+  html { scroll-padding-top: 150px; }
+  .brand { padding: 6px 0 5px; gap: 8px; }
+  .brand-mark { height: 40px; }
+  .brand-word { height: 32px; }
+  .search-toggle { width: 40px; height: 40px; }
+  .tab { padding: 10px 4px; font-size: 15px; }
+  /* Filters open: price and region share one centred row under the league chips */
+  .filters.open #priceSeg { margin-left: auto; }
+  .filters.open #regionSeg { margin-left: 0; margin-right: auto; }
+  .filters .segmented { height: 36px; }
+  .filters .segmented button { padding: 0 9px; font-size: 13px; }
+}
+@media (max-width: 560px) {
+  .ix-lockup { --c: 13px; display: block; white-space: nowrap; }
+  .ix-lockup .ix-tipoff { display: inline; }
+  .ix-lockup img { display: inline-block; }
+  .ix-tipoff img:first-child { vertical-align: calc(var(--c) * -0.195); }
+  .ix-tipoff img:last-child { vertical-align: calc(var(--c) * -0.035); }
+  .ix-lockup .ix-logo { vertical-align: calc(var(--c) * -0.176); }
+  .ix-lockup .ix-x { font-size: calc(var(--c) * 1.5); }
+}
+@media (max-width: 760px) {
+  /* keep the league chips and Filters button on row one, so price + region always drop to their own row */
+  .filters .chips { min-width: calc(100% - 120px); }
+  .filters.open { row-gap: 10px; }
+}

@@ -2475,13 +2475,7 @@
     if (open) fx("show", $$(".more-watch-body .shelf-block", box), { y: 8, step: 0.05 });
   });
 
-  // Phones: slide the header away while scrolling down, bring it back when scrolling up.
-  let lastY = scrollY;
-  window.addEventListener("scroll", () => {
-    const y = scrollY, bar = $("#topbar");
-    const tuck = innerWidth <= 760 && y > lastY && y > 200 && document.activeElement !== $("#search");
-    if (Math.abs(y - lastY) > 6) { bar.classList.toggle("tucked", tuck); lastY = y; }
-  }, { passive: true });
+  // The header stays on screen while scrolling (it used to slide away on phones).
 
   // ---------- boot ----------
   $("#year").textContent = new Date().getFullYear();
