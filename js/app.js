@@ -281,7 +281,7 @@
       }
     }
     for (const [lg, list] of Object.entries(CURATED_TEAMS)) {
-      for (const t of list) out.push({ key: `${lg}:${t.name}`, league: lg, name: t.name, short: t.name, color: t.color, logo: "" });
+      for (const t of list) out.push({ key: `${lg}:${t.name}`, league: lg, name: t.name, short: t.name, color: t.color, logo: t.logo || "" });
     }
     for (const t of out) teamByKey.set(t.key, t);
     return out;
@@ -942,7 +942,7 @@
     const days = Math.round(h / 24);
     return days === 1 ? "Yesterday" : `${days} days ago`;
   }
-  const NEWS_LOGOS = { unrivaled: "assets/brand/unrivaled-logo.svg" };
+  const NEWS_LOGOS = { unrivaled: "assets/brand/unrivaled-logo.svg", upshot: "assets/upshot/upshot-league-logo.png" };
   function newsSectionHTML() {
     // Same order as the ticker: leagues take turns, newest first within each league.
     const list = (state.news || []).filter((n) => state.league === "all" || n.league === state.league).slice(0, 12);

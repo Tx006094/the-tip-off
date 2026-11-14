@@ -46,11 +46,14 @@ const LEAGUES = {
 
 /* Teams for leagues that don't come from ESPN. */
 const CURATED_TEAMS = {
+  // Logos from upshotleague.com, saved in assets/upshot/.
   upshot: [
-    { name: "Charlotte Crown", color: "6d28d9" },
-    { name: "Greensboro Groove", color: "0ea5e9" },
-    { name: "Jacksonville Waves", color: "14b8a6" },
-    { name: "Savannah Steel", color: "64748b" },
+    { name: "Baltimore Starlings", color: "dc2626", logo: "assets/upshot/baltimore-starlings.png" },
+    { name: "Charlotte Crown", color: "6d28d9", logo: "assets/upshot/charlotte-crown.png" },
+    { name: "Greensboro Groove", color: "0ea5e9", logo: "assets/upshot/greensboro-groove.png" },
+    { name: "Jacksonville Waves", color: "14b8a6", logo: "assets/upshot/jacksonville-waves.png" },
+    { name: "Nashville Vibe", color: "1e3a8a", logo: "assets/upshot/nashville-vibe.png" },
+    { name: "Savannah Steel", color: "ec4899", logo: "assets/upshot/savannah-steel.png" },
   ],
   unrivaled: [
     { name: "Breeze BC", color: "38bdf8" },
