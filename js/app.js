@@ -1424,7 +1424,7 @@
     $$("#regionSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.region === state.region)));
     const ft = $("#filterToggle");
     if (ft) {
-      const bits = [state.price !== "all" && { free: "Free", paid: "Paid", mine: "Mine" }[state.price], state.region === "ca" && "CA"].filter(Boolean);
+      const bits = [state.price !== "all" && { free: "Free", paid: "Paid", mine: "My Services" }[state.price], state.region === "ca" && "CA"].filter(Boolean);
       ft.querySelector("span").textContent = bits.length ? `Filters · ${bits.join(", ")}` : "Filters";
       ft.classList.toggle("is-set", bits.length > 0);
     }
