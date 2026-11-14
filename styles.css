@@ -1419,16 +1419,6 @@ main:focus { outline: none; }
   .shelf .card .card-art { padding-top: 14px; }
   .shelf .card .card-art img, .shelf .card .card-art .mono { width: min(50%, 64px); }
 }
-/* Showcase games: a bigger, bolder event badge on the cards so the big games stand out */
-.card-event {
-  gap: 6px; padding: 6px 13px 6px 10px; border-radius: 999px; bottom: 10px;
-  font: 800 13px/1.15 var(--font-display); font-stretch: 88%; letter-spacing: .04em; text-transform: uppercase;
-  color: #1a1407; background: linear-gradient(180deg, #f3e2b3, #d9bf7c); border-color: #f6e7bd;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, .45), 0 0 0 3px rgba(232, 213, 163, .18);
-}
-.card-event svg { width: 16px; height: 16px; stroke-width: 2.2; }
-.card-art:has(.card-event) > :is(img, .mono, .at) { margin-bottom: 34px; }
-@media (max-width: 760px) {
-  .card-event { font-size: 12.5px; padding: 6px 12px 6px 9px; }
-  .shelf .card .card-art:has(.card-event) { aspect-ratio: 16 / 9; }
-}
+/* Game pop-up: the same showcase badge, just bigger, so a big game reads as one when you open it */
+.m-event .event-tag { gap: 8px; padding: 8px 16px 8px 13px; border-radius: 9px; font-size: 16px; font-weight: 700; }
+.m-event .event-tag svg { width: 19px; height: 19px; }
