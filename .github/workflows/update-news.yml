@@ -1,4 +1,4 @@
-# Refreshes the Unrivaled headlines in js/news-data.js every morning, the job the Mac used to run.
+# Every morning: refreshes the Unrivaled headlines in js/news-data.js and adds any new TheIXPodcast episodes to watch.html.
 # When the file changes it commits it, and Cloudflare Pages republishes the site automatically.
 name: Update headlines
 
@@ -17,14 +17,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fetch headlines
         run: python3 scripts/update_news.py
+      - name: Check for new TheIXPodcast episodes
+        run: python3 scripts/update_watch.py
       - name: Commit if anything changed
         run: |
-          if git diff --quiet -- js/news-data.js; then
-            echo "Headlines unchanged."
+          if git diff --quiet -- js/news-data.js watch.html; then
+            echo "Nothing new."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-            git add js/news-data.js
-            git commit -m "Update headlines"
+            git add js/news-data.js watch.html
+            git commit -m "Update headlines and episodes"
             git push
           fi
