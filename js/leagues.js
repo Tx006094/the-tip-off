@@ -66,17 +66,18 @@ const CURATED_TEAMS = {
     { name: "Rose BC", color: "be123c", logo: "assets/unrivaled/rose.png" },
     { name: "Vinyl BC", color: "7c2d12", logo: "assets/unrivaled/vinyl.png" },
   ],
+  // National team flags from ESPN (same image service as the WNBA and college logos).
   fiba: [
-    { name: "USA", color: "1d4ed8" },
-    { name: "Australia", color: "15803d" },
-    { name: "France", color: "1e3a8a" },
-    { name: "Spain", color: "b91c1c" },
-    { name: "Canada", color: "dc2626" },
-    { name: "Japan", color: "e11d48" },
-    { name: "Belgium", color: "111827" },
-    { name: "China", color: "dc2626" },
-    { name: "Germany", color: "0f172a" },
-    { name: "Nigeria", color: "16a34a" },
+    { name: "USA", color: "1d4ed8", logo: "https://a.espncdn.com/i/teamlogos/countries/500/usa.png" },
+    { name: "Australia", color: "15803d", logo: "https://a.espncdn.com/i/teamlogos/countries/500/aus.png" },
+    { name: "France", color: "1e3a8a", logo: "https://a.espncdn.com/i/teamlogos/countries/500/fra.png" },
+    { name: "Spain", color: "b91c1c", logo: "https://a.espncdn.com/i/teamlogos/countries/500/esp.png" },
+    { name: "Canada", color: "dc2626", logo: "https://a.espncdn.com/i/teamlogos/countries/500/can.png" },
+    { name: "Japan", color: "e11d48", logo: "https://a.espncdn.com/i/teamlogos/countries/500/jpn.png" },
+    { name: "Belgium", color: "111827", logo: "https://a.espncdn.com/i/teamlogos/countries/500/bel.png" },
+    { name: "China", color: "dc2626", logo: "https://a.espncdn.com/i/teamlogos/countries/500/chn.png" },
+    { name: "Germany", color: "0f172a", logo: "https://a.espncdn.com/i/teamlogos/countries/500/ger.png" },
+    { name: "Nigeria", color: "16a34a", logo: "https://a.espncdn.com/i/teamlogos/countries/500/ngr.png" },
   ],
 };
 
