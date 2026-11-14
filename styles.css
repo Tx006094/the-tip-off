@@ -1403,3 +1403,19 @@ main:focus { outline: none; }
   .filters .chips { min-width: calc(100% - 120px); }
   .filters.open { row-gap: 10px; }
 }
+/* Phones: lighter What to watch cards. No league tag (the logos say it), a shorter logo panel,
+   and the time and channel share one line. */
+@media (max-width: 760px) {
+  .shelf .card .card-badges .pill.lg { display: none; }
+  .shelf .card .card-badges { justify-content: flex-end; }
+  .shelf .card .card-art { aspect-ratio: 2 / 1; }
+  .shelf .card .card-body { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 8px; row-gap: 6px; padding: 11px 12px 12px; align-items: center; }
+  .shelf .card .card-title { grid-column: 1 / -1; }
+  .shelf .card .card-meta { grid-column: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .shelf .card .platform-row { grid-column: 2; margin: 0; padding: 0; flex-wrap: nowrap; justify-content: flex-end; }
+  .shelf .card .platform-row .ptag:nth-child(n+2) { display: none; }
+}
+@media (max-width: 760px) {
+  .shelf .card .card-art { padding-top: 14px; }
+  .shelf .card .card-art img, .shelf .card .card-art .mono { width: min(50%, 64px); }
+}
