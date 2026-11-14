@@ -1359,3 +1359,18 @@ main:focus { outline: none; }
 /* IX lockup: logos sit close to the × */
 .ix-lockup { gap: clamp(8px, 1.4vw, 14px); }
 .ix-logo { border-radius: 0; }
+/* IX lockup, level: both wordmarks' letters are the same height (--c) and sit on one baseline; the pin hangs below as in the logo.
+   Measured: TIP-OFF letters = 85/126 of the wordmark, 3/126 above its bottom; TheIXPodcast letters = 91/131, 16/131 above its bottom. */
+.ix-lockup { --c: clamp(18px, 2.3vw, 26px); display: block; line-height: 1; white-space: nowrap; }
+.ix-lockup .ix-tipoff { display: inline; }
+.ix-tipoff img:first-child { height: calc(var(--c) * 1.872); vertical-align: calc(var(--c) * -0.195); margin-right: calc(var(--c) * 0.3); }
+.ix-tipoff img:last-child { height: calc(var(--c) * 1.482); vertical-align: calc(var(--c) * -0.035); }
+.ix-lockup .ix-x { display: inline-block; margin: 0 calc(var(--c) * 0.55); font-size: calc(var(--c) * 1.5); vertical-align: calc(var(--c) * 0.12); }
+.ix-lockup .ix-logo { height: calc(var(--c) * 1.44); vertical-align: calc(var(--c) * -0.176); }
+@media (max-width: 560px) {
+  .ix-lockup { --c: 18px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .ix-lockup .ix-tipoff { display: flex; align-items: center; }
+  .ix-tipoff img, .ix-lockup .ix-logo { vertical-align: 0; }
+}
+.ix-lockup img { display: inline-block; max-width: none; }
+@media (max-width: 560px) { .ix-lockup img { display: block; } }
