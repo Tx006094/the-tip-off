@@ -1433,3 +1433,5 @@ main:focus { outline: none; }
 .m-team-link:focus-visible .nm { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 .m-team .m-fav { height: 30px; min-height: 0; padding: 0 12px; margin-top: 8px; font-size: 13px; gap: 5px; border-radius: 999px; background: rgba(0,0,0,.28); }
 .m-team .m-fav svg { width: 14px; height: 14px; }
+/* Headline league tags: lighten the league colour so small text passes contrast on dark */
+.nw-tag { color: color-mix(in srgb, var(--c) 55%, #fff); }

@@ -999,7 +999,7 @@
     const team = (t, other) => `<span class="srow-team${g.state === "post" && other.winner ? " lost" : ""}">${logoHTML(t)}<span class="srow-name">${t.rank ? `<span class="rk">${t.rank}</span>` : ""}${esc(t.short || t.name)}</span>${showScore && t.score !== "" ? `<span class="sc">${esc(t.score)}</span>` : ""}</span>`;
     const time = g.state === "in" ? `<span class="srow-live">Live</span>` : g.state === "post" ? "Final" : esc(clock(g));
     const sub = g.state === "in" ? esc(g.statusText) : esc(lg.short);
-    return `<button type="button" class="srow${g.state === "post" ? " is-final" : ""}" data-game="${esc(g.id)}" aria-label="${esc(`${matchupLabel(g)}, ${g.state === "pre" ? clock(g) : g.statusText}`)}">
+    return `<button type="button" class="srow${g.state === "post" ? " is-final" : ""}" data-game="${esc(g.id)}">
       <span class="srow-time">${time}<small style="--c:${lg.color}">${sub}</small></span>
       <span class="srow-match">${team(g.away, g.home)}${team(g.home, g.away)}${eventTag(g)}</span>
       <span class="srow-ch">${priceTag(g)}${platformTags(g.platforms, 3)}</span>

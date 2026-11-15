@@ -1,0 +1,22 @@
+# Browser caching (Cloudflare reads this file).
+# Images, fonts and the logo files change rarely; when one is replaced we add ?v= to its link.
+/assets/*
+  Cache-Control: public, max-age=604800
+# Scripts and styles always load with a ?v= version tag, so browsers can keep them for a year.
+/styles.css
+  Cache-Control: public, max-age=31536000, immutable
+/js/app.js
+  Cache-Control: public, max-age=31536000, immutable
+/js/platforms.js
+  Cache-Control: public, max-age=31536000, immutable
+/js/services.js
+  Cache-Control: public, max-age=31536000, immutable
+/js/leagues.js
+  Cache-Control: public, max-age=31536000, immutable
+/js/teams-data.js
+  Cache-Control: public, max-age=31536000, immutable
+/js/motion-fx.js
+  Cache-Control: public, max-age=31536000, immutable
+/js/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+# js/news-data.js is rewritten every morning under the same link, so it keeps the default short cache.
