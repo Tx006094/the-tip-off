@@ -1435,3 +1435,26 @@ main:focus { outline: none; }
 .m-team .m-fav svg { width: 14px; height: 14px; }
 /* Headline league tags: lighten the league colour so small text passes contrast on dark */
 .nw-tag { color: color-mix(in srgb, var(--c) 55%, #fff); }
+
+/* Calmer look (Nov 15): less motion, one banner at a time, softer colors */
+/* 1. Less motion */
+.intro-copy > *, .intro .stats, .next-pill, .modal, .sheet { animation: none !important; }
+.ticker-track { animation-duration: calc(var(--dur, 80s) * 2) !important; }
+.beam::before { animation: none !important; background: color-mix(in srgb, var(--paid) 55%, transparent) !important; }
+.next-pill { display: none !important; }
+.card-art img { transition: none !important; }
+/* 2. One banner at a time: quiet dark strip */
+.event-banner { background: #141418 !important; color: var(--text) !important; border-bottom: 1px solid var(--line-strong); font-size: 14px; }
+.event-banner .eb-tag { color: var(--accent) !important; background: none !important; }
+.event-banner .eb-cta { background: none !important; color: var(--accent) !important; border: 1px solid rgba(250,78,2,.5) !important; }
+.ix-hero ~ .event-banner { display: none !important; }
+.ix-hero { background: linear-gradient(180deg,#121216,#0a0a0c) !important; }
+.ix-hero::before { display: none; }
+.ix-tag i { box-shadow: none !important; }
+/* 3. Fewer colors */
+.league-tag, .eyebrow .league-tag { color: var(--muted) !important; }
+.card-art, .hero-bg, .m-hero { filter: saturate(.5) brightness(.85); }
+.card-art img { filter: drop-shadow(0 0 1px rgba(255,255,255,.35)) saturate(2) brightness(1.15); }
+/* 4. Hierarchy and space */
+section + section, .shelf, .sec-head { margin-top: 12px; }
+.sec-head h2 { letter-spacing: 0; }
