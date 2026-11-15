@@ -1041,7 +1041,11 @@
   const listNames = (names) => (names.length > 2 ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}` : names.join(" and "));
   const phaseOrder = { in: 0, pre: 1, post: 2 };
   // Live games first, then what's still to come in tip-off order; finished games drop to the end.
-  const byPhase = (a, b) => phaseOrder[a.state] - phaseOrder[b.state] || a.date - b.date || notability(b) - notability(a);
+  // Live games: ranked matchups first (two ranked teams, then one, best ranking first), then by start time.
+  const rankedCount = (g) => (g.home?.rank ? 1 : 0) + (g.away?.rank ? 1 : 0);
+  const bestRank = (g) => Math.min(Number(g.home?.rank) || 99, Number(g.away?.rank) || 99);
+  const liveRank = (a, b) => a.state !== "in" ? 0 : rankedCount(b) - rankedCount(a) || bestRank(a) - bestRank(b);
+  const byPhase = (a, b) => phaseOrder[a.state] - phaseOrder[b.state] || liveRank(a, b) || a.date - b.date || notability(b) - notability(a);
 
   function scheduleHTML() {
     if (!schedGames.some((g) => g.away)) return "";
