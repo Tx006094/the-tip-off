@@ -1458,3 +1458,26 @@ main:focus { outline: none; }
 /* 4. Hierarchy and space */
 section + section, .shelf, .sec-head { margin-top: 12px; }
 .sec-head h2 { letter-spacing: 0; }
+
+/* Team schedule pop-up (Nov 15) */
+.ts-meta { margin-top: 6px; color: var(--muted); font-size: 13px; text-align: center; }
+.ts-next { display: block; width: 100%; margin: 0 0 14px; padding: 14px; border-radius: 16px; background: var(--surface-2, #202027); border: 1px solid var(--line); color: var(--text); text-align: center; font: inherit; cursor: pointer; }
+.ts-next small { display: block; color: var(--accent); font: 800 11px var(--font-display); letter-spacing: .12em; text-transform: uppercase; }
+.ts-next b { display: block; font: 800 18px/1.2 var(--font-display); margin: 4px 0 2px; }
+.ts-next span { color: var(--muted); font-size: 13px; }
+.ts-tabs { display: flex; gap: 6px; justify-content: center; margin-bottom: 4px; }
+.ts-tabs button { flex: 1; max-width: 160px; min-height: 36px; background: none; border: 1px solid var(--line-strong); color: var(--muted); border-radius: 999px; font: 600 13px var(--font-body); cursor: pointer; }
+.ts-tabs button[aria-selected="true"] { background: var(--text); color: #000; border-color: var(--text); }
+.ts-mo { font: 800 12px var(--font-display); letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin: 16px 2px 4px; }
+.ts-row { display: grid; grid-template-columns: 46px 30px minmax(0,1fr) auto; gap: 10px; align-items: center; width: 100%; padding: 10px 4px; background: none; border: 0; border-bottom: 1px solid var(--line); color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.ts-row:hover { background: rgba(255,255,255,.03); }
+.ts-dt { text-align: center; line-height: 1.1; } .ts-dt b { display: block; font: 800 17px var(--font-display); } .ts-dt i { font-style: normal; color: var(--dim); font-size: 11px; text-transform: uppercase; }
+.ts-row img { width: 30px; height: 30px; object-fit: contain; }
+.ts-op { min-width: 0; } .ts-op b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ts-op span { color: var(--muted); font-size: 12.5px; }
+.ts-r { text-align: right; font-size: 13px; white-space: nowrap; }
+.ts-w { color: var(--free, #22c55e); font-weight: 800; } .ts-l, .ts-live { color: var(--live, #ff3b3b); font-weight: 800; }
+.ts-tag { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 999px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; }
+.ts-tag.free { color: var(--free, #22c55e); background: rgba(34,197,94,.12); } .ts-tag.paid { color: var(--paid); background: rgba(245,165,36,.12); }
+.ts-cal { text-align: center; margin-top: 16px; }
+.ts-cal button { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; color: var(--muted); font: 600 13px var(--font-body); cursor: pointer; min-height: 44px; }
+.ts-cal button:hover { color: var(--text); } .ts-cal svg { width: 15px; height: 15px; }

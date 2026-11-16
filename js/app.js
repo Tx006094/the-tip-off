@@ -1953,6 +1953,12 @@
     return `<button type="button" class="btn btn-ghost ${compact ? "m-fav " : ""}${on ? "is-on" : ""}" data-fav="${esc(key)}"${name ? ` data-fav-name="${esc(name)}"` : ""}${compact ? " data-fav-compact" : ""} aria-pressed="${on}" aria-label="${esc(aria)}">${ICON.star}${esc(label)}</button>`;
   }
 
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ts-view]"); if (!b) return;
+    const body = b.closest(".m-body"); if (!body?._tsViews) return;
+    body.querySelectorAll("[data-ts-view]").forEach((x) => x.setAttribute("aria-selected", String(x === b)));
+    $("#tsList").innerHTML = body._tsViews[b.dataset.tsView];
+  });
   async function openTeam(key) {
     const t = teamByKey.get(key) || state.teams.find((x) => x.key === key);
     if (!t) return false;
@@ -1988,6 +1994,7 @@
       try {
         const j = await getJSON(`${ESPN}/${lg.espn}/teams/${t.espnId}/schedule`);
         games = (j.events || []).map((e) => parseEspnEvent(e, t.league)).filter(Boolean);
+        games.meta = { record: j.team?.recordSummary || "", standing: j.team?.standingSummary || "" };
         scheduleCache.set(key, games);
       } catch { games = null; }
     }
@@ -1999,30 +2006,54 @@
     }
     const future = games.filter((g) => g.state !== "post").sort((a, b) => a.date - b.date);
     const past = games.filter((g) => g.state === "post").sort((a, b) => b.date - a.date);
-    const pool = future.length ? future : past;
-    const counts = new Map();
-    for (const g of pool) for (const p of g.platforms) {
-      const k = p.id === "local" ? "local:" + p.name : p.id;
-      const c = counts.get(k) || { p, n: 0 }; c.n++; counts.set(k, c);
-    }
-    const freeGames = pool.filter((g) => priceInfo(g.platforms).kind === "free").length;
-    const summary = [...counts.values()].sort((a, b) => b.n - a.n).map(({ p, n }) => `<span class="ptag ${p.access}">${esc(p.name)} <em>${n}</em></span>`).join("");
-    const word = future.length ? "upcoming" : "listed";
+    const meta = games.meta || {};
+    const metaLine = [meta.record, meta.standing].filter(Boolean).join(" · ");
+    if (metaLine) $(".m-hero .eyebrow")?.insertAdjacentHTML("afterend", `<div class="ts-meta">${esc(metaLine)}</div>`);
+    const mine = (g) => (String(g.home.id) === String(t.espnId) ? { me: g.home, op: g.away, home: true } : { me: g.away, op: g.home, home: false });
+    const opLogo = (op) => op.logo || (op.id ? `https://a.espncdn.com/i/teamlogos/${t.league === "wnba" ? "wnba/500/" + String(op.abbr || "").toLowerCase() : "ncaa/500/" + op.id}.png` : "");
+    const tm = (d) => d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    const row = (g) => {
+      gameById.set(g.id, g);
+      const { me, op, home } = mine(g), d = g.date;
+      const name = `${home ? "vs." : "at"} ${op.rank ? "No. " + op.rank + " " : ""}${op.short || op.name}`;
+      let right;
+      if (g.state === "post") right = `<span class="${me.winner ? "ts-w" : "ts-l"}">${me.winner ? "W" : "L"}</span> ${esc(me.score)}-${esc(op.score)}`;
+      else if (g.state === "in") right = `<span class="ts-live">Live</span> ${esc(me.score)}-${esc(op.score)}`;
+      else {
+        const pi = priceInfo(g.platforms), ch = g.platforms[0];
+        right = ch ? `<span class="ts-tag ${pi.kind === "free" ? "free" : "paid"}">${pi.kind === "free" ? "Free" : "Paid"} · ${esc((pi.free[0] || ch).name)}</span>` : "";
+      }
+      const lg = opLogo(op);
+      return `<button type="button" class="ts-row" data-game="${esc(g.id)}"><span class="ts-dt"><b>${d.getDate()}</b><i>${esc(d.toLocaleDateString([], { weekday: "short" }))}</i></span>
+        ${lg ? `<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : "<span></span>"}
+        <span class="ts-op"><b>${esc(name)}</b><span>${g.state === "post" ? "Final" : g.state === "in" ? esc(g.statusText || "Live") : esc(tm(d))}</span></span><span class="ts-r">${right}</span></button>`;
+    };
+    const listHTML = (arr) => {
+      let mo = "", h = "";
+      for (const g of arr) {
+        const m = g.date.toLocaleDateString([], { month: "long", year: g.date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined });
+        if (m !== mo) { mo = m; h += `<div class="ts-mo">${esc(m)}</div>`; }
+        h += row(g);
+      }
+      return h || `<div class="notice" style="margin:12px 0 0">Nothing here yet. ${esc(lg.season)}</div>`;
+    };
+    const all = [...games].sort((a, b) => a.date - b.date);
+    const views = { up: listHTML(future), past: listHTML(past), all: listHTML(all) };
+    const first = future.length ? "up" : "past";
+    const n = future[0];
     let html = "";
-    if (pool.length) {
-      html += freeGames
-        ? `<div class="verdict free">${ICON.check}<div>${freeGames} of ${pool.length} ${word} games are free to watch<small>Based on channels announced so far. More are added closer to game day.</small></div></div>`
-        : `<div class="verdict paid">${ICON.card}<div>All ${pool.length} ${word} games need a subscription<small>Based on channels announced so far. More are added closer to game day.</small></div></div>`;
-      html += `<h3>Channels this season</h3><div class="summary-chips">${summary || '<span class="ptag more">No channels announced yet</span>'}</div>`;
+    if (n) {
+      const { op, home } = mine(n), pi = priceInfo(n.platforms), ch = pi.free[0] || n.platforms[0];
+      html += `<button type="button" class="ts-next" data-game="${esc(n.id)}"><small>${n.state === "in" ? "Live now" : "Next game"}</small><b>${home ? "vs." : "at"} ${esc(op.short || op.name)}</b>
+        <span>${esc(n.date.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" }))} · ${esc(tm(n.date))}${ch ? " · " + esc(ch.name) : ""}</span></button>`;
     }
+    html += `<div class="ts-tabs" role="tablist">${[["up", "Upcoming"], ["past", "Results"], ["all", "All"]].map(([v, l]) =>
+      `<button type="button" role="tab" data-ts-view="${v}" aria-selected="${v === first}">${l}</button>`).join("")}</div>
+      <div class="ts-list" id="tsList">${views[first]}</div>`;
     const calGames = future.filter(canCalendar);
-    if (calGames.length) {
-      html += `<div class="team-cal"><button type="button" class="btn btn-ghost" data-ics-team="${esc(key)}">${ICON.cal}Add ${calGames.length === 1 ? "this game" : `all ${calGames.length} games`} to my calendar</button>
-        <span>Downloads a calendar file with each game's time and channels. Open it to add the games to Apple Calendar or Outlook, or import it into Google Calendar.</span></div>`;
-    }
-    if (future.length) html += `<h3>Upcoming · times in ${esc(tzName())}</h3><div class="sched">${future.map(schedItemHTML).join("")}</div>`;
-    else html += `<div class="notice" style="margin:18px 0 0">No upcoming games listed. ${esc(lg.season)}</div>`;
-    if (past.length) html += `<details class="past"><summary>Past results (${past.length})</summary><div class="sched" style="margin-top:10px">${past.map(schedItemHTML).join("")}</div></details>`;
+    if (calGames.length) html += `<div class="ts-cal"><button type="button" class="linkbtn" data-ics-team="${esc(key)}">${ICON.cal}Add ${calGames.length === 1 ? "this game" : `all ${calGames.length} games`} to my calendar</button></div>`;
+    body.classList.add("ts-body");
+    body._tsViews = views;
     body.innerHTML = html;
     return true;
   }
