@@ -1453,8 +1453,8 @@ main:focus { outline: none; }
 .ix-tag i { box-shadow: none !important; }
 /* 3. Fewer colors */
 .league-tag, .eyebrow .league-tag { color: var(--muted) !important; }
-.card-art, .hero-bg, .m-hero { filter: saturate(.5) brightness(.85); }
-.card-art img { filter: drop-shadow(0 0 1px rgba(255,255,255,.35)) saturate(2) brightness(1.15); }
+.card-art, .hero-bg, .m-hero { filter: saturate(.75) brightness(.93); }
+.card-art img { filter: drop-shadow(0 0 1px rgba(255,255,255,.35)) saturate(1.33) brightness(1.07); }
 /* 4. Hierarchy and space */
 section + section, .shelf, .sec-head { margin-top: 12px; }
 .sec-head h2 { letter-spacing: 0; }
