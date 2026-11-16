@@ -329,6 +329,10 @@
       lists.push(...byLeague.values());
     }
     const out = [];
+    // Our own story, pinned first in headlines and the ticker for two weeks after the lottery.
+    if (Date.now() < Date.parse("2026-11-30T05:00:00Z")) out.push({ id: "news-tipoff-lottery-2027", league: "wnba",
+      headline: "Toronto Tempo win the 2027 WNBA Draft Lottery; Houston picks No. 2. See the full order",
+      url: "/draft-lottery", date: new Date("2026-11-16T01:30:00Z"), img: "" });
     const longest = Math.max(0, ...lists.map((l) => l.length));
     for (let i = 0; i < longest; i++) for (const l of lists) if (l[i]) out.push(l[i]);
     return out;
@@ -955,7 +959,7 @@
       const thumb = n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy" decoding="async">`
         : leagueLogo ? `<span class="nw-ph nw-logo" style="--c:${lg.color}"><img src="${leagueLogo}" alt=""></span>`
         : `<span class="nw-ph" style="--c:${lg.color}">${esc(lg.short)}</span>`;
-      return `<a class="nw-item" href="${esc(n.url)}" target="_blank" rel="noopener">
+      return `<a class="nw-item" href="${esc(n.url)}"${n.url.startsWith("/") ? "" : ' target="_blank" rel="noopener"'}>
           <span class="nw-thumb">${thumb}</span>
           <span class="nw-text"><span class="nw-tag" style="--c:${lg.color}">${esc(lg.short)}</span><b>${esc(n.headline)}</b><small>${esc([src(n), ago(n.date)].filter(Boolean).join(" · "))}</small></span>
         </a>`;
@@ -2085,7 +2089,7 @@
       ${tickerTeam(g.home, fin && g.home.winner)} <b>${esc(g.home.score)}</b></button>`;
   }
   function tickerNewsHTML(n, focusable) {
-    return `<a class="t-item t-news" href="${esc(n.url)}" target="_blank" rel="noopener"${focusable ? "" : ' tabindex="-1"'}>
+    return `<a class="t-item t-news" href="${esc(n.url)}"${n.url.startsWith("/") ? "" : ' target="_blank" rel="noopener"'}${focusable ? "" : ' tabindex="-1"'}>
       <span class="t-tag" style="--c:${LEAGUES[n.league].color}">${esc(LEAGUES[n.league].short)}</span>${esc(n.headline)} <span class="t-arrow" aria-hidden="true">↗</span></a>`;
   }
   function renderTicker() {
