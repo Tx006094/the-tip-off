@@ -588,7 +588,7 @@
       const nextDay = g && g.date - Date.now() < 6 * 86400000 ? g.date.toLocaleDateString([], { weekday: "short" }) : g && dayLabel(g.date);
       const nextTxt = g ? `Next: ${nextDay} · ${clock(g)}` : "See the full schedule";
       line = `<span class="mt-when mt-final ${won ? "won" : "lost"}">${esc(res)}</span><span class="mt-vs">${esc(vsOf(last))}</span><span class="mt-ch">${esc(nextTxt)}</span>`;
-      attr = `data-game="${esc(last.id)}" aria-label="${esc(`${team.name}: ${res}, ${vsOf(last)}. ${nextTxt}`)}"`;
+      attr = `data-team="${esc(key)}" aria-label="${esc(`${team.name}: ${res}, ${vsOf(last)}. ${nextTxt}. Open schedule`)}"`;
       gameById.set(last.id, last);
     } else if (g) {
       const live = g.state === "in";
@@ -596,7 +596,7 @@
       const when = live ? `Live now${me.score !== "" ? ` · ${me.score}–${opp.score}` : ""}` : `${dayLabel(g.date)} · ${clock(g)}`;
       const ch = g.platforms.length ? g.platforms.slice(0, 2).map((x) => x.name).join(", ") : "Channel TBA";
       line = `<span class="mt-when${live ? " is-live" : ""}">${esc(when)}</span><span class="mt-vs">${esc(vsOf(g))}</span><span class="mt-ch">${esc(ch)}</span>`;
-      attr = `data-game="${esc(g.id)}" aria-label="${esc(`${team.name}: ${when}, ${vsOf(g)}, on ${ch}`)}"`;
+      attr = `data-team="${esc(key)}" aria-label="${esc(`${team.name}: ${when}, ${vsOf(g)}, on ${ch}. Open schedule`)}"`;
       gameById.set(g.id, g);
     } else {
       line = `<span class="mt-when">No upcoming games</span><span class="mt-ch">See the full schedule</span>`;
