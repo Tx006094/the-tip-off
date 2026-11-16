@@ -2,12 +2,13 @@
 
 Reads the channel's Videos page (youtube.com/@theixpodcast/videos), finds any video IDs not already in the
 VIDEOS list in watch.html, and puts them at the top. Existing entries (and any titles edited by hand) are left
-alone, and older videos left off the page stay off. Keeps the newest 12. If YouTube can't be reached or the page changes shape, it changes nothing.
+alone, and older videos left off the page stay off. Videos deleted from YouTube are dropped. Keeps the newest 12. If YouTube can't be reached or the page changes shape, it changes nothing.
 """
 import json
 import pathlib
 import re
 import sys
+import urllib.error
 import urllib.request
 
 CHANNEL = "https://www.youtube.com/@theixpodcast/videos"
@@ -50,6 +51,18 @@ def latest_videos():
     return out
 
 
+def gone(vid):
+    """True only when YouTube clearly says the video no longer exists (deleted). Network trouble counts as still there."""
+    url = "https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + vid
+    try:
+        urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"}), timeout=15)
+        return False
+    except urllib.error.HTTPError as e:
+        return e.code in (400, 404)
+    except Exception:
+        return False
+
+
 def main():
     try:
         videos = latest_videos()
@@ -73,15 +86,19 @@ def main():
         if v in have:
             break
         new.append((v, t))
-    if not new:
+    # drop episodes that were deleted from YouTube
+    kept = [l for l in lines if not (re.search(r'id: "([^"]+)"', l) and gone(re.search(r'id: "([^"]+)"', l).group(1)))]
+    removed = len(lines) - len(kept)
+    if not new and not removed:
         print("No new episodes.")
         return 0
     # newest first, in the channel's order
     add = [f"      {{ id: {json.dumps(v)}, title: {json.dumps(t, ensure_ascii=False)} }}," for v, t in new]
-    lines = (add + lines)[:KEEP]
+    lines = (add + kept)[:KEEP]
     s = s[: m.start(2)] + "\n".join(lines) + s[m.end(2):]
     PAGE.write_text(s, encoding="utf-8")
-    print("Added:", ", ".join(t for _, t in new))
+    if new: print("Added:", ", ".join(t for _, t in new))
+    if removed: print("Removed deleted videos:", removed)
     return 0
 
 
