@@ -59,6 +59,28 @@
     .tile[aria-current="true"] .th { border-color:var(--accent); }
     .tile[aria-current="true"] b { color:var(--accent); }
     .tile[aria-current="true"] .th::after { content:"NOW PLAYING"; position:absolute; left:10px; top:10px; border-radius:999px !important; background:var(--accent); color:#fff; font:800 10px var(--font-display); letter-spacing:.08em; padding:3px 6px; border-radius:4px; }
+    .tile .th .dur { position:absolute; right:8px; bottom:8px; background:rgba(0,0,0,.8); color:#fff; font:700 12px var(--font-body); padding:2px 6px; border-radius:6px; }
+    .meta { color:var(--muted); font-size:13px; margin:6px 0 0; }
+    .tools { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 0; }
+    .tools button { min-height:40px; padding:0 14px; border-radius:999px; border:1px solid var(--line-strong); background:var(--surface); color:var(--text); font:600 13px var(--font-body); cursor:pointer; }
+    .tools button:hover { border-color:var(--text); }
+    .tools .ok { color:var(--accent); font-size:13px; font-weight:700; align-self:center; }
+    .chapters { margin:16px 0 0; }
+    .chapters h2, .about h2 { font:800 13px var(--font-display); letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 8px; }
+    .chap-list { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; scrollbar-width:thin; }
+    .chap { flex:0 0 auto; max-width:220px; text-align:left; padding:8px 12px; border-radius:12px; border:1px solid var(--line); background:var(--surface); color:var(--text); font:500 13px/1.3 var(--font-body); cursor:pointer; }
+    .chap b { display:block; color:var(--accent); font-size:12px; }
+    .chap:hover { border-color:var(--line-strong); }
+    .about { margin:18px 0 0; padding:14px 16px; border-radius:16px; background:var(--surface); border:1px solid var(--line); }
+    .about p { margin:0; white-space:pre-line; color:var(--text); font-size:14px; line-height:1.55; }
+    .about.clamp p { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+    .about .more { margin-top:8px; padding:0; border:0; background:none; color:var(--accent); font:700 13px var(--font-body); cursor:pointer; }
+    .upnext { position:absolute; inset:0; z-index:3; display:grid; place-items:center; background:rgba(0,0,0,.82); text-align:center; padding:16px; }
+    .upnext small { display:block; color:var(--accent); font:800 12px var(--font-display); letter-spacing:.12em; }
+    .upnext b { display:block; font:800 clamp(16px,2.4vw,22px)/1.25 var(--font-display); margin:6px auto 14px; max-width:520px; }
+    .upnext .row { display:flex; gap:8px; justify-content:center; }
+    .upnext button { min-height:40px; padding:0 16px; border-radius:999px; border:1px solid var(--line-strong); background:var(--surface); color:var(--text); font:700 13px var(--font-body); cursor:pointer; }
+    .upnext button.go { background:var(--accent); border-color:var(--accent); color:#fff; }
     .cta { display:block; width:max-content; margin:0 auto 60px; padding:13px 24px; border-radius:999px; background:var(--accent); color:#fff; font-weight:700; text-decoration:none; }
     @media (max-width:860px) {
       .player-grid { grid-template-columns:1fr; }
@@ -80,7 +102,11 @@
     <div class="player-grid">
       <div class="main" id="mainPlayer">
         <div class="frame" id="frame"></div>
-        <div class="now"><small>Now playing</small><h1 id="nowTitle"></h1></div>
+        <div class="now"><small>Now playing</small><h1 id="nowTitle"></h1><p class="meta" id="nowMeta"></p>
+          <div class="tools"><button type="button" id="shareNow">Share</button><button type="button" id="shareAt" hidden>Share from 0:00</button><span class="ok" id="shareOk" hidden>Link copied</span></div>
+          <div class="chapters" id="chapters" hidden><h2>Chapters</h2><div class="chap-list" id="chapList"></div></div>
+          <div class="about clamp" id="about" hidden><h2>About this episode</h2><p id="aboutText"></p><button type="button" class="more" id="aboutMore">Show more</button></div>
+        </div>
       </div>
       <ul class="list" id="list" aria-label="More episodes"></ul>
     </div>
@@ -89,40 +115,120 @@
   <script>
     // Episodes from youtube.com/@theixpodcast, newest first. Add new ones at the top.
     const VIDEOS = [
-      { id: "YCnRiniffD0", title: "South Carolina 89, USC 85: What Changed From Last Year" },
-      { id: "2UnOFeYm5sw", title: "The WNBA Just Made Its Injury Problem Worse" },
-      { id: "u__z4SkFiD8", title: "Team USA - FIBA Women's Basketball 2026 Roster" },
-      { id: "dnUDNqXJYzk", title: "WNBA Trade Deadline" },
-      { id: "e4oJ_sqiLnk", title: "WNBA All-Star Voting Explained" },
-      { id: "wQJLfIz9E5k", title: "The Chennedy Carter Problem: A WNBA Timeline" },
-      { id: "t1s8Y9eJ-nY", title: "The 2026 WNBA Rookie Class Is Different: Ranking the Top 5 Right Now" },
-      { id: "fTehfl1ECwM", title: "Is Napheesa Collier Back...?" },
-      { id: "XqmkRhrgkOo", title: "The WNBA Just Turned Back the Clock" },
-      { id: "dTxfHdeX9dc", title: "Did A'ja Wilson Hijack the MVP Race?" },
+      { id: "YCnRiniffD0", title: "South Carolina 89, USC 85: What Changed From Last Year", len: 249, date: "2026-11-16", desc: "No. 1 South Carolina beat No. 3 USC 89–85 in Greenville to win “The Real SC” series. The final 15 seconds came down to a blocked shot and a replay challenge.\n\nIn this episode of theixpodcast, we cover what changed after South Carolina’s 17-point win in Los Angeles last year:\n\n🏀 JuJu Watkins is back. In only USC’s fourth game after missing all of last season with a torn ACL, she scored 25 points, 11 of them in the fourth quarter.\n🏀 USC fixed its rebounding problem. After getting outrebounded 56–32 last year, the Trojans won the offensive glass and took more shots.\n🏀 Experience still won. South Carolina shot 55% to USC’s 42%. Tessa Johnson (career-high 28), Joyce Edwards and Chloe Kitts combined for 63 points.\n\nWe also look at where USC’s young core of Jazzy Davidson and Saniyah Hall goes from here, and whether these teams could meet again in March.\n\n⏱️ CHAPTERS\n0:00 The final 15 seconds\n0:00 JuJu Watkins’ return\n0:00 How USC closed the gap\n0:00 Why South Carolina still won\n0:00 What’s next for both teams\n\n📺 THIS EPISODE IS SPONSORED BY THE TIP-OFF\nNever miss tip-off again. Enter the TV and streaming services you already have, and The Tip-Off shows you exactly where to watch every women’s basketball game.\n👉 https://thetipoffguide.com\n\n🔔 Subscribe to theixpodcast for women’s basketball explained, every week." },
+      { id: "2UnOFeYm5sw", title: "The WNBA Just Made Its Injury Problem Worse", len: 259, date: "2026-11-15", desc: "The WNBA is going to a record 50-game season in 2027, with no midseason break. We dug into four years of injury data to see what more games could mean for player health, and why roster size is the piece no one’s talking about.\n\nIn 2025, the first 44-game season, the WNBA set records for injuries and games missed. But the data shows something surprising: per game, players aren’t clearly getting hurt more often. They’re just playing a lot more games. That’s why 50 games matters, and why deeper rosters could help spread the extra minutes.\n\nIn this video:\n0:00 – The WNBA’s record 50-game season\n0:35 – What the injury data actually shows\n1:20 – Why more games means more total injuries\n1:55 – Are back-to-backs really the problem?\n2:30 – The roster size question\n3:05 – The minutes math: 1,200 extra minutes per team\n3:35 – The NBA counterpoint\n3:55 – What to watch in 2027" },
+      { id: "u__z4SkFiD8", title: "Team USA - FIBA Women's Basketball 2026 Roster", len: 356, date: "2026-08-06", desc: "Caitlin Clark, Paige Bueckers Named to Team USA's FIBA World Cup Roster — Full Breakdown\n\nUSA Basketball just dropped its 12-player roster for the 2026 FIBA Women's World Cup, and Caitlin Clark and Paige Bueckers are both in. In this episode we break down the full roster, the coaching staff, and the three storylines that matter most: the youth movement led by Clark, Bueckers, Angel Reese, and Aliyah Boston, the veteran core anchored by A'ja Wilson and Breanna Stewart, and the notable absence of Sabrina Ionescu.\n\nTeam USA is chasing its 12th World Cup gold and a fifth straight championship in Berlin, Germany, September 4–13. Group play opens against China, Italy, and Czechia." },
+      { id: "dnUDNqXJYzk", title: "WNBA Trade Deadline", len: 238, date: "2026-08-01", desc: "WNBA Trade Deadline: Why Kelsey Plum and Skylar Diggins Are the Names to Watch\nSunday, August 2nd at 3 PM ET, the WNBA trade deadline closes... and two names have dominated the conversation heading into it: Kelsey Plum and Skylar Diggins.\nIn this episode, we break down why the WNBA's hard salary cap makes every deadline deal different from the NBA or MLB, what's actually driving the Kelsey Plum speculation in Los Angeles, and the specific chain of events in Chicago (a benching, a public reaction, and a front office standing firm) that's put Skylar Diggins in the middle of trade rumors.\nWe separate what's confirmed from what's still speculation, and lay out what to watch for when the deadline hits.\n📊 Stats current through July 2026\n🏀 Sources: ESPN, CBS Sports, Yahoo Sports\nTimestamps:\n0:00 The deadline moment\n0:15 Why the WNBA's hard cap changes everything\n1:00 Kelsey Plum & the Sparks' crossroads\n1:45 Skylar Diggins & the Chicago Sky situation\n3:15 What to watch for Sunday\nSubscribe for weekly WNBA breakdowns, new episodes every Wednesday." },
+      { id: "e4oJ_sqiLnk", title: "WNBA All-Star Voting Explained", len: 298, date: "2026-07-24", desc: "How does WNBA All-Star voting actually work? Fan votes, player votes, media votes... it all factors in differently than you'd think. In this episode, we break down the full voting process, how the weighting works, and why the results sometimes surprise even die-hard fans." },
+      { id: "wQJLfIz9E5k", title: "The Chennedy Carter Problem: A WNBA Timeline", len: 239, date: "2026-07-12", desc: "On July 7th, the defending champion Las Vegas Aces waived Chennedy Carter, their leading bench scorer, two days after she played 15 minutes off the bench. No explanation given. It's the fourth time in her career a team has parted ways with her under similar circumstances.\nIn this episode, we trace Carter's path from the 2020 draft through Atlanta, LA, Chicago, and now Vegas... the flashes of elite scoring, the recurring conflicts, and what the pattern actually tells us about her career at 27.\n🏀 New episodes every Wednesday.\n💬 Let us know what you think in the comments." },
+      { id: "t1s8Y9eJ-nY", title: "The 2026 WNBA Rookie Class Is Different: Ranking the Top 5 Right Now", len: 875, date: "2026-06-16", desc: "The 2026 WNBA rookie class was supposed to be a two-player race between Azzi Fudd and Olivia Miles. Instead, it's become one of the deepest and most surprising rookie classes in years — and in this episode, we break down the top 5 rookies right now, where they stand, and what the stats actually say.\nFrom Olivia Miles dominating as the frontrunner in Minnesota, to Azzi Fudd fighting the weight of the #1 overall pick, to the undrafted international stars like Pauline Astier and Jovana Nogić who nobody saw coming — this is your complete guide to the 2026 WNBA Rookie of the Year race.\nWe cover the stats, the storylines, the betting odds, and the bigger picture: why this rookie class is proof that the WNBA's talent pipeline and new CBA are changing the league forever.\n⏱️ TIMESTAMPS\n\n0:00 – The rookie class nobody expected\n\n1:15 – Why this class matters (CBA + college pipeline)\n\n2:30 – #5 Gabriela Jaquez (Chicago Sky)\n\n3:45 – #4 Jovana Nogić (Phoenix Mercury)\n\n5:00 – #3 Pauline Astier (New York Liberty)\n\n6:20 – #2 Azzi Fudd (Dallas Wings)\n\n7:40 – #1 Olivia Miles (Minnesota Lynx)\n\n9:00 – What it all means + final takeaway\n\n🏀 IN THIS EPISODE\n\n2026 WNBA Rookie of the Year race explained\nOlivia Miles vs Azzi Fudd breakdown\nThe undrafted rookies making history\nFull top 5 rookie rankings with stats\n\n💬 Who's YOUR pick for Rookie of the Year? Drop it in the comments — we read every one.\n👍 LIKE if this helped you catch up on the rookie race\n\n🔔 SUBSCRIBE for new WNBA breakdowns every Wednesday & Friday" },
+      { id: "fTehfl1ECwM", title: "Is Napheesa Collier Back...?", len: 187, date: "2026-06-11", desc: "Napheesa Collier is getting closer to her return, and the timing couldn't be more fascinating.\n\nAfter undergoing surgeries on both ankles and missing the start of the season, Collier is preparing to rejoin a Minnesota Lynx team that has somehow become one of the WNBA's biggest surprises. Despite losing five key rotation players and their superstar, the Lynx have raced out to a 7-2 start behind elite defense and the emergence of rookie sensation Olivia Miles.\n\nIn this episode of The IX Podcast, we break down:\n\n🏀 Napheesa Collier's road back from injury\n\n🏀 How the Lynx stayed among the WNBA's best without their MVP candidate\n\n🏀 Olivia Miles' incredible rookie season\n\n🏀 Whether Minnesota's chemistry changes when Collier returns\n\n🏀 Why the Lynx may have championship aspirations when fully healthy\n\nCan Collier and Miles become the WNBA's most dangerous duo? Or will Minnesota face the challenge of reintegrating its superstar into a team that has already found its identity?\n\nLet us know in the comments: Do the Lynx win the championship when Napheesa Collier returns?\n\n🔔 Subscribe for weekly WNBA analysis, news, player stories, CBA coverage, expansion updates, and deep dives from around women's basketball." },
+      { id: "XqmkRhrgkOo", title: "The WNBA Just Turned Back the Clock", len: 178, date: "2026-05-07", desc: "30 years later… the WNBA is finally getting the respect its pioneers built from the ground up. 👏🏾🔥\nThe throwback jerseys, retro courts, and old-school logos aren’t just about nostalgia… they’re a reminder that this league survived, evolved, and is now entering a completely different era.\nQuestion for the fans:\nWhich classic WNBA era or team do you wish got MORE recognition today? 👀🏀" },
+      { id: "dTxfHdeX9dc", title: "Did A'ja Wilson Hijack the MVP Race?", len: 381, date: "2025-08-19", desc: "A’ja Wilson just dropped 32 points and 20 rebounds — the kind of performance that defines greatness. In this episode, we break down how she dominated on both ends of the floor, why this game stands out even in her legendary career, and what it means for the Las Vegas Aces moving forward." },
     ];
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+    const clock = (sec) => { sec = Math.max(0, Math.floor(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s2 = String(sec % 60).padStart(2, "0"); return h ? `${h}:${String(m).padStart(2, "0")}:${s2}` : `${m}:${s2}`; };
+    /** Chapters from description timestamps (YouTube's rule: starts at 0:00, at least three, in order). */
+    function chapters(desc) {
+      const out = [];
+      for (const line of String(desc || "").split("\n")) {
+        const m = /^\s*\(?((?:\d+:)?\d{1,2}:\d{2})\)?\s*[-–—:]?\s*(.+)$/.exec(line);
+        if (!m) continue;
+        const sec = m[1].split(":").reduce((a, n) => a * 60 + Number(n), 0);
+        out.push({ sec, title: m[2].trim() });
+      }
+      if (out.length < 3 || out[0].sec !== 0 || out.some((c, i) => i && c.sec <= out[i - 1].sec)) return [];
+      return out;
+    }
+    const stripChapters = (desc) => String(desc || "").split("\n").filter((l) => !/^\s*\(?(?:\d+:)?\d{1,2}:\d{2}\)?\s*[-–—:]?\s*\S/.test(l)).join("\n").replace(/\n{3,}/g, "\n\n").trim();
+
+    let cur = 0, player = null, apiReady = null, countdown = null;
+    function loadAPI() {
+      if (!apiReady) apiReady = new Promise((res) => { window.onYouTubeIframeAPIReady = res; const t = document.createElement("script"); t.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(t); });
+      return apiReady;
+    }
+    function stopCountdown() { clearInterval(countdown); countdown = null; $("#frame .upnext")?.remove(); }
     // Picking an episode shows its cover art with a play button; the video loads only when the viewer presses play.
-    function play(i) {
+    function play(i, start = 0, autoplay = false) {
+      stopCountdown();
+      cur = i; player = null;
       const v = VIDEOS[i];
       $("#frame").innerHTML = `<button type="button" class="cover" aria-label="Play ${esc(v.title)}">
           <img src="https://img.youtube.com/vi/${v.id}/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v.id}/hqdefault.jpg'" alt="${esc(v.title)} cover art">
           <span class="bigplay" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4l14 8-14 8z"/></svg></span></button>`;
-      $("#frame .cover").addEventListener("click", () => {
-        $("#frame").innerHTML = `<iframe src="https://www.youtube-nocookie.com/embed/${v.id}?rel=0&autoplay=1" title="${esc(v.title)}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>`;
-      });
+      $("#frame .cover").addEventListener("click", () => start_(start));
       $("#nowTitle").textContent = v.title;
+      const date = v.date ? new Date(v.date + "T12:00:00").toLocaleDateString([], { month: "long", day: "numeric", year: "numeric" }) : "";
+      $("#nowMeta").textContent = [date, v.len ? clock(v.len) : ""].filter(Boolean).join(" · ");
+      const ch = chapters(v.desc);
+      $("#chapters").hidden = !ch.length;
+      $("#chapList").innerHTML = ch.map((c) => `<button type="button" class="chap" data-sec="${c.sec}"><b>${clock(c.sec)}</b>${esc(c.title)}</button>`).join("");
+      const about = stripChapters(v.desc);
+      $("#about").hidden = !about;
+      $("#aboutText").textContent = about;
+      $("#about").classList.add("clamp");
+      $("#aboutMore").textContent = "Show more";
+      requestAnimationFrame(() => { const p = $("#aboutText"); $("#aboutMore").hidden = p.scrollHeight <= p.clientHeight + 2; });
+      $("#shareAt").hidden = true; $("#shareOk").hidden = true;
       document.querySelectorAll(".tile").forEach((t, j) => t.setAttribute("aria-current", j === i ? "true" : "false"));
+      if (autoplay) start_(start);
     }
-    $("#list").innerHTML = VIDEOS.map((v, i) => `<li><button type="button" class="tile" data-i="${i}" aria-label="Play ${esc(v.title)}">
-        <span class="th"><img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${esc(v.title)} thumbnail" loading="lazy" decoding="async"></span>
+    async function start_(start) {
+      const v = VIDEOS[cur], mine = cur;
+      $("#frame").innerHTML = `<div id="yt"></div>`;
+      await loadAPI();
+      if (mine !== cur) return;
+      player = new YT.Player("yt", {
+        host: "https://www.youtube-nocookie.com", videoId: v.id, width: "100%", height: "100%",
+        playerVars: { autoplay: 1, rel: 0, playsinline: 1, start: Math.floor(start) },
+        events: {
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.PLAYING) $("#shareAt").hidden = false;
+            if (e.data === YT.PlayerState.ENDED) upNext();
+          },
+        },
+      });
+    }
+    function seek(sec) {
+      if (player && player.seekTo) { player.seekTo(sec, true); player.playVideo(); }
+      else start_(sec);
+      $("#mainPlayer").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    // When an episode ends, count down to the next one (older episode; wraps to the newest).
+    function upNext() {
+      const n = (cur + 1) % VIDEOS.length;
+      if (n === cur) return;
+      let left = 5;
+      $("#frame").insertAdjacentHTML("beforeend", `<div class="upnext" role="dialog" aria-label="Up next"><div><small>Up next in <span id="unLeft">${left}</span></small>
+        <b>${esc(VIDEOS[n].title)}</b><div class="row"><button type="button" class="go" id="unGo">Play now</button><button type="button" id="unCancel">Cancel</button></div></div></div>`);
+      $("#unGo").onclick = () => play(n, 0, true);
+      $("#unCancel").onclick = stopCountdown;
+      countdown = setInterval(() => { left--; const el = $("#unLeft"); if (el) el.textContent = left; if (left <= 0) play(n, 0, true); }, 1000);
+    }
+    const link = (t) => `https://thetipoffguide.com/watch?v=${VIDEOS[cur].id}${t ? `&t=${Math.floor(t)}` : ""}`;
+    async function share(t) {
+      const url = link(t), title = VIDEOS[cur].title;
+      if (navigator.share) { try { await navigator.share({ title, url }); return; } catch (e) { if (e.name === "AbortError") return; } }
+      try { await navigator.clipboard.writeText(url); $("#shareOk").hidden = false; setTimeout(() => { $("#shareOk").hidden = true; }, 2000); } catch { prompt("Copy this link:", url); }
+    }
+    $("#shareNow").onclick = () => share(0);
+    $("#shareAt").onclick = () => share(player?.getCurrentTime?.() || 0);
+    setInterval(() => { if (player?.getCurrentTime && !$("#shareAt").hidden) $("#shareAt").textContent = "Share from " + clock(player.getCurrentTime()); }, 1000);
+    $("#chapList").addEventListener("click", (e) => { const b = e.target.closest(".chap"); if (b) seek(+b.dataset.sec); });
+    $("#aboutMore").onclick = () => { const c = $("#about").classList.toggle("clamp"); $("#aboutMore").textContent = c ? "Show more" : "Show less"; };
+
+    $("#list").innerHTML = VIDEOS.map((v, i) => `<li><button type="button" class="tile" data-i="${i}" aria-label="Play ${esc(v.title)}${v.len ? `, ${clock(v.len)}` : ""}">
+        <span class="th"><img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${esc(v.title)} thumbnail" loading="lazy" decoding="async">${v.len ? `<span class="dur">${clock(v.len)}</span>` : ""}</span>
         <span><b>${esc(v.title)}</b></span></button></li>`).join("");
     $("#list").addEventListener("click", (e) => {
       const b = e.target.closest(".tile"); if (!b) return;
       play(+b.dataset.i);
       $("#mainPlayer").scrollIntoView({ behavior: "smooth", block: "start" });
     });
-    play(0);
+    // Shared links: /watch?v=ID&t=SECONDS open that episode at that moment.
+    const q = new URLSearchParams(location.search), qi = VIDEOS.findIndex((v) => v.id === q.get("v"));
+    play(qi >= 0 ? qi : 0, Number(q.get("t")) || 0);
   </script>
 </body>
 </html>

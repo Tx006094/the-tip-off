@@ -2,7 +2,7 @@
 
 Reads the channel's Videos page (youtube.com/@theixpodcast/videos), finds any video IDs not already in the
 VIDEOS list in watch.html, and puts them at the top. Existing entries (and any titles edited by hand) are left
-alone, and older videos left off the page stay off. Videos deleted from YouTube are dropped. Keeps the newest 12. If YouTube can't be reached or the page changes shape, it changes nothing.
+alone, and older videos left off the page stay off. Videos deleted from YouTube are dropped; each episode's length, date and description are filled in once. Keeps the newest 12. If YouTube can't be reached or the page changes shape, it changes nothing.
 """
 import json
 import pathlib
@@ -51,6 +51,29 @@ def latest_videos():
     return out
 
 
+def details(vid):
+    """Length (seconds), publish date and description from the video's YouTube page, or None."""
+    req = urllib.request.Request("https://www.youtube.com/watch?v=" + vid, headers={"User-Agent": "Mozilla/5.0", "Accept-Language": "en"})
+    try:
+        html = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", "replace")
+        m = re.search(r"ytInitialPlayerResponse\s*=\s*(\{.+?\});(?:var|</script>)", html, re.S)
+        d = json.loads(m.group(1))
+        v = d["videoDetails"]
+        mf = d.get("microformat", {}).get("playerMicroformatRenderer", {})
+        desc = re.sub(r"\n?(#\w+\s*)+$", "", v.get("shortDescription", "")).strip()[:2000]
+        return {"len": int(v.get("lengthSeconds") or 0), "date": (mf.get("publishDate") or "")[:10], "desc": desc}
+    except Exception:
+        return None
+
+
+def entry(vid, title, extra):
+    parts = [f"id: {json.dumps(vid)}", f"title: {json.dumps(title, ensure_ascii=False)}"]
+    for k in ("len", "date", "desc"):
+        if extra.get(k):
+            parts.append(f"{k}: {json.dumps(extra[k], ensure_ascii=False)}")
+    return "      { " + ", ".join(parts) + " },"
+
+
 def gone(vid):
     """True only when YouTube clearly says the video no longer exists (deleted). Network trouble counts as still there."""
     url = "https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v=" + vid
@@ -89,16 +112,27 @@ def main():
     # drop episodes that were deleted from YouTube
     kept = [l for l in lines if not (re.search(r'id: "([^"]+)"', l) and gone(re.search(r'id: "([^"]+)"', l).group(1)))]
     removed = len(lines) - len(kept)
-    if not new and not removed:
-        print("No new episodes.")
-        return 0
     # newest first, in the channel's order
-    add = [f"      {{ id: {json.dumps(v)}, title: {json.dumps(t, ensure_ascii=False)} }}," for v, t in new]
+    add = [entry(v, t, {}) for v, t in new]
     lines = (add + kept)[:KEEP]
+    # fill in length, date and description for any episode that doesn't have them yet
+    filled = 0
+    for i, l in enumerate(lines):
+        if "len:" in l:
+            continue
+        vid = re.search(r'id: "([^"]+)"', l).group(1)
+        title = json.loads(re.search(r'title: ("(?:[^"\\]|\\.)*")', l).group(1))
+        info = details(vid)
+        if info:
+            lines[i] = entry(vid, title, info); filled += 1
+    if not new and not removed and not filled:
+        print("No changes.")
+        return 0
     s = s[: m.start(2)] + "\n".join(lines) + s[m.end(2):]
     PAGE.write_text(s, encoding="utf-8")
     if new: print("Added:", ", ".join(t for _, t in new))
     if removed: print("Removed deleted videos:", removed)
+    if filled: print("Added details for", filled, "episodes")
     return 0
 
 
