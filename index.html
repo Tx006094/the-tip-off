@@ -42,7 +42,7 @@
   <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,500..900&family=Inter:wght@400;500;600;700&display=swap" /></noscript>
-  <link rel="stylesheet" href="styles.css?v=20261118a" />
+  <link rel="stylesheet" href="styles.css?v=20261118b" />
   <!-- Motion (motion.dev) 14.4.0, MIT. Loads after the page; the site works without it. -->
   <script src="js/vendor/motion-14.4.0.js" defer></script>
 
@@ -165,6 +165,10 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
         </button>
       </form>
+      <!-- Phones: show a QR code so someone nearby can open the site with their camera -->
+      <button type="button" class="qr-toggle" data-qr-open aria-label="Show a QR code to share The Tip-Off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 17h4v4h-4z"/></svg>
+      </button>
       <!-- Phones: the search box folds into this button so the logo has room -->
       <button type="button" class="search-toggle" data-search-open aria-label="Search teams, games and platforms" aria-controls="search" aria-expanded="false">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -366,6 +370,6 @@
   <script src="js/leagues.js?v=20261114h" defer></script>
   <script src="js/teams-data.js?v=20261113g" defer></script>
   <script src="js/news-data.js?v=20261114e" defer></script>
-  <script src="js/app.js?v=20261118a" defer></script>
+  <script src="js/app.js?v=20261118b" defer></script>
 </body>
 </html>

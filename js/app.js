@@ -2169,6 +2169,41 @@
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => { t.hidden = true; }, 2200);
   }
+  // ---------- QR code to share the site in person ----------
+  const SITE_URL = "https://thetipoffguide.com/";
+  let qrLib = null;
+  const loadQR = () => qrLib || (qrLib = new Promise((res, rej) => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js";
+    sc.onload = () => res(window.QRCode); sc.onerror = () => { qrLib = null; rej(); };
+    document.head.appendChild(sc);
+  }));
+  async function openQR() {
+    openModal(`<div class="qr-wrap">
+        <h2 id="modalTitle" class="qr-title">Share The Tip-Off</h2>
+        <p class="qr-sub">Point a phone camera at the code to open the site.</p>
+        <div class="qr-box" id="qrBox" role="img" aria-label="QR code for thetipoffguide.com"><div class="skel" style="width:100%;height:100%"></div></div>
+        <div class="qr-url">thetipoffguide.com</div>
+        <div class="qr-actions"><button type="button" class="btn btn-primary" data-qr-share>${ICON.share}Share link</button><button type="button" class="btn btn-ghost" data-qr-copy>Copy link</button></div>
+      </div>`, "Share The Tip-Off");
+    try {
+      const QR = await loadQR();
+      const box = $("#qrBox"); if (!box) return;
+      box.innerHTML = "";
+      new QR(box, { text: SITE_URL, width: 520, height: 520, colorDark: "#0a0a0c", colorLight: "#ffffff", correctLevel: QR.CorrectLevel.M });
+    } catch {
+      const box = $("#qrBox"); if (box) box.innerHTML = `<span class="qr-fail">Couldn't draw the code. Share the link below instead.</span>`;
+    }
+  }
+  document.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-qr-open]")) return openQR();
+    if (e.target.closest("[data-qr-share]")) {
+      try { if (navigator.share) { await navigator.share({ title: SITE, url: SITE_URL }); return; } } catch (err) { if (err.name === "AbortError") return; }
+      try { await navigator.clipboard.writeText(SITE_URL); toast("Link copied"); } catch {}
+    }
+    if (e.target.closest("[data-qr-copy]")) { try { await navigator.clipboard.writeText(SITE_URL); toast("Link copied"); } catch {} }
+  });
+
   async function shareCurrent() {
     const url = location.href;
     const title = document.title;

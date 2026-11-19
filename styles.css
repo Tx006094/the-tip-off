@@ -1519,3 +1519,21 @@ section + section, .shelf, .sec-head { margin-top: 12px; }
 .nw-tag { color: var(--muted) !important; background: var(--surface-2) !important; }
 .ix-h1 { max-width: none !important; }
 .t-tag { color: var(--muted) !important; }
+
+/* QR share (phones) */
+.qr-toggle { display: none; }
+@media (max-width: 760px) {
+  .qr-toggle { display: grid; place-items: center; order: 2; margin-left: auto; width: 44px; height: 44px; border-radius: 12px;
+    border: 1px solid var(--line-strong); background: var(--surface); color: var(--text); }
+  .qr-toggle svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; }
+  .qr-toggle + .search-toggle { margin-left: 8px; }
+  .masthead.searching .qr-toggle { display: none; }
+}
+.qr-wrap { text-align: center; padding: 28px 20px 24px; }
+.qr-title { margin: 0; font: 800 26px/1.1 var(--font-display); font-stretch: 85%; text-transform: uppercase; }
+.qr-sub { margin: 8px 0 20px; color: var(--muted); font-size: 15px; }
+.qr-box { width: min(280px, 72vw); aspect-ratio: 1; margin: 0 auto; padding: 16px; background: #fff; border-radius: 20px; display: grid; place-items: center; }
+.qr-box img, .qr-box canvas { width: 100% !important; height: auto !important; display: block; }
+.qr-fail { color: #0a0a0c; font-size: 14px; }
+.qr-url { margin: 16px 0 20px; font: 700 18px var(--font-body); color: var(--accent); }
+.qr-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
