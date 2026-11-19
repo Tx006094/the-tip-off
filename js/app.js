@@ -400,8 +400,7 @@
   const tint = (c, pct = 40) => `color-mix(in srgb, ${c} ${pct}%, #141418)`;
   function artBackground(g) {
     if (!g.away) {
-      const c = LEAGUES[g.league]?.color || "#444";
-      return `background: ${tint(c)}`;
+      return "background: var(--surface-2)"; // events: neutral field, no league colour
     }
     // Two flat fields of team colour: away on the left, home on the right (the ::before half, see
     // styles.css). Each colour is mixed into the dark base so same-colour logos stay visible.

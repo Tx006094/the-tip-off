@@ -1481,3 +1481,41 @@ section + section, .shelf, .sec-head { margin-top: 12px; }
 .ts-cal { text-align: center; margin-top: 16px; }
 .ts-cal button { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; color: var(--muted); font: 600 13px var(--font-body); cursor: pointer; min-height: 44px; }
 .ts-cal button:hover { color: var(--text); } .ts-cal svg { width: 15px; height: 15px; }
+
+/* Design pass (Nov 18): slim announcement, smaller page title, fewer boxes, one accent */
+/* 1. Announcement becomes a slim strip; games reach the first screen */
+.ix-hero { background: #121216 !important; }
+.ix-hero::before, .ix-tag, .ix-sub, .ix-body, .ix-more, .ix-ghost { display: none !important; }
+.ix-inner { display: flex; align-items: center; justify-content: center; gap: 12px 28px; flex-wrap: wrap; padding: 14px var(--gutter) !important; }
+.ix-lockup { margin: 0 !important; gap: 12px !important; }
+.ix-lockup img, .ix-tipoff img { height: 26px !important; width: auto !important; }
+.ix-tipoff img:first-child { height: 30px !important; }
+.ix-x { font-size: 18px !important; }
+.ix-h1 { margin: 0 !important; font-size: clamp(18px, 1.7vw, 24px) !important; line-height: 1.1 !important; letter-spacing: 0 !important; }
+.ix-h1 em { color: inherit !important; font-style: normal !important; }
+.ix-ctas { margin: 0 !important; }
+.ix-btn { min-height: 40px !important; padding: 0 18px !important; font-size: 14px !important; }
+@media (max-width: 760px) {
+  .ix-inner { gap: 10px 14px; padding: 12px 16px !important; }
+  .ix-lockup img, .ix-tipoff img { height: 18px !important; }
+  .ix-tipoff img:first-child { height: 22px !important; }
+  .ix-h1 { flex-basis: 100%; font-size: 17px !important; }
+  .ix-lockup { flex-basis: 100%; }
+}
+/* 2. Page title sized for a listing, not a poster */
+.intro h1 { font-size: clamp(28px, 2.8vw, 40px) !important; margin: 0 0 8px !important; }
+.intro h1 .h1-sub { font-size: clamp(15px, 1.2vw, 18px) !important; color: var(--muted) !important; margin-top: 8px !important; }
+.intro { padding-top: clamp(20px, 2.4vw, 32px) !important; }
+/* 3. Fewer boxes: panels separated by tone, not outlines; league colour only as a small dot */
+.hero, .lg-card, .nw-item, .mt-card, .legend, .notice { border-color: transparent !important; }
+.lg-card { border-top: 0 !important; align-self: start; }
+.lg-card h3 { display: flex; align-items: center; gap: 10px; }
+.lg-card h3::before { content: ""; flex: 0 0 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.chip:not([aria-pressed="true"]) { border-color: transparent !important; background: var(--surface) !important; }
+.ix-h1 { white-space: nowrap; }
+.ix-h1 br { display: none; }
+@media (max-width: 760px) { .ix-h1 { flex-basis: 100% !important; white-space: normal; } .ix-ctas { flex-basis: 100%; display: flex; justify-content: center; } }
+/* league labels in headlines and the ticker: gray, not league colour */
+.nw-tag { color: var(--muted) !important; background: var(--surface-2) !important; }
+.ix-h1 { max-width: none !important; }
+.t-tag { color: var(--muted) !important; }
