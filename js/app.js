@@ -2493,16 +2493,10 @@
       state.q = "";
       const url = new URL(location.href); url.searchParams.delete("q");
       history.replaceState(null, "", url.pathname + url.search);
+      render();
     }
-    if (state.view !== "home") { state.view = "home"; setHash(""); }
-    schedTeams = [key]; schedDay = TEAM_TAB; schedAll = false;
-    render();
-    requestAnimationFrame(() => {
-      const s = $("#schedule");
-      if (!s) return;
-      s.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
-      fx("show", $$("#schedBody .team-today, #schedBody .srow").slice(0, 6), { y: 10, step: 0.04 });
-    });
+    // Open the team's schedule card; Add to My Teams lives there.
+    openTeam(key);
   }
   document.addEventListener("click", (e) => {
     const pick = e.target.closest("[data-head-pick]");
