@@ -632,9 +632,9 @@
       .sort((a, b) => b.starts - a.starts || a.tm.name.length - b.tm.name.length || a.tm.name.localeCompare(b.tm.name))
       .slice(0, 6).map((x) => x.tm) : [];
     box.innerHTML = list.length
-      ? list.map((tm, i) => `<li role="option" id="mts-${i}" class="sug" data-follow="${esc(tm.key)}" aria-selected="${i === 0}">
+      ? list.map((tm, i) => `<li role="option" id="mts-${i}" class="sug" data-team="${esc(tm.key)}" aria-selected="${i === 0}" aria-label="${esc(tm.name)}: schedule">
           ${logoHTML(tm, { size: 32, eager: true })}<span class="sug-name">${esc(tm.name)}<small>${esc(LEAGUES[tm.league].short)}</small></span>
-          <span class="sug-n">Follow</span></li>`).join("")
+          <span class="sug-n">Schedule</span></li>`).join("")
       : q ? `<li class="sug-empty" role="presentation">No team matches “${esc(q)}”</li>` : "";
     box.hidden = !q;
     input.setAttribute("aria-expanded", String(!!q && list.length > 0));
@@ -646,6 +646,11 @@
     else if (e.key === "Escape") { e.target.value = ""; renderMtSuggest(); }
   });
   document.addEventListener("click", (e) => { if (!e.target.closest?.(".mt-find")) { const b = $("#mtSuggest"); if (b) b.hidden = true; } });
+  // Picking a team from the search opens its schedule card (with Add to My Teams there), then clears the search.
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest?.("#mtSuggest [data-team]")) return;
+    const f = $("#mtFind"); if (f) { f.value = ""; setTimeout(renderMtSuggest, 0); }
+  });
 
   document.addEventListener("click", (e) => {
     const card = e.target.closest?.(".mt-card");
