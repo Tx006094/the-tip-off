@@ -662,7 +662,7 @@
     const head = secHead("My Teams", favs.length ? plural(favs.length, "team") : "", { color: "var(--paid)" });
     const pickHTML = (k) => {
       const tm = teamByKey.get(k);
-      return `<button type="button" class="mt-pick" data-follow="${esc(k)}" aria-label="Follow ${esc(tm.name)}">${logoHTML(tm, { size: 32, eager: true })}<span>${esc(tm.short || tm.name)}</span></button>`;
+      return `<button type="button" class="mt-pick" data-team="${esc(k)}" aria-label="${esc(tm.name)}: schedule">${logoHTML(tm, { size: 32, eager: true })}<span>${esc(tm.short || tm.name)}</span></button>`;
     };
     if (favs.length) {
       // Once a team is followed the quick picks go away; "Add more teams" leads to the full list.
