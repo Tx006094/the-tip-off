@@ -1541,3 +1541,10 @@ section + section, .shelf, .sec-head { margin-top: 12px; }
 /* Web interface guidelines: no double-tap delay, no gray tap flash (press states already give feedback) */
 a, button, [role="button"], input, select, summary, label { touch-action: manipulation; }
 html { -webkit-tap-highlight-color: transparent; }
+
+/* My Teams and Schedule: clear space between sections and inside My Teams */
+.myteams { padding-bottom: clamp(28px, 4vw, 48px); }
+.myteams .mt-find { margin-top: 20px; }
+.myteams + .sched-sec, .sched-sec { margin-top: clamp(20px, 3vw, 36px); }
+.sched-sec .sec-head { margin-bottom: 16px; }
+.sched-tools { margin-bottom: 18px; }
