@@ -1064,7 +1064,7 @@
     const chip = (k) => {
       const tm = teamByKey.get(k), g = nextGameFor(k);
       const when = g ? (g.state === "in" ? "Live now" : `${dayLabel(g.date)} · ${clock(g)}`) : "No games soon";
-      return `<button type="button" class="st-chip" data-sched-only="${esc(k)}" aria-pressed="${solo === k}">${logoHTML(tm, { size: 32, eager: true })}<span><b>${esc(tm.short || tm.name)}</b><small>${esc(when)}</small></span></button>`;
+      return `<span class="st-item"><button type="button" class="st-chip" data-sched-only="${esc(k)}" aria-pressed="${solo === k}">${logoHTML(tm, { size: 32, eager: true })}<span><b>${esc(tm.short || tm.name)}</b><small>${esc(when)}</small></span></button><button type="button" class="st-x" data-unfollow="${esc(k)}" aria-label="Unfollow ${esc(tm.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button></span>`;
     };
     if (!favs.length) {
       const picks = state.teams.filter((t) => t.league === "wnba").slice(0, 5).map((t) => t.key);
@@ -1085,6 +1085,15 @@
       if (k) { schedTeams = [k]; schedDay = TEAM_TAB; } else { schedTeams = []; schedDay = null; }
       schedAll = false;
       refreshSchedule();
+      return;
+    }
+    const x = e.target.closest("[data-unfollow]");
+    if (x) {
+      const k = x.dataset.unfollow;
+      state.favs.delete(k); pendingBeam.delete(k); saveFavs();
+      if (schedTeams.includes(k)) { schedTeams = schedTeams.filter((t) => t !== k); if (!schedTeams.length && schedDay === TEAM_TAB) schedDay = null; }
+      toast(`Unfollowed ${teamByKey.get(k)?.short || "team"}`);
+      render();
       return;
     }
     if (e.target.closest("[data-st-follow]")) { const f = $("#schedFind"); f?.focus(); f?.scrollIntoView({ block: "center", behavior: "smooth" }); }

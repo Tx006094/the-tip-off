@@ -1566,3 +1566,12 @@ html { -webkit-tap-highlight-color: transparent; }
 .st-hint { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; padding-right: 6px; }
 .st-pick { min-height: 48px; }
 .srow.is-mine { box-shadow: inset 3px 0 0 var(--paid); }
+
+/* Unfollow × on each team chip (top-right corner) */
+.st-item { position: relative; flex: 0 0 auto; display: flex; scroll-snap-align: start; }
+.st-item .st-chip { padding-right: 30px; }
+.st-x { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--muted); cursor: pointer; }
+.st-x::after { content: ""; position: absolute; inset: -11px; } /* 44px tap area */
+.st-x svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.4; fill: none; }
+.st-x:hover, .st-x:focus-visible { background: var(--line-strong); color: var(--text); }
+.st-chip[aria-pressed="true"] + .st-x { background: rgba(0,0,0,.12); color: rgba(0,0,0,.6); }
