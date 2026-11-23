@@ -646,7 +646,7 @@
     else if (e.key === "Escape") { e.target.value = ""; renderMtSuggest(); }
   });
   document.addEventListener("click", (e) => { if (!e.target.closest?.(".mt-find")) { const b = $("#mtSuggest"); if (b) b.hidden = true; } });
-  // Picking a team from the search opens its schedule card (with Add to My Teams there), then clears the search.
+  // Picking a team from the search opens its schedule card (with Follow there), then clears the search.
   document.addEventListener("click", (e) => {
     if (!e.target.closest?.("#mtSuggest [data-team]")) return;
     const f = $("#mtFind"); if (f) { f.value = ""; setTimeout(renderMtSuggest, 0); }
@@ -668,7 +668,7 @@
       // Once a team is followed the quick picks go away; "Add more teams" leads to the full list.
       return `<section class="myteams" aria-label="My Teams">${head}
         <div class="mt-row">${favs.map(myTeamCardHTML).join("")}
-          <a class="mt-add" href="#teams">${ICON.star}<span>Add more teams</span></a></div>${mtFinderHTML()}</section>`;
+          <a class="mt-add" href="#teams">${ICON.star}<span>Follow more teams</span></a></div>${mtFinderHTML()}</section>`;
     }
     const picks = quickPickKeys().slice(0, 12);
     if (!picks.length) return "";
@@ -1116,7 +1116,7 @@
     let body;
     if (schedDay === TEAM_TAB) {
       const names = listNames(schedTeams.map(shortTeam));
-      const stars = schedTeams.filter((k) => !state.favs.has(k)).map((k) => favButton(k).replace("Add to My Teams", `Star ${esc(shortTeam(k))}`)).join("");
+      const stars = schedTeams.filter((k) => !state.favs.has(k)).map((k) => favButton(k, shortTeam(k))).join("");
       const season = schedTeams.length === 1 ? `<button type="button" class="btn btn-ghost" data-team="${esc(schedTeams[0])}">Full season schedule</button>` : "";
       const answers = schedTeams.slice(0, 3).map(teamTodayHTML).join("");
       const head = `${answers}<div class="sched-team-head">
@@ -1952,8 +1952,8 @@
   /** The follow/unfollow toggle. With a team name it reads "Follow UConn" / "Following UConn". */
   function favButton(key, name = "", compact = false) {
     const on = state.favs.has(key);
-    const label = compact ? (on ? "Following" : "Follow") : name ? (on ? `Following ${name}` : `Follow ${name}`) : (on ? "In My Teams" : "Add to My Teams");
-    const aria = on ? `${name || "This team"} is in My Teams. Tap to unfollow.` : `Add ${name || "this team"} to My Teams`;
+    const label = compact || !name ? (on ? "Following" : "Follow") : (on ? `Following ${name}` : `Follow ${name}`);
+    const aria = on ? `Following ${name || "this team"}. Tap to unfollow.` : `Follow ${name || "this team"}`;
     return `<button type="button" class="btn btn-ghost ${compact ? "m-fav " : ""}${on ? "is-on" : ""}" data-fav="${esc(key)}"${name ? ` data-fav-name="${esc(name)}"` : ""}${compact ? " data-fav-compact" : ""} aria-pressed="${on}" aria-label="${esc(aria)}">${ICON.star}${esc(label)}</button>`;
   }
 
@@ -2419,7 +2419,7 @@
       t.outerHTML = favButton(k, t.dataset.favName || "", t.dataset.favCompact !== undefined);
       fx("pop", $(`[data-fav="${CSS.escape(k)}"] svg`), 1.4);
       $(`[data-fav="${CSS.escape(k)}"]`)?.focus();
-      toast(state.favs.has(k) ? "Added to My Teams" : "Removed from My Teams");
+      toast(state.favs.has(k) ? `Following ${teamByKey.get(k)?.short || "team"}` : `Unfollowed ${teamByKey.get(k)?.short || "team"}`);
       render();
       return;
     }
@@ -2495,7 +2495,7 @@
       history.replaceState(null, "", url.pathname + url.search);
       render();
     }
-    // Open the team's schedule card; Add to My Teams lives there.
+    // Open the team's schedule card; Follow lives there.
     openTeam(key);
   }
   document.addEventListener("click", (e) => {
