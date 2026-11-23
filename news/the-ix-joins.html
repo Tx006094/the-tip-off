@@ -6,7 +6,8 @@
   <title>TheIXPodcast Joins The Tip-Off | The Tip-Off</title>
   <meta name="description" content="TheIXPodcast is officially joining The Tip-Off, bringing news, analysis and conversation on the WNBA, NCAA, Unrivaled, UpShot, FIBA and the Olympics." />
   <link rel="canonical" href="https://thetipoffguide.com/news/the-ix-joins" />
-  <meta name="theme-color" content="#0b0b0d" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0a0a0c" />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="The Tip-Off" />
   <meta property="og:title" content="TheIXPodcast joins The Tip-Off" />
@@ -41,7 +42,9 @@
     .btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:24px; }
     .btns a { padding:13px 22px; border-radius:999px; font-weight:700; text-decoration:none; }
     .p { background:#fa4e02; color:#fff; } .g { border:1px solid rgba(255,255,255,.16); color:#f4f4f5; }
-      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion, quick taps */
+    a, button, input, select, summary { touch-action: manipulation; }
+    html { -webkit-tap-highlight-color: transparent; }
     h1, h2, h3 { text-wrap: balance; }
     p, li { text-wrap: pretty; }
     @media (prefers-reduced-motion: reduce) {

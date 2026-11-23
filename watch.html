@@ -6,7 +6,8 @@
   <title>Watch TheIXPodcast | The Tip-Off</title>
   <meta name="description" content="Watch TheIXPodcast on The Tip-Off: WNBA and NCAA women's basketball talk, news and breakdowns, plus where to watch tonight's games." />
   <link rel="canonical" href="https://thetipoffguide.com/watch" />
-  <meta name="theme-color" content="#0b0b0d" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0a0a0c" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="The Tip-Off" />
   <meta property="og:title" content="Watch TheIXPodcast on The Tip-Off" />
@@ -86,7 +87,9 @@
       .player-grid { grid-template-columns:1fr; }
       .list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 14px; }
     }
-      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion, quick taps */
+    a, button, input, select, summary { touch-action: manipulation; }
+    html { -webkit-tap-highlight-color: transparent; }
     h1, h2, h3 { text-wrap: balance; }
     p, li { text-wrap: pretty; }
     @media (prefers-reduced-motion: reduce) {
@@ -134,6 +137,8 @@
       { id: "XqmkRhrgkOo", title: "The WNBA Just Turned Back the Clock", len: 178, date: "2026-05-07", desc: "30 years later… the WNBA is finally getting the respect its pioneers built from the ground up. 👏🏾🔥\nThe throwback jerseys, retro courts, and old-school logos aren’t just about nostalgia… they’re a reminder that this league survived, evolved, and is now entering a completely different era.\nQuestion for the fans:\nWhich classic WNBA era or team do you wish got MORE recognition today? 👀🏀" },
       { id: "dTxfHdeX9dc", title: "Did A'ja Wilson Hijack the MVP Race?", len: 381, date: "2025-08-19", desc: "A’ja Wilson just dropped 32 points and 20 rebounds — the kind of performance that defines greatness. In this episode, we break down how she dominated on both ends of the floor, why this game stands out even in her legendary career, and what it means for the Las Vegas Aces moving forward." },
     ];
+    // Typography: a real ellipsis in titles and descriptions from YouTube
+    VIDEOS.forEach((v) => { v.title = v.title.replace(/\.\.\./g, "…"); if (v.desc) v.desc = v.desc.replace(/\.\.\./g, "…"); });
     const $ = (s) => document.querySelector(s);
     const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
     const clock = (sec) => { sec = Math.max(0, Math.floor(sec)); const h = Math.floor(sec / 3600), m = Math.floor(sec % 3600 / 60), s2 = String(sec % 60).padStart(2, "0"); return h ? `${h}:${String(m).padStart(2, "0")}:${s2}` : `${m}:${s2}`; };
@@ -163,7 +168,7 @@
       cur = i; player = null;
       const v = VIDEOS[i];
       $("#frame").innerHTML = `<button type="button" class="cover" aria-label="Play ${esc(v.title)}">
-          <img src="https://img.youtube.com/vi/${v.id}/maxresdefault.jpg" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v.id}/hqdefault.jpg'" alt="${esc(v.title)} cover art">
+          <img src="https://img.youtube.com/vi/${v.id}/maxresdefault.jpg" width="1280" height="720" onerror="this.onerror=null;this.src='https://img.youtube.com/vi/${v.id}/hqdefault.jpg'" alt="${esc(v.title)} cover art">
           <span class="bigplay" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4l14 8-14 8z"/></svg></span></button>`;
       $("#frame .cover").addEventListener("click", () => start_(start));
       $("#nowTitle").textContent = v.title;
@@ -227,7 +232,7 @@
     $("#aboutMore").onclick = () => { const c = $("#about").classList.toggle("clamp"); $("#aboutMore").textContent = c ? "Show more" : "Show less"; };
 
     $("#list").innerHTML = VIDEOS.map((v, i) => `<li><button type="button" class="tile" data-i="${i}" aria-label="Play ${esc(v.title)}${v.len ? `, ${clock(v.len)}` : ""}">
-        <span class="th"><img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${esc(v.title)} thumbnail" loading="lazy" decoding="async">${v.len ? `<span class="dur">${clock(v.len)}</span>` : ""}</span>
+        <span class="th"><img src="https://img.youtube.com/vi/${v.id}/mqdefault.jpg" alt="${esc(v.title)} thumbnail" width="320" height="180" loading="lazy" decoding="async">${v.len ? `<span class="dur">${clock(v.len)}</span>` : ""}</span>
         <span><b>${esc(v.title)}</b></span></button></li>`).join("");
     $("#list").addEventListener("click", (e) => {
       const b = e.target.closest(".tile"); if (!b) return;

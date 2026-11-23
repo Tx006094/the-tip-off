@@ -615,7 +615,7 @@
         <div class="sched-find-box">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <label class="sr-only" for="mtFind">Find a team to follow</label>
-          <input id="mtFind" type="search" placeholder="Search for a team to follow" autocomplete="off" spellcheck="false" enterkeyhint="go"
+          <input id="mtFind" type="search" placeholder="Search for a team to follow…" autocomplete="off" spellcheck="false" enterkeyhint="go"
             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mtSuggest" />
         </div>
         <ul class="sched-suggest" id="mtSuggest" role="listbox" aria-label="Teams to follow" hidden></ul>
@@ -960,8 +960,8 @@
       const lg = LEAGUES[n.league];
       // No photo: the league's own logo where we have it (Unrivaled), otherwise a tile in the league colour.
       const leagueLogo = NEWS_LOGOS[n.league];
-      const thumb = n.img ? `<img src="${esc(n.img)}" alt="" loading="lazy" decoding="async">`
-        : leagueLogo ? `<span class="nw-ph nw-logo" style="--c:${lg.color}"><img src="${leagueLogo}" alt=""></span>`
+      const thumb = n.img ? `<img src="${esc(n.img)}" alt="" width="240" height="135" loading="lazy" decoding="async">`
+        : leagueLogo ? `<span class="nw-ph nw-logo" style="--c:${lg.color}"><img src="${leagueLogo}" alt="" width="64" height="64"></span>`
         : `<span class="nw-ph" style="--c:${lg.color}">${esc(lg.short)}</span>`;
       return `<a class="nw-item" href="${esc(n.url)}"${n.url.startsWith("/") ? "" : ' target="_blank" rel="noopener"'}>
           <span class="nw-thumb">${thumb}</span>
@@ -1064,7 +1064,7 @@
         <div class="sched-find-box">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <label class="sr-only" for="schedFind">Find a team in the schedule</label>
-          <input id="schedFind" type="search" placeholder="Find a team, like Oklahoma or Liberty" autocomplete="off" spellcheck="false" enterkeyhint="search"
+          <input id="schedFind" type="search" placeholder="Find a team, like Oklahoma or Liberty…" autocomplete="off" spellcheck="false" enterkeyhint="search"
             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="schedSuggest" value="${esc(schedQuery)}" />
         </div>
         <ul class="sched-suggest" id="schedSuggest" role="listbox" aria-label="Teams" hidden></ul>
@@ -2029,7 +2029,7 @@
       }
       const lg = opLogo(op);
       return `<button type="button" class="ts-row" data-game="${esc(g.id)}"><span class="ts-dt"><b>${d.getDate()}</b><i>${esc(d.toLocaleDateString([], { weekday: "short" }))}</i></span>
-        ${lg ? `<img src="${esc(lg)}" alt="" loading="lazy" onerror="this.style.visibility='hidden'">` : "<span></span>"}
+        ${lg ? `<img src="${esc(lg)}" alt="" width="30" height="30" loading="lazy" onerror="this.style.visibility='hidden'">` : "<span></span>"}
         <span class="ts-op"><b>${esc(name)}</b><span>${g.state === "post" ? "Final" : g.state === "in" ? esc(g.statusText || "Live") : esc(tm(d))}</span></span><span class="ts-r">${right}</span></button>`;
     };
     const listHTML = (arr) => {

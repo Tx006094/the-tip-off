@@ -7,6 +7,7 @@
   <meta name="description" content="See how The Tip-Off works in 50 seconds. Find where every women's basketball game is streaming, including free options." />
   <!-- One canonical address: /start redirects here (see _redirects), so search engines index only this URL -->
   <link rel="canonical" href="https://thetipoffguide.com/how-it-works" />
+  <meta name="color-scheme" content="dark" />
   <meta name="theme-color" content="#0b0b0d" />
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="The Tip-Off" />
@@ -123,7 +124,9 @@
       .guide-btn { width: 100%; font-size: 15px; white-space: nowrap; padding: 0 12px; }
       .brand .pin { height: 40px; } .brand .word { height: 32px; }
     }
-      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion, quick taps */
+    a, button, input, select, summary { touch-action: manipulation; }
+    html { -webkit-tap-highlight-color: transparent; }
     h1, h2, h3 { text-wrap: balance; }
     p, li { text-wrap: pretty; }
     @media (prefers-reduced-motion: reduce) {

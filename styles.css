@@ -1537,3 +1537,7 @@ section + section, .shelf, .sec-head { margin-top: 12px; }
 .qr-fail { color: #0a0a0c; font-size: 14px; }
 .qr-url { margin: 16px 0 20px; font: 700 18px var(--font-body); color: var(--accent); }
 .qr-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* Web interface guidelines: no double-tap delay, no gray tap flash (press states already give feedback) */
+a, button, [role="button"], input, select, summary, label { touch-action: manipulation; }
+html { -webkit-tap-highlight-color: transparent; }
