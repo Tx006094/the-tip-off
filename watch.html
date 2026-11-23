@@ -86,7 +86,14 @@
       .player-grid { grid-template-columns:1fr; }
       .list { grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px 14px; }
     }
-  </style>
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+    h1, h2, h3 { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+    .tile .th .dur, .meta, .chap b, #shareAt { font-variant-numeric: tabular-nums; }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -194,7 +201,7 @@
     function seek(sec) {
       if (player && player.seekTo) { player.seekTo(sec, true); player.playVideo(); }
       else start_(sec);
-      $("#mainPlayer").scrollIntoView({ behavior: "smooth", block: "start" });
+      $("#mainPlayer").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     }
     // When an episode ends, count down to the next one (older episode; wraps to the newest).
     function upNext() {
@@ -225,7 +232,7 @@
     $("#list").addEventListener("click", (e) => {
       const b = e.target.closest(".tile"); if (!b) return;
       play(+b.dataset.i);
-      $("#mainPlayer").scrollIntoView({ behavior: "smooth", block: "start" });
+      $("#mainPlayer").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" });
     });
     // Shared links: /watch?v=ID&t=SECONDS open that episode at that moment.
     const q = new URLSearchParams(location.search), qi = VIDEOS.findIndex((v) => v.id === q.get("v"));

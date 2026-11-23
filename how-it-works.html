@@ -123,7 +123,13 @@
       .guide-btn { width: 100%; font-size: 15px; white-space: nowrap; padding: 0 12px; }
       .brand .pin { height: 40px; } .brand .word { height: 32px; }
     }
-  </style>
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+    h1, h2, h3 { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -138,7 +144,7 @@
       <p class="dek">Every women's basketball game, the channel or app it's on, and which ones you can watch free. Here's how to use it.</p>
 
       <div class="player">
-        <video controls playsinline preload="metadata" poster="assets/video/the-tip-off-cover-tagline.jpg">
+        <video aria-label="The Tip-Off: 50-second tour" controls playsinline preload="metadata" poster="assets/video/the-tip-off-cover-tagline.jpg">
           <source src="assets/video/the-tip-off-how-it-works.mp4" type="video/mp4" />
           Your browser can't play this video. <a href="assets/video/the-tip-off-how-it-works.mp4">Download it here.</a>
         </video>

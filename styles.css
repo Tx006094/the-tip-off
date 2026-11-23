@@ -689,7 +689,7 @@ main:focus { outline: none; }
   position: relative; display: flex; flex-direction: column; min-width: 0;
   border-radius: var(--radius); overflow: hidden; background: var(--surface);
   text-align: left; border: 1px solid var(--line); padding: 0;
-  transition: transform .25s var(--ease), border-color .2s;
+  transition: transform .2s var(--ease), border-color .2s;
 }
 @media (hover: hover) {
   .card:hover { transform: translateY(-4px); border-color: var(--line-strong); z-index: 2; }
@@ -1044,7 +1044,7 @@ main:focus { outline: none; }
   .masthead.searching .brand, .masthead.searching .search-toggle { display: none; }
   .masthead.searching .search { flex: 1 1 100%; margin: 13px 0 14px; height: 44px; }
   .search-close { display: grid; }
-  .masthead { transition: transform .28s var(--ease); }
+  .masthead { transition: transform .2s var(--ease); }
   .masthead.tucked { transform: translateY(-100%); }
   .search kbd { display: none; }
   .tabs { order: 3; align-self: auto; width: calc(100% + 2 * var(--edge)); margin: 0 calc(-1 * var(--edge)); padding: 0 calc(var(--edge) - 10px); border-top: 1px solid var(--line); }

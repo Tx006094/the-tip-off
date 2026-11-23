@@ -41,7 +41,13 @@
     .btns { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:24px; }
     .btns a { padding:13px 22px; border-radius:999px; font-weight:700; text-decoration:none; }
     .p { background:#fa4e02; color:#fff; } .g { border:1px solid rgba(255,255,255,.16); color:#f4f4f5; }
-  </style>
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+    h1, h2, h3 { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+</style>
 </head>
 <body>
 <article>

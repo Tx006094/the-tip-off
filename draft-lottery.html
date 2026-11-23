@@ -158,7 +158,14 @@
       .mock-board .pick small { display: inline; }
       .mock-board .pick .undo { padding-left: 6px; }
     }
-  </style>
+      /* Baseline polish: balanced headings, tidy paragraphs, reduced motion */
+    h1, h2, h3 { text-wrap: balance; }
+    p, li { text-wrap: pretty; }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+    .rk, .pct, .pct b, .pct small, .rec, .so, .pool-list .rk, .sim-stats { font-variant-numeric: tabular-nums; }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -353,7 +360,7 @@
       }
       function resetDraft() { picks = []; $("poolFind").value = ""; renderBoard(); }
       // On phones, after a pick bring the player list back into view for the next team.
-      function afterPick() { if (innerWidth <= 760 && current() >= 0) $("pool").scrollIntoView({ behavior: "smooth", block: "start" }); }
+      function afterPick() { if (innerWidth <= 760 && current() >= 0) $("pool").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }); }
       $("poolList").addEventListener("click", function (ev) {
         var b = ev.target.closest("[data-pick]"); if (!b) return;
         var cur = current(); if (cur < 0) return;
@@ -363,7 +370,7 @@
       $("mockBoard").addEventListener("click", function (ev) {
         var b = ev.target.closest("[data-undo]"); if (!b) return;
         picks[Number(b.dataset.undo)] = null; renderBoard();
-        $("pool").scrollIntoView({ behavior: "smooth", block: "nearest" });
+        $("pool").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
       });
       $("poolFind").addEventListener("input", renderPool);
       $("autoDraft").addEventListener("click", function () {
