@@ -537,6 +537,7 @@
     }
   }
   function refreshMyTeams() {
+    refreshTeamsRow();
     const box = $(".myteams");
     if (!box) return;
     const fresh = document.createElement("div");
@@ -871,7 +872,7 @@
 
     const today = dayKey(new Date());
     html += shelfHTML("Live Now", real.filter((g) => g.state === "in"), "", { color: "var(--live)", live: true });
-    html += myTeamsHTML();
+    // My Teams lives inside the Schedule (team chips under the search)
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     if (lastNight) { const have = new Set(schedGames.map((g) => g.id)); schedGames = schedGames.concat(lastNight.filter((g) => !have.has(g.id) && passesFilters(g))); }
     html += scheduleHTML();
@@ -1007,7 +1008,8 @@
     const team = (t, other) => `<span class="srow-team${g.state === "post" && other.winner ? " lost" : ""}">${logoHTML(t)}<span class="srow-name">${t.rank ? `<span class="rk">${t.rank}</span>` : ""}${esc(t.short || t.name)}</span>${showScore && t.score !== "" ? `<span class="sc">${esc(t.score)}</span>` : ""}</span>`;
     const time = g.state === "in" ? `<span class="srow-live">Live</span>` : g.state === "post" ? "Final" : esc(clock(g));
     const sub = g.state === "in" ? esc(g.statusText) : esc(lg.short);
-    return `<button type="button" class="srow${g.state === "post" ? " is-final" : ""}" data-game="${esc(g.id)}">
+    const mine = [g.away, g.home].some((t) => t?.id && state.favs.has(`${g.league}:${t.id}`));
+    return `<button type="button" class="srow${g.state === "post" ? " is-final" : ""}${mine ? " is-mine" : ""}" data-game="${esc(g.id)}">
       <span class="srow-time">${time}<small style="--c:${lg.color}">${sub}</small></span>
       <span class="srow-match">${team(g.away, g.home)}${team(g.home, g.away)}${eventTag(g)}</span>
       <span class="srow-ch">${priceTag(g)}${platformTags(g.platforms, 3)}</span>
@@ -1055,6 +1057,38 @@
   const liveRank = (a, b) => a.state !== "in" ? 0 : rankedCount(b) - rankedCount(a) || bestRank(a) - bestRank(b);
   const byPhase = (a, b) => phaseOrder[a.state] - phaseOrder[b.state] || liveRank(a, b) || a.date - b.date || notability(b) - notability(a);
 
+  /** My Teams, inside the Schedule: followed teams as filter chips under the search. */
+  function schedTeamsRowHTML() {
+    const favs = [...state.favs].filter((k) => teamByKey.has(k));
+    const solo = schedDay === TEAM_TAB && schedTeams.length === 1 ? schedTeams[0] : "";
+    const chip = (k) => {
+      const tm = teamByKey.get(k), g = nextGameFor(k);
+      const when = g ? (g.state === "in" ? "Live now" : `${dayLabel(g.date)} · ${clock(g)}`) : "No games soon";
+      return `<button type="button" class="st-chip" data-sched-only="${esc(k)}" aria-pressed="${solo === k}">${logoHTML(tm, { size: 32, eager: true })}<span><b>${esc(tm.short || tm.name)}</b><small>${esc(when)}</small></span></button>`;
+    };
+    if (!favs.length) {
+      const picks = state.teams.filter((t) => t.league === "wnba").slice(0, 5).map((t) => t.key);
+      return `<div class="st-row st-empty" id="stRow"><span class="st-hint">${ICON.star}Follow your teams to see them here</span>${picks.map((k) => `<button type="button" class="st-chip st-pick" data-team="${esc(k)}">${logoHTML(teamByKey.get(k), { size: 32, eager: true })}<span><b>${esc(teamByKey.get(k).short)}</b></span></button>`).join("")}</div>`;
+    }
+    return `<div class="st-row" id="stRow" role="group" aria-label="My Teams"><button type="button" class="st-chip st-all" data-sched-only="" aria-pressed="${!solo}"><span><b>All games</b><small>Everyone</small></span></button>${favs.map(chip).join("")}<button type="button" class="st-chip st-add" data-st-follow>${ICON.star}<span><b>Follow</b><small>Add a team</small></span></button></div>`;
+  }
+  function refreshTeamsRow() {
+    const el = $("#stRow"); if (!el) return;
+    const box = document.createElement("div"); box.innerHTML = schedTeamsRowHTML();
+    const sx = el.scrollLeft, next = box.firstElementChild;
+    el.replaceWith(next); next.scrollLeft = sx;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-sched-only]");
+    if (b) {
+      const k = b.dataset.schedOnly;
+      if (k) { schedTeams = [k]; schedDay = TEAM_TAB; } else { schedTeams = []; schedDay = null; }
+      schedAll = false;
+      refreshSchedule();
+      return;
+    }
+    if (e.target.closest("[data-st-follow]")) { const f = $("#schedFind"); f?.focus(); f?.scrollIntoView({ block: "center", behavior: "smooth" }); }
+  });
   function scheduleHTML() {
     if (!schedGames.some((g) => g.away)) return "";
     return `<section class="sched-sec" id="schedule" aria-labelledby="schedTitle">
@@ -1064,13 +1098,14 @@
         <div class="sched-find-box">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <label class="sr-only" for="schedFind">Find a team in the schedule</label>
-          <input id="schedFind" type="search" placeholder="Find a team, like Oklahoma or Liberty…" autocomplete="off" spellcheck="false" enterkeyhint="search"
+          <input id="schedFind" type="search" placeholder="Find or follow a team, like Oklahoma or Liberty…" autocomplete="off" spellcheck="false" enterkeyhint="search"
             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="schedSuggest" value="${esc(schedQuery)}" />
         </div>
         <ul class="sched-suggest" id="schedSuggest" role="listbox" aria-label="Teams" hidden></ul>
       </div>
       ${confSelectHTML()}
       </div>
+      ${schedTeamsRowHTML()}
       <div id="schedBody">${schedBodyHTML()}</div>
     </section>`;
   }
@@ -1096,7 +1131,8 @@
     // Tabs: the picked teams' tab first, then one per day, dotted where lead teams play.
     const teamGames = picked.size ? pool.filter((g) => g.away && playsIn(g, picked)).sort((a, b) => a.date - b.date) : [];
     const teamLabel = schedTeams.length === 1 ? shortTeam(schedTeams[0]) : `${schedTeams.length} teams`;
-    let tabs = picked.size
+    const chipMode = schedTeams.length === 1 && state.favs.has(schedTeams[0]); // shown by its chip under the search
+    let tabs = picked.size && !chipMode
       ? `<button type="button" class="sched-day sched-day-team" data-sched-day="${TEAM_TAB}" aria-pressed="${schedDay === TEAM_TAB}"><b>${esc(teamLabel)}</b><span>All games · ${teamGames.length}</span></button>` : "";
     tabs += days.map((k) => {
       const d = new Date(k);
@@ -1109,7 +1145,7 @@
     }).join("");
 
     // Chips for the picked teams, each removable.
-    const chips = schedTeams.length ? `<div class="sched-picks" aria-label="Teams you picked">${schedTeams.map((k) =>
+    const chips = schedTeams.length && !chipMode ? `<div class="sched-picks" aria-label="Teams you picked">${schedTeams.map((k) =>
       `<button type="button" class="pick-chip" data-sched-remove="${esc(k)}" aria-label="Remove ${esc(teamName(k))}">${logoHTML(teamByKey.get(k))}${esc(shortTeam(k))}<svg class="pick-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>`).join("")}
       <button type="button" class="pick-clear" data-sched-clear>Clear</button></div>` : "";
 
@@ -1175,6 +1211,7 @@
     const el = $("#schedBody");
     if (!el) return render();
     el.innerHTML = schedBodyHTML();
+    refreshTeamsRow();
     if (focusSel) $(focusSel)?.focus({ preventScroll: true });
   }
 

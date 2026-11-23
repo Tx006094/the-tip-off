@@ -1548,3 +1548,21 @@ html { -webkit-tap-highlight-color: transparent; }
 .myteams + .sched-sec, .sched-sec { margin-top: clamp(20px, 3vw, 36px); }
 .sched-sec .sec-head { margin-bottom: 16px; }
 .sched-tools { margin-bottom: 18px; }
+
+/* My Teams inside the Schedule: followed teams as chips under the search */
+.st-row { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; padding: 2px var(--edge, 16px) 4px; margin: -4px 0 18px; scroll-snap-type: x proximity; scroll-padding-left: var(--edge, 16px); }
+.st-row::-webkit-scrollbar { display: none; }
+.st-chip { flex: 0 0 auto; scroll-snap-align: start; display: flex; align-items: center; gap: 10px; min-height: 56px; padding: 8px 16px 8px 10px; border-radius: 14px; background: var(--surface); border: 1px solid transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.st-chip img, .st-chip .mono { width: 32px; height: 32px; object-fit: contain; }
+.st-chip b { display: block; font-weight: 700; font-size: 15px; line-height: 1.2; }
+.st-chip small { display: block; color: var(--muted); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.st-chip:hover { background: var(--surface-2); }
+.st-chip[aria-pressed="true"] { background: var(--text); color: var(--bg); }
+.st-chip[aria-pressed="true"] small { color: rgba(0,0,0,.6); }
+.st-all { padding-left: 16px; }
+.st-add { border: 1px dashed var(--line-strong); background: none; padding-left: 14px; }
+.st-add svg, .st-hint svg { width: 16px; height: 16px; fill: var(--paid); }
+.st-empty { align-items: center; }
+.st-hint { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; padding-right: 6px; }
+.st-pick { min-height: 48px; }
+.srow.is-mine { box-shadow: inset 3px 0 0 var(--paid); }
