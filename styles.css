@@ -1640,3 +1640,10 @@ html { -webkit-tap-highlight-color: transparent; }
 .pc-next b { display: block; font: 800 18px/1.2 var(--font-display); }
 .pc-next span span, .pc-next > span > span { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
 .pc-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+/* Player call-out on game cards: champagne gold, no box (separated by a thin line) */
+.card .hot-line { background: none; border-top: 1px solid var(--line); border-radius: 0; padding: 10px 0 0; }
+.card .hot-line strong { color: var(--event); }
+.card .hot-line span { color: var(--muted); }
+.card .hot-line .flame { fill: var(--event); }
+.hot-line[data-player]:hover { background: none; }
+.hot-line[data-player]:hover strong { text-decoration: underline; text-underline-offset: 3px; }
