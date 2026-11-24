@@ -480,8 +480,41 @@
   }
   function hotLineHTML(g) {
     const p = hotFor(g); if (!p) return "";
-    return `<div class="hot-line">${FLAME}<img src="${esc(headshot(p.shot, 80))}" alt="" width="24" height="24" loading="lazy"><span><strong>Watch ${esc(p.short || p.name)}</strong> · ${esc(p.why)}</span></div>`;
+    return `<div class="hot-line" role="button" tabindex="0" data-player="${esc(p.id)}" aria-label="${esc(`${p.name}: ${p.why}. Open player card`)}">${FLAME}<img src="${esc(headshot(p.shot, 80))}" alt="" width="24" height="24" loading="lazy"><span><strong>Watch ${esc(p.short || p.name)}</strong> · ${esc(p.why)}</span></div>`;
   }
+  /** Player card pop-up (opened from the "Watch [player]" line on a game card). */
+  function openPlayer(id) {
+    const p = HOT_PLAYERS.find((x) => x.id === id); if (!p) return;
+    const tm = teamByKey.get(p.team), g = tm ? nextGameFor(p.team) : null;
+    let next = "";
+    if (g) {
+      gameById.set(g.id, g);
+      const home = `${g.league}:${g.home?.id}` === p.team, opp = home ? g.away : g.home;
+      const when = g.state === "in" ? "Live now" : `${dayLabel(g.date)} · ${clock(g)}`;
+      const ch = g.platforms.length ? g.platforms.slice(0, 2).map((x) => x.name).join(", ") : "Channel TBA";
+      next = `<div class="pc-next"><span><small>${g.state === "in" ? "Playing now" : "Next game"}</small><b>${home ? "vs." : "at"} ${esc(opp?.short || opp?.name || "")}</b><span>${esc(when)} · ${esc(ch)}</span></span>
+        <button type="button" class="btn btn-primary" data-game="${esc(g.id)}">${ICON.play}Where to watch</button></div>`;
+    }
+    openModal(`<div class="pc">
+        <div class="pc-top" style="--tc:${hex(tm?.color)}">${tm ? logoHTML(tm, { size: 40 }) : ""}<span class="pw-tag">${FLAME}${esc(p.tag)}</span><img class="pc-shot" src="${esc(headshot(p.shot, 440))}" alt="${esc(p.name)}" width="440" height="320"></div>
+        <div class="pc-body">
+          <h2 id="modalTitle" class="pc-name">${esc(p.name)}</h2>
+          <div class="pc-team">${tm ? `<button type="button" class="pc-teamlink" data-team="${esc(p.team)}">${esc(tm.name)}</button>` : ""}${p.pos ? ` · ${esc(p.pos)}` : ""}</div>
+          <div class="pc-nums"><div><b>${p.avg.toFixed(1)}</b><span>Points a game (last ${p.last})</span></div><div><b>${p.best}</b><span>Best game</span></div>${p.streak >= 2 ? `<div><b>${p.streak}</b><span>Straight 20-point games</span></div>` : ""}</div>
+          <p class="pc-why">${FLAME}${esc(p.why)}</p>
+          ${next}
+          ${tm ? `<div class="pc-actions">${favButton(p.team, tm.short || tm.name)}<button type="button" class="btn btn-ghost" data-team="${esc(p.team)}">${esc(tm.short || tm.name)} schedule</button></div>` : ""}
+        </div></div>`, `${p.name}: Next Game & Where to Watch`);
+  }
+  // The player line sits inside the game card's button, so catch it first.
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest?.("[data-player]"); if (!b) return;
+    e.preventDefault(); e.stopPropagation(); openPlayer(b.dataset.player);
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    const b = e.target.closest?.("[data-player]"); if (!b || (e.key !== "Enter" && e.key !== " ")) return;
+    e.preventDefault(); e.stopPropagation(); openPlayer(b.dataset.player);
+  }, true);
   function playersRowHTML() {
     const soon = Date.now() + 7 * 86400000;
     const list = HOT_PLAYERS.map((p) => ({ p, g: teamByKey.has(p.team) ? nextGameFor(p.team) : null }))
@@ -913,7 +946,6 @@
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     if (lastNight) { const have = new Set(schedGames.map((g) => g.id)); schedGames = schedGames.concat(lastNight.filter((g) => !have.has(g.id) && passesFilters(g))); }
     html += scheduleHTML();
-    html += playersRowHTML();
     html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });

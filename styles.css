@@ -1617,3 +1617,26 @@ html { -webkit-tap-highlight-color: transparent; }
 .pw-next b { color: var(--text); font-weight: 600; }
 .card .hot-line { align-self: stretch; width: 100%; box-sizing: border-box; }
 .card .hot-line { grid-column: 1 / -1; }
+
+/* Player card pop-up (from the Watch line on game cards) */
+.hot-line[data-player] { cursor: pointer; }
+.hot-line[data-player]:hover { background: rgba(250,78,2,.18); }
+.hot-line[data-player]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pc-top { position: relative; height: 220px; display: flex; align-items: flex-end; justify-content: center; background: color-mix(in srgb, var(--tc, #333) 45%, var(--bg)); }
+.pc-top > img:first-child:not(.pc-shot), .pc-top > .mono { position: absolute; top: 16px; left: 18px; width: 40px !important; height: 40px; object-fit: contain; }
+.pc-top .pw-tag { top: 18px; right: 64px; }
+.pc-shot { height: 210px; width: auto; }
+.pc-body { padding: 18px 22px 24px; display: flex; flex-direction: column; gap: 10px; text-align: center; align-items: center; }
+.pc-name { margin: 0; font: 900 clamp(28px, 4vw, 38px)/1 var(--font-display); font-stretch: 75%; text-transform: uppercase; }
+.pc-team { color: var(--muted); font-size: 15px; }
+.pc-teamlink { padding: 0; border: 0; background: none; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.pc-nums { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.pc-nums div { background: var(--surface-2); border-radius: 12px; padding: 10px 14px; min-width: 104px; }
+.pc-nums b { display: block; font: 800 26px/1 var(--font-display); font-variant-numeric: tabular-nums; }
+.pc-nums span { color: var(--muted); font-size: 12px; }
+.pc-why { margin: 0; display: inline-flex; align-items: center; gap: 6px; color: var(--text); font-weight: 600; }
+.pc-next { width: 100%; max-width: 460px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 16px; border-radius: 14px; background: var(--surface-2); text-align: left; }
+.pc-next small { display: block; color: var(--accent); font: 800 11px var(--font-display); letter-spacing: .1em; text-transform: uppercase; }
+.pc-next b { display: block; font: 800 18px/1.2 var(--font-display); }
+.pc-next span span, .pc-next > span > span { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.pc-actions { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
