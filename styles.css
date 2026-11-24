@@ -1647,3 +1647,22 @@ html { -webkit-tap-highlight-color: transparent; }
 .card .hot-line .flame { fill: var(--event); }
 .hot-line[data-player]:hover { background: none; }
 .hot-line[data-player]:hover strong { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Player card: even spacing on phones */
+.pc-body { gap: 14px; }
+.pc-nums { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; width: 100%; max-width: 460px; }
+.pc-nums div { min-width: 0; padding: 12px 8px; display: flex; flex-direction: column; justify-content: center; gap: 6px; }
+.pc-nums span { line-height: 1.25; }
+.pc-next { justify-content: center; text-align: center; }
+.pc-next > span { flex: 1 1 100%; }
+.pc-next .btn { flex: 1 1 100%; justify-content: center; }
+.pc-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; max-width: 460px; }
+.pc-actions .btn { justify-content: center; min-width: 0; padding-inline: 10px; }
+@media (max-width: 480px) {
+  .pc-top { height: 190px; }
+  .pc-shot { height: 180px; }
+  .pc-body { padding: 18px 16px 22px; }
+  .pc-nums b { font-size: 24px; }
+  .pc-nums span { font-size: 11.5px; }
+}
+.pc-actions .btn { font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

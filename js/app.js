@@ -501,9 +501,9 @@
           <h2 id="modalTitle" class="pc-name">${esc(p.name)}</h2>
           <div class="pc-team">${tm ? `<button type="button" class="pc-teamlink" data-team="${esc(p.team)}">${esc(tm.name)}</button>` : ""}${p.pos ? ` · ${esc(p.pos)}` : ""}</div>
           <div class="pc-nums"><div><b>${p.avg.toFixed(1)}</b><span>Points a game (last ${p.last})</span></div><div><b>${p.best}</b><span>Best game</span></div>${p.streak >= 2 ? `<div><b>${p.streak}</b><span>Straight 20-point games</span></div>` : ""}</div>
-          <p class="pc-why">${FLAME}${esc(p.why)}</p>
+          ${p.streak >= 2 ? "" : `<p class="pc-why">${FLAME}${esc(p.why)}</p>`}
           ${next}
-          ${tm ? `<div class="pc-actions">${favButton(p.team, tm.short || tm.name)}<button type="button" class="btn btn-ghost" data-team="${esc(p.team)}">${esc(tm.short || tm.name)} schedule</button></div>` : ""}
+          ${tm ? `<div class="pc-actions">${favButton(p.team, tm.short || tm.name)}<button type="button" class="btn btn-ghost" data-team="${esc(p.team)}">Full schedule</button></div>` : ""}
         </div></div>`, `${p.name}: Next Game & Where to Watch`);
   }
   // The player line sits inside the game card's button, so catch it first.
