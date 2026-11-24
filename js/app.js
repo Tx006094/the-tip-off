@@ -1067,10 +1067,29 @@
       return `<span class="st-item"><button type="button" class="st-chip" data-sched-only="${esc(k)}" aria-pressed="${solo === k}">${logoHTML(tm, { size: 32, eager: true })}<span><b>${esc(tm.short || tm.name)}</b><small>${esc(when)}</small></span></button><button type="button" class="st-x" data-unfollow="${esc(k)}" aria-label="Unfollow ${esc(tm.name)}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button></span>`;
     };
     if (!favs.length) {
-      const picks = state.teams.filter((t) => t.league === "wnba").slice(0, 5).map((t) => t.key);
+      const picks = inSeasonPicks(5);
       return `<div class="st-row st-empty" id="stRow"><span class="st-hint">${ICON.star}Follow your teams to see them here</span>${picks.map((k) => `<button type="button" class="st-chip st-pick" data-team="${esc(k)}">${logoHTML(teamByKey.get(k), { size: 32, eager: true })}<span><b>${esc(teamByKey.get(k).short)}</b></span></button>`).join("")}</div>`;
     }
     return `<div class="st-row" id="stRow" role="group" aria-label="My Teams"><button type="button" class="st-chip st-all" data-sched-only="" aria-pressed="${!solo}"><span><b>All games</b><small>Everyone</small></span></button>${favs.map(chip).join("")}<button type="button" class="st-chip st-add" data-st-follow>${ICON.star}<span><b>Follow</b><small>Add a team</small></span></button></div>`;
+  }
+  /** Teams to suggest: only from leagues playing in the next two weeks, mixed across leagues, ranked teams first. */
+  function inSeasonPicks(n) {
+    const soon = Date.now() + 14 * 86400000, byLeague = new Map();
+    for (const g of state.games) {
+      if (!g.away || g.date > soon || g.state === "post") continue;
+      for (const t of [g.away, g.home]) {
+        const k = t?.id ? `${g.league}:${t.id}` : "";
+        if (!k || !teamByKey.has(k) || state.favs.has(k)) continue;
+        if (!byLeague.has(g.league)) byLeague.set(g.league, new Map());
+        const m = byLeague.get(g.league), cur = m.get(k) || { k, rank: 99, n: 0 };
+        cur.n++; if (t.rank) cur.rank = Math.min(cur.rank, t.rank); m.set(k, cur);
+      }
+    }
+    const lists = [...byLeague.values()].map((m) => [...m.values()].sort((a, b) => a.rank - b.rank || b.n - a.n))
+      .sort((a, b) => b.length - a.length);
+    const out = [];
+    for (let i = 0; out.length < n && lists.some((l) => l[i]); i++) for (const l of lists) if (l[i] && out.length < n) out.push(l[i].k);
+    return out;
   }
   function refreshTeamsRow() {
     const el = $("#stRow"); if (!el) return;
@@ -1106,8 +1125,8 @@
       <div class="sched-find">
         <div class="sched-find-box">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <label class="sr-only" for="schedFind">Find a team in the schedule</label>
-          <input id="schedFind" type="search" placeholder="Find or follow a team, like Oklahoma or Liberty…" autocomplete="off" spellcheck="false" enterkeyhint="search"
+          <label class="sr-only" for="schedFind">Search the schedule for a team</label>
+          <input id="schedFind" type="search" placeholder="Search the schedule for a team, like Oklahoma…" autocomplete="off" spellcheck="false" enterkeyhint="search"
             role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="schedSuggest" value="${esc(schedQuery)}" />
         </div>
         <ul class="sched-suggest" id="schedSuggest" role="listbox" aria-label="Teams" hidden></ul>
@@ -1156,12 +1175,12 @@
     // Chips for the picked teams, each removable.
     const chips = schedTeams.length && !chipMode ? `<div class="sched-picks" aria-label="Teams you picked">${schedTeams.map((k) =>
       `<button type="button" class="pick-chip" data-sched-remove="${esc(k)}" aria-label="Remove ${esc(teamName(k))}">${logoHTML(teamByKey.get(k))}${esc(shortTeam(k))}<svg class="pick-x" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7 7 17"/></svg></button>`).join("")}
-      <button type="button" class="pick-clear" data-sched-clear>Clear</button></div>` : "";
+      <button type="button" class="pick-clear" data-sched-clear>Clear</button>${schedTeams.filter((k) => !state.favs.has(k)).map((k) => favButton(k, shortTeam(k))).join("")}</div>` : "";
 
     let body;
     if (schedDay === TEAM_TAB) {
       const names = listNames(schedTeams.map(shortTeam));
-      const stars = schedTeams.filter((k) => !state.favs.has(k)).map((k) => favButton(k, shortTeam(k))).join("");
+      const stars = ""; // Follow now sits beside the searched team, right under the search
       const season = schedTeams.length === 1 ? `<button type="button" class="btn btn-ghost" data-team="${esc(schedTeams[0])}">Full season schedule</button>` : "";
       const answers = schedTeams.slice(0, 3).map(teamTodayHTML).join("");
       const head = `${answers}<div class="sched-team-head">

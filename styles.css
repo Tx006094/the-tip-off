@@ -1575,3 +1575,8 @@ html { -webkit-tap-highlight-color: transparent; }
 .st-x svg { width: 12px; height: 12px; stroke: currentColor; stroke-width: 2.4; fill: none; }
 .st-x:hover, .st-x:focus-visible { background: var(--line-strong); color: var(--text); }
 .st-chip[aria-pressed="true"] + .st-x { background: rgba(0,0,0,.12); color: rgba(0,0,0,.6); }
+
+/* Follow beside a team searched in the schedule */
+.sched-picks .btn[data-fav] { min-height: 36px; padding: 0 14px; font-size: 14px; margin-left: 4px; }
+.sched-sec .st-row { padding-left: var(--edge, 16px) !important; padding-right: var(--edge, 16px) !important; }
+.st-hint { scroll-snap-align: start; }
