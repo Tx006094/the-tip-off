@@ -1580,3 +1580,16 @@ html { -webkit-tap-highlight-color: transparent; }
 .sched-picks .btn[data-fav] { min-height: 36px; padding: 0 14px; font-size: 14px; margin-left: 4px; }
 .sched-sec .st-row { padding-left: var(--edge, 16px) !important; padding-right: var(--edge, 16px) !important; }
 .st-hint { scroll-snap-align: start; }
+
+/* Team row: edge fades (all screens) and arrows (computers) when teams are off-screen */
+.st-wrap { position: relative; }
+.st-wrap.fade-r .st-row { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 72px), transparent); } /* taste-skill-ignore: edge fade hints more to scroll */
+.st-wrap.fade-l .st-row { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 72px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 72px), transparent); } /* taste-skill-ignore: edge fade */
+.st-wrap.fade-l.fade-r .st-row { -webkit-mask-image: linear-gradient(to right, transparent, #000 72px, #000 calc(100% - 72px), transparent); mask-image: linear-gradient(to right, transparent, #000 72px, #000 calc(100% - 72px), transparent); } /* taste-skill-ignore: edge fade */
+.st-arrow { position: absolute; top: 50%; translate: 0 calc(-50% - 9px); width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border-radius: 50%; border: 1px solid var(--line-strong); background: var(--surface-2); color: var(--text); cursor: pointer; z-index: 2; }
+.st-arrow[hidden] { display: none; }
+.st-arrow svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2.2; fill: none; }
+.st-arrow:hover, .st-arrow:focus-visible { background: var(--text); color: var(--bg); }
+.st-prev { left: calc(var(--edge, 16px) - 8px); }
+.st-next { right: calc(var(--edge, 16px) - 8px); }
+@media (hover: none), (max-width: 760px) { .st-arrow { display: none !important; } } /* phones swipe */

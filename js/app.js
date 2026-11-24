@@ -1096,7 +1096,24 @@
     const box = document.createElement("div"); box.innerHTML = schedTeamsRowHTML();
     const sx = el.scrollLeft, next = box.firstElementChild;
     el.replaceWith(next); next.scrollLeft = sx;
+    stEdges();
   }
+  /** Team row: arrows (computers) and edge fades show only when teams are hidden on that side. */
+  function stEdges() {
+    const row = $("#stRow"), wrap = row?.closest(".st-wrap"); if (!wrap) return;
+    const left = row.scrollLeft > 4, right = row.scrollLeft + row.clientWidth < row.scrollWidth - 4;
+    wrap.classList.toggle("fade-l", left); wrap.classList.toggle("fade-r", right);
+    const p = wrap.querySelector(".st-prev"), n = wrap.querySelector(".st-next");
+    if (p) p.hidden = !left; if (n) n.hidden = !right;
+  }
+  document.addEventListener("scroll", (e) => { if (e.target.id === "stRow") stEdges(); }, true);
+  addEventListener("resize", () => stEdges());
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest("[data-st-scroll]"); if (!a) return;
+    const row = $("#stRow"); if (!row) return;
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    row.scrollBy({ left: Number(a.dataset.stScroll) * row.clientWidth * 0.8, behavior: reduce ? "auto" : "smooth" });
+  });
   document.addEventListener("click", (e) => {
     const b = e.target.closest("[data-sched-only]");
     if (b) {
@@ -1133,7 +1150,10 @@
       </div>
       ${confSelectHTML()}
       </div>
-      ${schedTeamsRowHTML()}
+      <div class="st-wrap">${schedTeamsRowHTML()}
+        <button type="button" class="st-arrow st-prev" data-st-scroll="-1" aria-label="Show earlier teams" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="st-arrow st-next" data-st-scroll="1" aria-label="Show more teams" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>
+      </div>
       <div id="schedBody">${schedBodyHTML()}</div>
     </section>`;
   }
@@ -1468,6 +1488,7 @@
   let revealNext = true;    // animate the next drawn view in (first load, switching tabs)
   let guideRevealed = false;
   function render() {
+    requestAnimationFrame(() => stEdges()); // team row arrows/fades once the page is drawn
     for (const v of ["home", "teams", "platforms"]) $("#view-" + v).hidden = v !== state.view;
     const showHomeExtras = state.view === "home" && !state.q;
     $$("[data-home-only]").forEach((el) => { el.hidden = !showHomeExtras; });
