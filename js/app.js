@@ -242,7 +242,7 @@
       neutral: !!comp.neutralSite,
       venue: comp.venue?.fullName || "",
       city: [comp.venue?.address?.city, comp.venue?.address?.state].filter(Boolean).join(", "),
-      note: (comp.notes || [])[0]?.headline || "",
+      note: ((comp.notes || [])[0]?.headline || "").replace(/\s*[-–—,:]\s*[^-–—,:]*\b(Division|Bracket|Pod)\b.*$/i, "").trim(),
       platforms: dedupePlatforms(names),
       link: (e.links || []).find((l) => (l.rel || []).includes("summary"))?.href || (e.links || [])[0]?.href || "",
     });
