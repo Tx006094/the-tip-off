@@ -461,8 +461,45 @@
         <div class="card-title">${title}</div>
         <div class="card-meta">${meta}${g.expected ? " · Expected" : ""}</div>
         <div class="platform-row">${platformTags(g.platforms)}</div>
+        ${hotLineHTML(g)}
       </div>
     </button>`;
+  }
+
+  // ---------- Players to Watch (picked each morning by scripts/update_players.py) ----------
+  const FLAME = '<svg class="flame" viewBox="0 0 24 24" aria-hidden="true"><path d="M13.5 2s.5 3.5-1.8 6.2C9.5 10.8 8 12.3 8 15a5 5 0 0 0 10 0c0-2.3-1-3.9-2-5 0 0 .2 2.2-1.4 3.2.4-3.7-1.1-8.3-1.1-11.2zM12 22a7 7 0 0 1-7-7c0-3.9 2.3-6.1 3.8-7.7C10.4 5.6 11 4 11 2c4 2 8 6.9 8 13a7 7 0 0 1-7 7z"/></svg>';
+  const HOT_PLAYERS = typeof PLAYERS !== "undefined" ? PLAYERS.players || [] : [];
+  const hotByTeam = new Map();
+  for (const p of HOT_PLAYERS) if (!hotByTeam.has(p.team)) hotByTeam.set(p.team, p);
+  const headshot = (url, w) => (/^https:\/\/a\.espncdn\.com(\/i\/headshots\/[^?]+\.png)$/.test(url) ? `https://a.espncdn.com/combiner/i?img=${RegExp.$1}&w=${w}&h=${Math.round(w * 0.727)}` : url);
+  /** The hot player in this game, if any (shown on upcoming and live game cards). */
+  function hotFor(g) {
+    if (!g.away || g.state === "post") return null;
+    for (const t of [g.away, g.home]) { const p = t?.id && hotByTeam.get(`${g.league}:${t.id}`); if (p) return p; }
+    return null;
+  }
+  function hotLineHTML(g) {
+    const p = hotFor(g); if (!p) return "";
+    return `<div class="hot-line">${FLAME}<img src="${esc(headshot(p.shot, 80))}" alt="" width="24" height="24" loading="lazy"><span><strong>Watch ${esc(p.short || p.name)}</strong> · ${esc(p.why)}</span></div>`;
+  }
+  function playersRowHTML() {
+    const soon = Date.now() + 7 * 86400000;
+    const list = HOT_PLAYERS.map((p) => ({ p, g: teamByKey.has(p.team) ? nextGameFor(p.team) : null }))
+      .filter(({ p, g }) => g && g.date <= soon && (state.league === "all" || p.team.startsWith(state.league + ":")))
+      .slice(0, 8);
+    if (!list.length) return "";
+    const cards = list.map(({ p, g }) => {
+      gameById.set(g.id, g);
+      const tm = teamByKey.get(p.team), home = `${g.league}:${g.home?.id}` === p.team, opp = home ? g.away : g.home;
+      const when = g.state === "in" ? "Live now" : `${dayLabel(g.date)} · ${clock(g)}`;
+      const ch = g.platforms.length ? g.platforms.slice(0, 2).map((x) => x.name).join(", ") : "Channel TBA";
+      return `<button type="button" class="pw-card" data-game="${esc(g.id)}" aria-label="${esc(`${p.name}, ${tm?.name || ""}: ${p.why}. Next: ${home ? "vs." : "at"} ${opp?.short || opp?.name || ""}, ${when}, on ${ch}`)}">
+        <span class="pw-top" style="--tc:${hex(tm?.color)}">${tm ? logoHTML(tm, { size: 30 }) : ""}<span class="pw-tag">${FLAME}${esc(p.tag)}</span><img class="pw-shot" src="${esc(headshot(p.shot, 280))}" alt="" width="280" height="204" loading="lazy"></span>
+        <span class="pw-body"><b class="pw-name">${esc(p.name)}</b><span class="pw-team">${esc(tm?.short || tm?.name || "")}${p.pos ? ` · ${esc(p.pos)}` : ""}</span>
+          <span class="pw-stat">${p.avg.toFixed(1)} PPG last ${p.last} · ${esc(p.why)}</span>
+          <span class="pw-next">Next: <b>${home ? "vs." : "at"} ${esc(opp?.short || opp?.name || "")}</b><br>${esc(when)} · ${esc(ch)}</span></span></button>`;
+    }).join("");
+    return `<section class="pw-sec" aria-labelledby="pwTitle">${secHead("Players to Watch", "Hot right now · updated each morning").replace("<h2>", '<h2 id="pwTitle">')}<div class="pw-row">${cards}</div></section>`;
   }
 
   function secHead(title, sub = "", { color, live, action = "" } = {}) {
@@ -876,6 +913,7 @@
     schedGames = real.filter((g) => dayKey(g.date) >= today);
     if (lastNight) { const have = new Set(schedGames.map((g) => g.id)); schedGames = schedGames.concat(lastNight.filter((g) => !have.has(g.id) && passesFilters(g))); }
     html += scheduleHTML();
+    html += playersRowHTML();
     html += shelfHTML("On National TV", real.filter((g) => g.state === "pre" && g.platforms.some((p) => NATIONAL.has(p.id))), "", { color: "var(--tv)" });
     html += shelfHTML("Top 25 Matchups", real.filter((g) => g.state === "pre" && g.home.rank && g.away?.rank), "Both teams ranked", { color: "var(--accent)" });
     if (state.price !== "paid") html += shelfHTML("Free to Watch", real.filter((g) => g.state === "pre" && priceInfo(g.platforms).kind === "free"), "No subscription needed", { color: "var(--free)" });

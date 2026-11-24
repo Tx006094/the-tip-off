@@ -1,4 +1,5 @@
-# Every morning: refreshes the Unrivaled and UpShot League headlines in js/news-data.js and adds any new TheIXPodcast episodes to watch.html.
+# Every morning: refreshes the Unrivaled and UpShot League headlines in js/news-data.js, adds any new TheIXPodcast episodes to watch.html,
+# and picks the Players to Watch (js/players-data.js).
 # When the file changes it commits it, and Cloudflare Pages republishes the site automatically.
 name: Update headlines
 
@@ -19,14 +20,16 @@ jobs:
         run: python3 scripts/update_news.py
       - name: Check for new TheIXPodcast episodes
         run: python3 scripts/update_watch.py
+      - name: Pick Players to Watch
+        run: python3 scripts/update_players.py
       - name: Commit if anything changed
         run: |
-          if git diff --quiet -- js/news-data.js watch.html; then
+          if git diff --quiet -- js/news-data.js watch.html js/players-data.js; then
             echo "Nothing new."
           else
             git config user.name "github-actions[bot]"
             git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
-            git add js/news-data.js watch.html
+            git add js/news-data.js watch.html js/players-data.js
             git commit -m "Update headlines and episodes"
             git push
           fi
